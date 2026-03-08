@@ -1,0 +1,77 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await login(email, password);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground mb-6">Sign in</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
+            {error}
+          </p>
+        )}
+        <div>
+          <label htmlFor="email" className="label block mb-2">Email</label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full rounded-2xl border border-border/50 bg-card px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+          />
+        </div>
+        <div>
+          <label htmlFor="password" className="label block mb-2">Password</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full rounded-2xl border border-border/50 bg-card px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-2xl bg-primary text-primary-foreground py-3.5 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all"
+        >
+          {loading ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        No account?{" "}
+        <Link href="/register" className="text-primary hover:underline">
+          Register
+        </Link>
+      </p>
+      <p className="mt-2 text-center text-xs text-muted-foreground/80">
+        Demo: user1@example.com / password
+      </p>
+    </>
+  );
+}

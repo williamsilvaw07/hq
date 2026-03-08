@@ -36,10 +36,17 @@ composer.lock
 ## 2. Get the code on the server
 
 **Option A – Git (if Hostinger gives you SSH/shell):**  
-Clone your GitHub repo (e.g. into `domains/yourdomain.com/` or the path they show). Then in the project folder run:
+Clone your GitHub repo (e.g. into `domains/yourdomain.com/` or the path they show). Then:
 
-- `composer install --no-dev`
-- `npm ci && npm run build`
+1. **Backend:** `composer install --no-dev`
+2. **Frontend (Fintech Tracker UI):** build and copy into `public/` so the home page serves the app:
+   ```bash
+   cd frontend
+   npm ci
+   npm run build
+   cp -r out/* ../public/
+   ```
+   Set `NEXT_PUBLIC_API_URL=` (empty) in the build so the app calls the same domain (e.g. `https://williamhq.com/api`).
 
 **Option B – Upload:**  
 Upload the project (or a zip) via File Manager or FTP. Exclude: `vendor`, `node_modules`, `.env`, `.git`. Then run Composer and NPM via SSH or their “Run script” tool if available.

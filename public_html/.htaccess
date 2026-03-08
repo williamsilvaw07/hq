@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
     # On shared hosting the domain document root is often public_html.
-    # Route all requests into Laravel's public/ folder (index.php and assets).
+    # Route all requests into Laravel's public/ folder.
     RewriteEngine On
     RewriteRule ^(.*)$ ../public/$1 [L]
 </IfModule>
