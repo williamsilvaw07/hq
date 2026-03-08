@@ -47,6 +47,6 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./frontend/out/
-          # Hostinger: usually public_html/public. If your FTP account root is already public_html, use just "public".
-          server-dir: public_html/public
+          # Hostinger: must end with / so the action treats it as a folder.
+          server-dir: public_html/public/
           log-level: verbose
