@@ -23,3 +23,15 @@ From then on:
 - Or run it by hand: **Actions** tab → **Build and deploy frontend** → **Run workflow**.
 
 You only need to run the build + upload on your Mac if you’re testing without pushing.
+
+---
+
+## If the workflow fails
+
+1. **Open the failed run** → click the **deploy** job → see which step went red.
+2. **"Install and build" failed**  
+   - Check the log for `npm` or `next build` errors. Fix the issue locally and push again.
+3. **"Deploy to Hostinger (FTP)" failed**  
+   - **FTP_HOST**: In Hostinger hPanel → FTP Accounts, use the **hostname** (e.g. `ftp.williamhq.com` or the one shown). No `ftp://` prefix.
+   - **server-dir**: The workflow uses `public_html/public`. If your FTP account’s “Directory” in Hostinger is already set to `public_html`, change `server-dir` in `.github/workflows/deploy-frontend.yml` to just `public` and push.
+   - **Logs**: The workflow uses `log-level: verbose`; the deploy step log will show the FTP error (e.g. connection refused, login failed, path not found).

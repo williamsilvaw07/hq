@@ -35,6 +35,11 @@ jobs:
           npm ci
           NEXT_PUBLIC_API_URL= npm run build
 
+      - name: Verify build output
+        run: |
+          if [ ! -f frontend/out/index.html ]; then echo "Build failed: frontend/out/index.html missing"; exit 1; fi
+          echo "Build OK — $(find frontend/out -type f | wc -l) files in frontend/out/"
+
       - name: Deploy to Hostinger (FTP)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -42,5 +47,6 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./frontend/out/
-          # Where the built site lives on the server (FTP path). Change in this file if yours is different.
+          # Hostinger: usually public_html/public. If your FTP account root is already public_html, use just "public".
           server-dir: public_html/public
+          log-level: verbose
