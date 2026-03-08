@@ -1,5 +1,33 @@
 # Deploy to Hostinger Business
 
+## Repo structure (Laravel standard)
+
+The domain must serve **`public/`**, not the Laravel root. The repo has:
+
+- **`public/`** – web-accessible folder (has `index.php`, assets). This is Laravel’s document root.
+- **`public_html/`** – on shared hosting, the server’s document root is often `public_html`. It contains only an `.htaccess` that routes all requests into `public/`.
+
+```
+app/
+bootstrap/
+config/
+database/
+public/          ← web-accessible (index.php, .htaccess, build/)
+public_html/     ← .htaccess only, routes into public/
+resources/
+routes/
+storage/
+vendor/           ← not in Git; composer install on server
+.env              ← never commit; create on server
+artisan
+composer.json
+composer.lock
+```
+
+**Important:** Set the domain document root to **`public_html/public`** (the `public` folder inside the repo). If your host only allows `public_html` as doc root, the included `public_html/.htaccess` will route everything into `public/`.
+
+---
+
 ## 1. On Hostinger (hPanel)
 
 - **Create a database:** Websites → your domain → MySQL Databases → Create. Note the DB name, username, password, and host (often `localhost`).
@@ -8,18 +36,19 @@
 ## 2. Get the code on the server
 
 **Option A – Git (if Hostinger gives you SSH/shell):**  
-Clone your GitHub repo into the account (e.g. `domains/yourdomain.com/` or the path they show), then run `composer install --no-dev` and `npm ci && npm run build` in the project folder.
+Clone your GitHub repo (e.g. into `domains/yourdomain.com/` or the path they show). Then in the project folder run:
+
+- `composer install --no-dev`
+- `npm ci && npm run build`
 
 **Option B – Upload:**  
 Upload the project (or a zip) via File Manager or FTP. Exclude: `vendor`, `node_modules`, `.env`, `.git`. Then run Composer and NPM via SSH or their “Run script” tool if available.
 
 ## 3. Point the domain to the app
 
-Set the **document root** to the app’s `public` folder, e.g.:
+Set the **document root** to the app’s **`public`** folder:
 
-`/domains/yourdomain.com/public_html` → `/path/to/valentteworkflow/public`
-
-(or move/copy contents of `public` into the existing `public_html` and adjust paths).
+- Use **`public_html/public`** (the `public` folder inside the repo root). Do not use `public_html` alone.
 
 ## 4. Environment on the server
 
