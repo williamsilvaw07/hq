@@ -1,12 +1,11 @@
-# Build the Next.js frontend and deploy to Hostinger via FTP.
+# Build the Next.js frontend and deploy to Hostinger via SFTP (password auth).
 # Trigger: push to main, or "Run workflow" from the Actions tab.
 #
-# One-time setup: In GitHub repo → Settings → Secrets and variables → Actions,
-# add these secrets (get FTP details from Hostinger hPanel):
-#   FTP_HOST      — e.g. ftp.williamhq.com or the hostname Hostinger gives you
-#   FTP_USERNAME  — your FTP username (often like u752162317)
-#   FTP_PASSWORD  — your FTP password
-#   FTP_REMOTE_PATH — optional; remote folder for the built site (default: public_html/public)
+# One-time setup: In GitHub repo → Settings → Secrets and variables → Actions, add:
+#   FTP_HOST     — Hostinger SFTP host (from hPanel → FTP or SSH; e.g. server123.hostinger.com or your domain)
+#   FTP_USERNAME — your FTP/SSH username (e.g. u752162317)
+#   FTP_PASSWORD — your FTP password (Hostinger uses the same for SFTP)
+# Hostinger SFTP port is 65002. Enable SSH in hPanel → Advanced → SSH Access if needed.
 
 name: Build and deploy frontend
 
@@ -40,13 +39,16 @@ jobs:
           if [ ! -f frontend/out/index.html ]; then echo "Build failed: frontend/out/index.html missing"; exit 1; fi
           echo "Build OK — $(find frontend/out -type f | wc -l) files in frontend/out/"
 
-      - name: Deploy to Hostinger (FTP)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./frontend/out/
-          # Hostinger: must end with / so the action treats it as a folder.
-          server-dir: public_html/public/
-          log-level: verbose
+      - name: Deploy to Hostinger (SFTP)
+        env:
+          SFTP_HOST: ${{ secrets.FTP_HOST }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -qq -y sshpass rsync
+          mkdir -p ~/.ssh
+          echo "StrictHostKeyChecking no" > ~/.ssh/config
+          chmod 600 ~/.ssh/config
+          sshpass -p "$SFTP_PASS" rsync -avz --delete \
+            -e "ssh -p 65002 -o StrictHostKeyChecking=no" \
+            frontend/out/ "$SFTP_USER@$SFTP_HOST:public_html/public/"
