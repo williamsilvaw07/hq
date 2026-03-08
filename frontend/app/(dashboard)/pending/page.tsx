@@ -24,8 +24,8 @@ export default function PendingPage() {
 
   useEffect(() => {
     if (!workspaceId) return;
-    api<{ data: Transaction[] }>(`/api/workspaces/${workspaceId}/transactions/pending`)
-      .then((r) => setList((r as { data: Transaction[] }).data || []))
+    api<Transaction[]>(`/api/workspaces/${workspaceId}/transactions/pending`)
+      .then((r) => setList(r.data || []))
       .catch(() => {});
   }, [workspaceId]);
 

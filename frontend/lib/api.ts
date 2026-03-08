@@ -39,14 +39,16 @@ export async function api<T>(
   return json;
 }
 
-export async function login(email: string, password: string) {
+export type LoginResponse = { token: string; user: { id: number; name: string; email: string; avatar_url?: string | null } };
+
+export async function login(email: string, password: string): Promise<LoginResponse> {
   try {
     const res = await fetch(`${API_URL}/api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json().catch(() => ({})) as { message?: string; errors?: Record<string, string[]> };
+    const data = await res.json().catch(() => ({})) as LoginResponse & { message?: string; errors?: Record<string, string[]> };
     if (!res.ok) {
       const msg =
         data.errors?.email?.[0] ??
@@ -55,7 +57,7 @@ export async function login(email: string, password: string) {
         (res.status === 422 ? "Invalid email or password. Use the exact password from the seed (e.g. password)." : `Login failed (${res.status})`);
       throw new Error(msg);
     }
-    return data;
+    return data as LoginResponse;
   } catch (err) {
     if (err instanceof TypeError && (err.message === "Load failed" || err.message === "Failed to fetch")) {
       throw new Error("Cannot reach the API. Is the backend running? (e.g. npm run dev in backend or ./run.sh)");
@@ -64,16 +66,16 @@ export async function login(email: string, password: string) {
   }
 }
 
-export async function register(name: string, email: string, password: string, password_confirmation: string) {
+export async function register(name: string, email: string, password: string, password_confirmation: string): Promise<LoginResponse> {
   try {
     const res = await fetch(`${API_URL}/api/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ name, email, password, password_confirmation }),
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error((data as { message?: string }).message || "Registration failed");
-    return data;
+    const data = await res.json().catch(() => ({})) as LoginResponse & { message?: string };
+    if (!res.ok) throw new Error(data.message || "Registration failed");
+    return data as LoginResponse;
   } catch (err) {
     if (err instanceof TypeError && (err.message === "Load failed" || err.message === "Failed to fetch")) {
       throw new Error("Cannot reach the API. Is the backend running? (e.g. npm run dev in backend or ./run.sh)");

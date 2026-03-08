@@ -54,14 +54,14 @@ export default function NewTransactionPage() {
 
   useEffect(() => {
     if (!workspaceId) return;
-    api(`/api/workspaces/${workspaceId}/accounts`)
-      .then((r: { data?: { accounts?: Account[] } }) => {
+    api<{ accounts: Account[]; credit_cards: unknown[] }>(`/api/workspaces/${workspaceId}/accounts`)
+      .then((r) => {
         if (r.data?.accounts) setAccounts(r.data.accounts);
       })
       .catch(() => {});
-    api(`/api/workspaces/${workspaceId}/categories`)
-      .then((r: { data?: Category[] }) => {
-        if (r.data) setCategories(r.data);
+    api<Category[]>(`/api/workspaces/${workspaceId}/categories`)
+      .then((r) => {
+        if (Array.isArray(r.data)) setCategories(r.data);
       })
       .catch(() => {});
   }, [workspaceId]);
@@ -104,12 +104,12 @@ export default function NewTransactionPage() {
     setCategoryError("");
     setSavingCategory(true);
     try {
-      const res = await api<{ data: Category }>(`/api/workspaces/${workspaceId}/categories`, {
+      const res = await api<Category>(`/api/workspaces/${workspaceId}/categories`, {
         method: "POST",
         body: JSON.stringify({ name: newCategoryName.trim(), type }),
       });
       if (res.data) {
-        setCategories((prev) => [...prev, res.data!]);
+        setCategories((prev) => [...prev, res.data as Category]);
         setCategoryId(String(res.data.id));
         setNewCategoryName("");
         setShowNewCategory(false);

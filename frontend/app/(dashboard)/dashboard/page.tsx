@@ -155,7 +155,7 @@ export default function DashboardPage() {
   const fetchDashboard = useCallback(() => {
     if (!workspaceId) return;
     setLoading(true);
-    api<{ data: DashboardData }>(`/api/workspaces/${workspaceId}/dashboard?period=${period}`)
+    api<DashboardData>(`/api/workspaces/${workspaceId}/dashboard?period=${period}`)
       .then((r) => {
         if (r.data) setData(r.data);
         else
@@ -188,12 +188,11 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!workspaceId) return;
     const now = new Date();
-    api<{ data: BudgetItem[] }>(
+    api<BudgetItem[]>(
       `/api/workspaces/${workspaceId}/budgets?month=${now.getMonth() + 1}&year=${now.getFullYear()}`
     )
       .then((r) => {
-        if (Array.isArray((r as { data?: BudgetItem[] }).data))
-          setBudgets((r as { data: BudgetItem[] }).data);
+        if (Array.isArray(r.data)) setBudgets(r.data);
       })
       .catch(() => {});
   }, [workspaceId]);

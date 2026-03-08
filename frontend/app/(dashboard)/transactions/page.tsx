@@ -43,7 +43,7 @@ export default function TransactionsPage() {
     if (from) params.set("from", from);
     if (to) params.set("to", to);
     api<Paginated>(`/api/workspaces/${workspaceId}/transactions?${params}`)
-      .then((r) => setResult(r as Paginated))
+      .then((r) => { if (r.data) setResult(r.data); })
       .catch(() => {});
   }, [workspaceId, page, status, typeFilter, search, from, to]);
 

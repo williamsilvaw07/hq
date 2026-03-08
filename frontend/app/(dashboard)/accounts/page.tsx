@@ -17,7 +17,7 @@ const ACCOUNT_TYPES = [
 ];
 
 function loadAccountsAndCards(workspaceId: number) {
-  return api<{ data: { accounts: Account[]; credit_cards: CreditCardItem[] } }>(
+  return api<{ accounts: Account[]; credit_cards: CreditCardItem[] }>(
     `/api/workspaces/${workspaceId}/accounts`
   ).then((r) => ({
     accounts: r.data?.accounts ?? [],

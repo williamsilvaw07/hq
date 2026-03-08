@@ -46,8 +46,8 @@ export default function TeamPage() {
   useEffect(() => {
     if (!workspaceId) return;
     Promise.all([
-      api<{ data: Member[] }>(`/api/workspaces/${workspaceId}/members`).then((r) => setMembers(r.data ?? [])).catch(() => {}),
-      api<{ data: Invitation[] }>(`/api/workspaces/${workspaceId}/invitations`).then((r) => setInvitations(r.data ?? [])).catch(() => {}),
+      api<Member[]>(`/api/workspaces/${workspaceId}/members`).then((r) => setMembers(r.data ?? [])).catch(() => {}),
+      api<Invitation[]>(`/api/workspaces/${workspaceId}/invitations`).then((r) => setInvitations(r.data ?? [])).catch(() => {}),
     ]).finally(() => setLoading(false));
   }, [workspaceId]);
 
@@ -58,7 +58,7 @@ export default function TeamPage() {
     setInviteLink("");
     try {
       const base = typeof window !== "undefined" ? window.location.origin : "";
-      const res = await api<{ data: { invite_link: string } }>(`/api/workspaces/${workspaceId}/members/invite`, {
+      const res = await api<{ invite_link: string }>(`/api/workspaces/${workspaceId}/members/invite`, {
         method: "POST",
         body: JSON.stringify({
           email: inviteEmail.trim(),

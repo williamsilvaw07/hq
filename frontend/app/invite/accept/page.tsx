@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -10,7 +11,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 type InviteInfo = { workspace_name: string; email: string; role: string };
 
-export default function AcceptInvitePage() {
+function AcceptInviteContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const { user, loading: authLoading } = useAuth();
@@ -133,5 +134,13 @@ export default function AcceptInvitePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AcceptInvitePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center p-6"><div className="text-muted-foreground text-sm">Loading…</div></div>}>
+      <AcceptInviteContent />
+    </Suspense>
   );
 }

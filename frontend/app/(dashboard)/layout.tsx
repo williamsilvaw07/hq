@@ -35,7 +35,7 @@ export default function DashboardLayout({
       return;
     }
     if (user) {
-      api<{ data: Workspace[] }>("/api/workspaces")
+      api<Workspace[]>("/api/workspaces")
         .then((r) => {
           if (r.data) {
             setWorkspaces(r.data);

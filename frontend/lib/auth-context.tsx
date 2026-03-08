@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
       return;
     }
-    api<{ data: { id: number; name: string; email: string; avatar_url?: string | null } }>("/api/user")
+    api<{ id: number; name: string; email: string; avatar_url?: string | null }>("/api/user")
       .then((r) => {
         if (r.data) setUser(r.data);
       })
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateProfile = useCallback(async (data: { name?: string; email?: string; avatar_url?: string | null }) => {
-    const res = await api<{ data: { id: number; name: string; email: string; avatar_url?: string | null } }>("/api/user", {
+    const res = await api<{ id: number; name: string; email: string; avatar_url?: string | null }>("/api/user", {
       method: "PATCH",
       body: JSON.stringify(data),
     });

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { formatBRL, CURRENCY_SYMBOL } from "@/lib/format";
-import { ShoppingBag, Bus, Cup, Plus, X } from "lucide-react";
+import { ShoppingBag, Bus, Coffee, Plus, X } from "lucide-react";
 
 type Budget = {
   id: number;
@@ -18,12 +18,12 @@ type Budget = {
 };
 type Category = { id: number; name: string; type: string };
 
-const categoryIcons: Record<string, typeof ShoppingBag> = { Shopping: ShoppingBag, Transport: Bus, Food: Cup };
+const categoryIcons: Record<string, typeof ShoppingBag> = { Shopping: ShoppingBag, Transport: Bus, Food: Coffee };
 const categoryColors = ["bg-orange-500/20 text-orange-500", "bg-chart-3/20 text-chart-3", "bg-chart-4/20 text-chart-4"];
 
 function loadBudgets(workspaceId: number, month: number, year: number): Promise<Budget[]> {
-  return api<{ data: Budget[] }>(`/api/workspaces/${workspaceId}/budgets?month=${month}&year=${year}`)
-    .then((r) => (Array.isArray((r as { data?: Budget[] }).data) ? (r as { data: Budget[] }).data : []));
+  return api<Budget[]>(`/api/workspaces/${workspaceId}/budgets?month=${month}&year=${year}`)
+    .then((r) => (Array.isArray(r.data) ? r.data : []));
 }
 
 export default function BudgetsPage() {
@@ -58,8 +58,8 @@ export default function BudgetsPage() {
 
   useEffect(() => {
     if (!workspaceId || !showAddForm) return;
-    api<{ data: Category[] }>(`/api/workspaces/${workspaceId}/categories`)
-      .then((r) => setCategories(Array.isArray((r as { data?: Category[] }).data) ? (r as { data: Category[] }).data : []))
+    api<Category[]>(`/api/workspaces/${workspaceId}/categories`)
+      .then((r) => setCategories(Array.isArray(r.data) ? r.data : []))
       .catch(() => setCategories([]));
   }, [workspaceId, showAddForm]);
 
@@ -101,12 +101,12 @@ export default function BudgetsPage() {
     setCategoryError("");
     setSavingCategory(true);
     try {
-      const res = await api<{ data: Category }>(`/api/workspaces/${workspaceId}/categories`, {
+      const res = await api<Category>(`/api/workspaces/${workspaceId}/categories`, {
         method: "POST",
         body: JSON.stringify({ name: newCategoryName.trim(), type: "expense" }),
       });
       if (res.data) {
-        setCategories((prev) => [...prev, res.data!]);
+        setCategories((prev) => [...prev, res.data as Category]);
         setNewCategoryId(String(res.data.id));
         setNewCategoryName("");
         setShowNewCategory(false);
