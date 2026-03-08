@@ -1,8 +1,5 @@
-// Use NEXT_PUBLIC_API_URL in browser so we hit the backend directly (avoids proxy/rewrite issues). Fallback for server.
-const API_URL =
-  typeof window !== "undefined"
-    ? (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000")
-    : (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000");
+// NEXT_PUBLIC_API_URL empty = same-origin (relative). Unset = fallback to local backend for dev.
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -22,7 +19,7 @@ export async function api<T>(
   if (token) {
     (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
-  const url = path.startsWith("http") ? path : `${API_URL}${path}`;
+  const url = path.startsWith("http") ? path : (API_URL ? `${String(API_URL).replace(/\/$/, "")}${path}` : path);
   const res = await fetch(url, { ...options, headers });
   const json = (await res.json().catch(() => ({}))) as {
     message?: string;

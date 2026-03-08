@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
@@ -28,23 +28,27 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  const hasRedirectedToLogin = useRef(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-      return;
-    }
+    if (loading) return;
     if (user) {
+      hasRedirectedToLogin.current = false;
       api<Workspace[]>("/api/workspaces")
         .then((r) => {
-          if (r.data) {
-            setWorkspaces(r.data);
-            if (r.data.length && !workspaceId) setWorkspaceId(r.data[0].id);
-          }
+          const list = Array.isArray(r?.data) ? r.data : [];
+          setWorkspaces(list);
+          if (list.length > 0 && !workspaceId) setWorkspaceId(list[0].id);
         })
         .catch(() => {});
+      return;
     }
-  }, [user, loading, router, setWorkspaceId, workspaceId]);
+    if (!hasRedirectedToLogin.current) {
+      hasRedirectedToLogin.current = true;
+      router.push("/login");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- omit router: unstable reference causes replaceState throttle
+  }, [user, loading, setWorkspaceId, workspaceId]);
 
   if (loading || !user) {
     return (

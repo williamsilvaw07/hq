@@ -153,7 +153,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = useCallback(() => {
-    if (!workspaceId) return;
+    if (!workspaceId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     api<DashboardData>(`/api/workspaces/${workspaceId}/dashboard?period=${period}`)
       .then((r) => {
@@ -197,17 +200,33 @@ export default function DashboardPage() {
       .catch(() => {});
   }, [workspaceId]);
 
+  if (!workspaceId) {
+    return (
+      <div className="min-h-screen pb-32 font-sans flex flex-col items-center justify-center px-6 text-center">
+        <p className="text-sm font-medium text-foreground mb-1">No workspace</p>
+        <p className="text-xs text-muted-foreground max-w-[260px]">
+          Create a workspace to start tracking. You can do this from the app once the feature is available, or ask an admin to add you to one.
+        </p>
+      </div>
+    );
+  }
+
   if (loading && !data) {
     return <DashboardSkeleton />;
   }
 
-  const displayData = data ?? {
+  const raw = data ?? {
     cash_bank_balance: 0,
     credit_usage: [],
     net_position: 0,
     period_income: 0,
     period_expense: 0,
     recent_transactions: [],
+  };
+  const displayData = {
+    ...raw,
+    credit_usage: Array.isArray(raw.credit_usage) ? raw.credit_usage : [],
+    recent_transactions: Array.isArray(raw.recent_transactions) ? raw.recent_transactions : [],
   };
 
   const periodIncome = displayData.period_income ?? displayData.monthly_income ?? 0;
