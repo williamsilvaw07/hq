@@ -23,6 +23,6 @@ Route::get('/{path?}', function () {
         return response()->file($index);
     }
 
-    // Fallback before first build: simple redirect to API info
-    return redirect('/api');
+    // Fallback before frontend is built: simple message (build frontend and copy out/* to public/)
+    return response('<html><head><title>William HQ</title></head><body style="font-family:sans-serif;max-width:600px;margin:2rem auto;padding:1rem"><h1>William HQ</h1><p>Fintech Tracker will appear here once the frontend is built and deployed.</p><p><a href="/api">API</a></p></body></html>', 200, ['Content-Type' => 'text/html']);
 })->where('path', '(?!api($|/)).*');
