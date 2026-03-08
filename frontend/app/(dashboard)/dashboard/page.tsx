@@ -145,8 +145,78 @@ function periodLabel(value: PeriodValue): string {
   return o ? o.label.toLowerCase() : "this month";
 }
 
+type Workspace = { id: number; name: string; slug: string };
+
+function NoWorkspaceEmptyState({ setWorkspaceId }: { setWorkspaceId: (id: number) => void }) {
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    if (!name.trim()) {
+      setError("Enter a workspace name.");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await api<Workspace>("/api/workspaces", {
+        method: "POST",
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      if (res.data) {
+        setWorkspaceId(res.data.id);
+        if (typeof window !== "undefined") window.dispatchEvent(new Event("workspaces-refresh"));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create workspace");
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen pb-32 font-sans flex flex-col items-center justify-center px-6 text-center pt-4">
+      <p className="text-sm font-medium text-foreground mb-1">No workspace</p>
+      <p className="text-xs text-muted-foreground max-w-[260px] mb-4">
+        Create a workspace to start tracking your finances.
+      </p>
+      <h2 className="text-base font-bold text-foreground mb-4">Create workspace</h2>
+      <form onSubmit={handleCreate} className="w-full max-w-[280px] space-y-4 text-left">
+        {error && (
+          <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
+            {error}
+          </p>
+        )}
+        <div>
+          <label htmlFor="workspace-name" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">
+            Workspace name
+          </label>
+          <input
+            id="workspace-name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Personal"
+            className="w-full rounded-2xl border border-border/50 bg-card px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            autoFocus
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={creating || !name.trim()}
+          className="w-full rounded-2xl bg-primary text-primary-foreground py-3.5 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98]"
+        >
+          {creating ? "Creating…" : "Create workspace"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
-  const { workspaceId } = useAuth();
+  const { workspaceId, setWorkspaceId } = useAuth();
   const [period, setPeriod] = useState<PeriodValue>("this_month");
   const [data, setData] = useState<DashboardData | null>(null);
   const [budgets, setBudgets] = useState<BudgetItem[]>([]);
@@ -202,12 +272,7 @@ export default function DashboardPage() {
 
   if (!workspaceId) {
     return (
-      <div className="min-h-screen pb-32 font-sans flex flex-col items-center justify-center px-6 text-center">
-        <p className="text-sm font-medium text-foreground mb-1">No workspace</p>
-        <p className="text-xs text-muted-foreground max-w-[260px]">
-          Create a workspace to start tracking. You can do this from the app once the feature is available, or ask an admin to add you to one.
-        </p>
-      </div>
+      <NoWorkspaceEmptyState setWorkspaceId={setWorkspaceId} />
     );
   }
 

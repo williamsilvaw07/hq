@@ -1,0 +1,46 @@
+# Build the Next.js frontend and deploy to Hostinger via FTP.
+# Trigger: push to main, or "Run workflow" from the Actions tab.
+#
+# One-time setup: In GitHub repo → Settings → Secrets and variables → Actions,
+# add these secrets (get FTP details from Hostinger hPanel):
+#   FTP_HOST      — e.g. ftp.williamhq.com or the hostname Hostinger gives you
+#   FTP_USERNAME  — your FTP username (often like u752162317)
+#   FTP_PASSWORD  — your FTP password
+#   FTP_REMOTE_PATH — optional; remote folder for the built site (default: public_html/public)
+
+name: Build and deploy frontend
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install and build
+        run: |
+          cd frontend
+          npm ci
+          NEXT_PUBLIC_API_URL= npm run build
+
+      - name: Deploy to Hostinger (FTP)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./frontend/out/
+          # Where the built site lives on the server (FTP path). Change in this file if yours is different.
+          server-dir: public_html/public

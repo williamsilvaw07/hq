@@ -30,25 +30,31 @@ export default function DashboardLayout({
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const hasRedirectedToLogin = useRef(false);
 
+  const fetchWorkspaces = useCallback(() => {
+    api<Workspace[]>("/api/workspaces")
+      .then((r) => {
+        const list = Array.isArray(r?.data) ? r.data : [];
+        setWorkspaces(list);
+        if (list.length > 0 && !workspaceId) setWorkspaceId(list[0].id);
+      })
+      .catch(() => {});
+  }, [setWorkspaceId, workspaceId]);
+
   useEffect(() => {
     if (loading) return;
     if (user) {
       hasRedirectedToLogin.current = false;
-      api<Workspace[]>("/api/workspaces")
-        .then((r) => {
-          const list = Array.isArray(r?.data) ? r.data : [];
-          setWorkspaces(list);
-          if (list.length > 0 && !workspaceId) setWorkspaceId(list[0].id);
-        })
-        .catch(() => {});
-      return;
+      fetchWorkspaces();
+      const onRefresh = () => fetchWorkspaces();
+      window.addEventListener("workspaces-refresh", onRefresh);
+      return () => window.removeEventListener("workspaces-refresh", onRefresh);
     }
     if (!hasRedirectedToLogin.current) {
       hasRedirectedToLogin.current = true;
       router.push("/login");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- omit router: unstable reference causes replaceState throttle
-  }, [user, loading, setWorkspaceId, workspaceId]);
+  }, [user, loading, fetchWorkspaces]);
 
   if (loading || !user) {
     return (
@@ -113,6 +119,9 @@ export default function DashboardLayout({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {workspaces.length === 0 && (
+              <span className="text-xs font-bold text-primary">No workspace — create below</span>
+            )}
             {workspaces.length > 1 && (
               <button
                 type="button"
