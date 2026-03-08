@@ -63,12 +63,15 @@ Create a `.env` on the server (copy from `.env.example`). Set at least:
 
 - `APP_ENV=production`
 - `APP_DEBUG=false`
-- `APP_URL=https://yourdomain.com`
+- `APP_URL=https://williamhq.com`
 - `APP_KEY=` (run `php artisan key:generate` once)
-- `DB_HOST=...` (from step 1)
-- `DB_DATABASE=...`
-- `DB_USERNAME=...`
-- `DB_PASSWORD=...`
+- **MySQL (Hostinger):**
+  - `DB_CONNECTION=mysql`
+  - `DB_HOST=localhost`
+  - `DB_PORT=3306`
+  - `DB_DATABASE=u752162317_hq`
+  - `DB_USERNAME=u752162317_hq`
+  - `DB_PASSWORD=` **← your MySQL password (from hPanel → MySQL Databases)**
 
 Run:
 
