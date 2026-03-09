@@ -6,7 +6,7 @@
 
 # Next.js
 /.next/
-out/
+# out/ — unignored so built site is committed and deployed from git
 .npm-cache/
 
 # Production
