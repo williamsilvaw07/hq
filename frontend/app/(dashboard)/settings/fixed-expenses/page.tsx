@@ -1,16 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { Home, Pencil, Trash2 } from "lucide-react";
+import { Home, Pencil, Trash2, Check, X } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { MOCK_FIXED_BILLS, type FixedBill, fixedBillsTotal } from "@/lib/fixed-expenses";
 
 export default function FixedExpensesPage() {
   const [bills, setBills] = useState<FixedBill[]>(MOCK_FIXED_BILLS);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [draft, setDraft] = useState<FixedBill | null>(null);
   const monthlyTotal = fixedBillsTotal(bills);
 
   function handleDelete(id: number) {
     setBills((prev) => prev.filter((bill) => bill.id !== id));
+  }
+
+  function startEdit(bill: FixedBill) {
+    setEditingId(bill.id);
+    setDraft({ ...bill });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft(null);
+  }
+
+  function saveEdit() {
+    if (!draft) return;
+    setBills((prev) => prev.map((bill) => (bill.id === draft.id ? draft : bill)));
+    setEditingId(null);
+    setDraft(null);
   }
 
   return (
@@ -27,7 +46,10 @@ export default function FixedExpensesPage() {
       <div className="space-y-4">
         <h3 className="section-title px-1">Active Recurring Bills</h3>
         <div className="space-y-4">
-          {bills.map((bill) => (
+          {bills.map((bill) => {
+            const isEditing = editingId === bill.id;
+            const display = isEditing && draft ? draft : bill;
+            return (
             <div
               key={bill.id}
               className="bg-card p-6 rounded-[2rem] space-y-5"
@@ -38,20 +60,49 @@ export default function FixedExpensesPage() {
                     <Home className="w-6 h-6 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground">{bill.name}</p>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={display.name}
+                        onChange={(e) =>
+                          setDraft((prev) =>
+                            prev && prev.id === bill.id ? { ...prev, name: e.target.value } : prev,
+                          )
+                        }
+                        className="text-sm font-bold text-foreground bg-transparent border-b border-border focus:outline-none"
+                      />
+                    ) : (
+                      <p className="text-sm font-bold text-foreground">{display.name}</p>
+                    )}
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">
-                      {bill.category} • Monthly
+                      {display.category} • Monthly
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-foreground">{formatMoney(bill.amount)}</p>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={display.amount}
+                      onChange={(e) =>
+                        setDraft((prev) =>
+                          prev && prev.id === bill.id
+                            ? { ...prev, amount: Number(e.target.value) || 0 }
+                            : prev,
+                        )
+                      }
+                      className="text-lg font-bold text-foreground bg-transparent border-b border-border text-right focus:outline-none"
+                    />
+                  ) : (
+                    <p className="text-lg font-bold text-foreground">{formatMoney(display.amount)}</p>
+                  )}
                   <p
                     className={`text-[9px] font-bold uppercase tracking-widest ${
-                      bill.dueSoon ? "text-chart-2" : "text-muted-foreground"
+                      display.dueSoon ? "text-chart-2" : "text-muted-foreground"
                     }`}
                   >
-                    {bill.dueSoon ? "Due in 5 days" : `Day ${bill.due.split("/")[0]}`}
+                    {display.dueSoon ? "Due in 5 days" : `Day ${display.due.split("/")[0]}`}
                   </p>
                 </div>
               </div>
@@ -61,31 +112,54 @@ export default function FixedExpensesPage() {
                     Next date:
                   </span>
                   <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">
-                    {bill.due}
+                    {display.due}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled
-                    title="Edit recurring bill (coming soon)"
-                    className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center opacity-60 cursor-not-allowed"
-                    aria-label="Edit (coming soon)"
-                  >
-                    <Pencil className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(bill.id)}
-                    className="w-8 h-8 rounded-lg bg-chart-2/10 flex items-center justify-center hover:bg-chart-2/20 transition-colors"
-                    aria-label={`Delete ${bill.name}`}
-                  >
-                    <Trash2 className="w-4 h-4 text-chart-2" />
-                  </button>
+                  {isEditing ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={saveEdit}
+                        className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+                        aria-label="Save"
+                      >
+                        <Check className="w-4 h-4 text-primary" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelEdit}
+                        className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                        aria-label="Cancel"
+                      >
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => startEdit(bill)}
+                        className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                        aria-label="Edit recurring bill"
+                      >
+                        <Pencil className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(bill.id)}
+                        className="w-8 h-8 rounded-lg bg-chart-2/10 flex items-center justify-center hover:bg-chart-2/20 transition-colors"
+                        aria-label={`Delete ${bill.name}`}
+                      >
+                        <Trash2 className="w-4 h-4 text-chart-2" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
     </div>
