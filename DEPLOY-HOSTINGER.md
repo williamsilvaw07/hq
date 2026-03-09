@@ -48,6 +48,10 @@ Clone your GitHub repo (e.g. into `domains/yourdomain.com/` or the path they sho
    ```
    Set `NEXT_PUBLIC_API_URL=` (empty) in the build so the app calls the same domain (e.g. `https://williamhq.com/api`).
 
+   **Important:** Hostinger’s “GIT” auto-deploy only runs `git pull`. It does **not** run the frontend build. So after every Git deploy you must either:
+   - **On server (SSH):** run the `cd frontend && npm ci && npm run build && cp -r out/* ../public/` steps above, or
+   - **From your machine:** run `./deploy-frontend.sh` (builds locally and uploads `frontend/out/` to `public_html/public/` via SSH/rsync). See `DEPLOY-FRONTEND.md`.
+
 **Option B – Upload:**  
 Upload the project (or a zip) via File Manager or FTP. Exclude: `vendor`, `node_modules`, `.env`, `.git`. Then run Composer and NPM via SSH or their “Run script” tool if available.
 
