@@ -25,8 +25,10 @@ if ! command -v npm &>/dev/null; then
   exit 1
 fi
 
-echo "Building in $(pwd) ..."
+BUILD_VERSION="$(date +%Y%m%d-%H%M%S)"
+export NEXT_PUBLIC_BUILD_VERSION="$BUILD_VERSION"
+echo "Building version ${NEXT_PUBLIC_BUILD_VERSION} in $(pwd) ..."
 export NEXT_PUBLIC_API_URL=
 npm ci
 npm run build
-echo "Done. Built files are in ./out/"
+echo "Done. Built files are in ./out/ (build ${NEXT_PUBLIC_BUILD_VERSION})"

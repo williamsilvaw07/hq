@@ -18,6 +18,8 @@ import {
 
 type Workspace = { id: number; name: string; slug: string };
 
+const BUILD_VERSION = process.env.NEXT_PUBLIC_BUILD_VERSION ?? "dev";
+
 export default function DashboardLayout({
   children,
 }: {
@@ -176,6 +178,11 @@ export default function DashboardLayout({
 
       {!isAddTransaction && (
         <div className="fixed bottom-0 left-0 w-full z-50 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+          <div className="mb-1 flex justify-center">
+            <span className="text-[9px] text-muted-foreground">
+              Build {BUILD_VERSION}
+            </span>
+          </div>
           <div className="bg-card/80 backdrop-blur-2xl rounded-[2.5rem] p-2 flex items-center shadow-2xl shadow-black/50">
             <Link href="/dashboard" className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 transition-colors ${pathname === "/dashboard" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
               <Home className="w-6 h-6" />
