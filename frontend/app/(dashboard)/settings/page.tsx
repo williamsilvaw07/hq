@@ -15,6 +15,8 @@ import {
   LogOut,
   Users,
 } from "lucide-react";
+import { loadFixedBills, type FixedBill } from "@/lib/fixed-expenses";
+import { formatMoney } from "@/lib/format";
 
 type Workspace = { id: number; name: string; slug: string };
 type WorkspaceMember = { id: number; user_id: number; role: string; name: string; email: string };
@@ -254,7 +256,12 @@ function WorkspaceSettingsSection() {
 }
 
 export default function SettingsPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, workspaceId } = useAuth();
+  const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
+
+  useEffect(() => {
+    setFixedBills(loadFixedBills(workspaceId ?? null));
+  }, [workspaceId]);
 
   return (
     <div className="space-y-8 pt-4">
@@ -330,34 +337,33 @@ export default function SettingsPage() {
           </Link>
         </div>
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-2xl">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center">
-                <Home className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm font-bold">Apartment Rent</p>
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                  Day 01 • Monthly
+          {fixedBills.length === 0 ? (
+            <p className="text-xs text-muted-foreground px-1">
+              You do not have any fixed expenses yet. Add one to see it here.
+            </p>
+          ) : (
+            fixedBills.map((bill) => (
+              <div
+                key={bill.id}
+                className="flex items-center justify-between p-4 bg-secondary/50 rounded-2xl"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center">
+                    <Home className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">{bill.name}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                      Day {bill.due.split("/")[0]} • Monthly
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm font-bold text-foreground">
+                  {formatMoney(bill.amount)}
                 </p>
               </div>
-            </div>
-            <p className="text-sm font-bold text-foreground">R$ 2.200,00</p>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-2xl">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center">
-                <span className="text-xs font-bold text-muted-foreground">NF</span>
-              </div>
-              <div>
-                <p className="text-sm font-bold">Netflix 4K</p>
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                  Day 12 • Monthly
-                </p>
-              </div>
-            </div>
-            <p className="text-sm font-bold text-foreground">R$ 19,99</p>
-          </div>
+            ))
+          )}
         </div>
       </section>
 

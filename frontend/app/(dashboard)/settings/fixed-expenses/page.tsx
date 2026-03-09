@@ -1,15 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Home, Pencil, Trash2, Check, X } from "lucide-react";
 import { formatMoney } from "@/lib/format";
-import { MOCK_FIXED_BILLS, type FixedBill, fixedBillsTotal } from "@/lib/fixed-expenses";
+import { useAuth } from "@/lib/auth-context";
+import {
+  MOCK_FIXED_BILLS,
+  type FixedBill,
+  fixedBillsTotal,
+  loadFixedBills,
+  saveFixedBills,
+} from "@/lib/fixed-expenses";
 
 export default function FixedExpensesPage() {
+  const { workspaceId } = useAuth();
   const [bills, setBills] = useState<FixedBill[]>(MOCK_FIXED_BILLS);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<FixedBill | null>(null);
   const monthlyTotal = fixedBillsTotal(bills);
+
+  useEffect(() => {
+    setBills(loadFixedBills(workspaceId ?? null));
+  }, [workspaceId]);
+
+  useEffect(() => {
+    saveFixedBills(workspaceId ?? null, bills);
+  }, [workspaceId, bills]);
 
   function handleDelete(id: number) {
     setBills((prev) => prev.filter((bill) => bill.id !== id));
