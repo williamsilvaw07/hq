@@ -178,14 +178,11 @@ function NoWorkspaceEmptyState({ setWorkspaceId }: { setWorkspaceId: (id: number
 
   return (
     <div id="create-workspace" className="min-h-screen pb-32 font-sans flex flex-col items-center justify-center px-6 text-center pt-4 scroll-mt-24">
-      <p className="text-sm font-medium text-foreground mb-1">No workspace</p>
-      <p className="text-xs text-muted-foreground max-w-[280px] mb-2">
-        Create a workspace to start tracking your finances.
-      </p>
+      <h1 className="text-lg font-bold text-foreground mb-2">Create your workspace</h1>
       <p className="text-xs text-muted-foreground max-w-[280px] mb-6">
-        Enter a name below and click <strong className="text-foreground">Create workspace</strong>.
+        Create a workspace to start tracking your finances. Enter a name below and click <strong className="text-foreground">Create workspace</strong>.
       </p>
-      <h2 className="text-base font-bold text-foreground mb-4">Create workspace</h2>
+      <h2 className="sr-only">Create workspace</h2>
       <form onSubmit={handleCreate} className="w-full max-w-[280px] space-y-4 text-left">
         {error && (
           <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
@@ -224,6 +221,14 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [budgets, setBudgets] = useState<BudgetItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const prev = typeof document !== "undefined" ? document.title : "";
+    if (typeof document !== "undefined") document.title = "Dashboard | Fintech Tracker";
+    return () => {
+      if (typeof document !== "undefined") document.title = prev || "Fintech Tracker";
+    };
+  }, []);
 
   const fetchDashboard = useCallback(() => {
     if (!workspaceId) {
