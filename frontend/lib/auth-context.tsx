@@ -25,7 +25,12 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [workspaceId, setWorkspaceIdState] = useState<number | null>(null);
+  const [workspaceId, setWorkspaceIdState] = useState<number | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = localStorage.getItem("workspaceId");
+    const parsed = stored ? Number(stored) : NaN;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -76,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
+    localStorage.removeItem("workspaceId");
     setToken(null);
     setUser(null);
     setWorkspaceIdState(null);
@@ -84,6 +90,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setWorkspaceId = useCallback((id: number | null) => {
     setWorkspaceIdState(id);
+    if (typeof window !== "undefined") {
+      if (id === null) {
+        localStorage.removeItem("workspaceId");
+      } else {
+        localStorage.setItem("workspaceId", String(id));
+      }
+    }
   }, []);
 
   const updateProfile = useCallback(async (data: { name?: string; email?: string; avatar_url?: string | null }) => {

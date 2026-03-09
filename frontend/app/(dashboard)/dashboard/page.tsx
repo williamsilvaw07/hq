@@ -13,7 +13,9 @@ import {
   Calendar,
   Receipt,
   TrendingUp,
+  Repeat,
 } from "lucide-react";
+import { fixedBillsTotal, fixedBillsCount, MOCK_FIXED_BILLS } from "@/lib/fixed-expenses";
 
 const PERIOD_OPTIONS = [
   { value: "today", label: "Today" },
@@ -400,6 +402,22 @@ export default function DashboardPage() {
               </p>
               <p className="text-lg font-bold text-foreground tabular-nums">
                 {formatMoney(periodExpense)}
+              </p>
+            </div>
+          </div>
+          <div className="bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 transition-all duration-200 hover:border-primary/30 hover:shadow-md active:scale-[0.98]">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+              <Repeat className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
+                Fixed expenses
+              </p>
+              <p className="text-lg font-bold text-foreground tabular-nums">
+                {formatMoney(fixedBillsTotal(MOCK_FIXED_BILLS))}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                {fixedBillsCount(MOCK_FIXED_BILLS)} active bill{fixedBillsCount(MOCK_FIXED_BILLS) !== 1 ? "s" : ""}
               </p>
             </div>
           </div>

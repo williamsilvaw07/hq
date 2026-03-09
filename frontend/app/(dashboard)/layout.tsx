@@ -91,7 +91,14 @@ export default function DashboardLayout({
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-lg font-bold">{settingsTitle}</h1>
+            <div>
+              <h1 className="text-lg font-bold">{settingsTitle}</h1>
+              {currentWorkspace && (
+                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-0.5">
+                  Workspace: {currentWorkspace.name}
+                </p>
+              )}
+            </div>
           </div>
         </header>
       ) : null}
@@ -113,7 +120,7 @@ export default function DashboardLayout({
             </Link>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                {pathname === "/dashboard" ? "DASHBOARD" : (currentWorkspace?.name ?? "DASHBOARD")}
+                Workspace: {currentWorkspace?.name ?? "No workspace"}
               </p>
               <p className="text-sm font-semibold text-foreground">{user.name}</p>
             </div>
