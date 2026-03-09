@@ -6,8 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+import { buildApiUrl } from "@/lib/api";
 
 type InviteInfo = { workspace_name: string; email: string; role: string };
 
@@ -26,7 +25,7 @@ function AcceptInviteContent() {
       setLoading(false);
       return;
     }
-    fetch(`${API_URL}/api/invitations/accept?token=${encodeURIComponent(token)}`, {
+    fetch(buildApiUrl(`/api/invitations/accept?token=${encodeURIComponent(token)}`), {
       headers: { Accept: "application/json" },
     })
       .then((r) => r.json())
@@ -44,7 +43,7 @@ function AcceptInviteContent() {
     setError("");
     try {
       const t = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`${API_URL}/api/invitations/accept`, {
+      const res = await fetch(buildApiUrl("/api/invitations/accept"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

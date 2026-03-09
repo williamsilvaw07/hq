@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, buildMediaUrl } from "@/lib/api";
 import {
   Home,
   History,
@@ -102,7 +102,7 @@ export default function DashboardLayout({
               <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center text-sm font-bold text-foreground overflow-hidden">
                 {user.avatar_url ? (
                   <img
-                    src={user.avatar_url.startsWith("http") ? user.avatar_url : `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}${user.avatar_url}`}
+                    src={buildMediaUrl(user.avatar_url)}
                     alt=""
                     className="w-full h-full object-cover"
                   />

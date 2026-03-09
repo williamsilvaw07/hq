@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { login as apiLogin, register as apiRegister, api } from "./api";
+import { login as apiLogin, register as apiRegister, api, buildApiUrl } from "./api";
 
 type User = { id: number; name: string; email: string; avatar_url?: string | null } | null;
 
@@ -19,11 +19,6 @@ type AuthContextType = {
   setWorkspaceId: (id: number | null) => void;
   workspaceId: number | null;
 };
-
-const API_URL =
-  typeof window !== "undefined"
-    ? (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000")
-    : "";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -103,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const formData = new FormData();
     formData.append("avatar", file);
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    const res = await fetch(`${API_URL}/api/user/avatar`, {
+    const res = await fetch(buildApiUrl("/api/user/avatar"), {
       method: "POST",
       headers: { Accept: "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: formData,

@@ -1,5 +1,38 @@
-// NEXT_PUBLIC_API_URL empty = same-origin (relative). Unset = fallback to local backend for dev.
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+const isBrowser = typeof window !== "undefined";
+
+function getApiBaseUrl(): string {
+  if (isBrowser) {
+    // Browser: use same-origin `/api` and let Next.js rewrites or the backend handle routing.
+    return "";
+  }
+
+  const fromEnv = process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL ?? "";
+  if (fromEnv) {
+    return fromEnv.replace(/\/+$/, "");
+  }
+
+  // Explicit local dev fallback when no env is configured.
+  if (process.env.NODE_ENV === "development") {
+    return "http://127.0.0.1:8000";
+  }
+
+  return "";
+}
+
+export function buildApiUrl(path: string): string {
+  if (path.startsWith("http")) return path;
+  const base = getApiBaseUrl();
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalizedPath}`;
+}
+
+export function buildMediaUrl(path: string | null | undefined): string {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const base = getApiBaseUrl();
+  return `${base}${normalizedPath}`;
+}
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -19,7 +52,7 @@ export async function api<T>(
   if (token) {
     (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
-  const url = path.startsWith("http") ? path : (API_URL ? `${String(API_URL).replace(/\/$/, "")}${path}` : path);
+  const url = buildApiUrl(path);
   const res = await fetch(url, { ...options, headers });
   const json = (await res.json().catch(() => ({}))) as {
     message?: string;
@@ -40,7 +73,7 @@ export type LoginResponse = { token: string; user: { id: number; name: string; e
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
   try {
-    const res = await fetch(`${API_URL}/api/login`, {
+    const res = await fetch(buildApiUrl("/api/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ email, password }),
@@ -65,7 +98,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 
 export async function register(name: string, email: string, password: string, password_confirmation: string): Promise<LoginResponse> {
   try {
-    const res = await fetch(`${API_URL}/api/register`, {
+    const res = await fetch(buildApiUrl("/api/register"), {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ name, email, password, password_confirmation }),

@@ -4,9 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { ArrowLeft, Camera, ChevronRight, Trash2, X } from "lucide-react";
-
-const API_URL =
-  typeof window !== "undefined" ? (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000") : "";
+import { buildMediaUrl } from "@/lib/api";
 
 export default function SettingsProfilePage() {
   const { user, updateProfile, uploadAvatar, changePassword } = useAuth();
@@ -133,7 +131,7 @@ export default function SettingsProfilePage() {
             >
               {user?.avatar_url ? (
                 <img
-                  src={user.avatar_url.startsWith("http") ? user.avatar_url : `${API_URL}${user.avatar_url}`}
+                  src={buildMediaUrl(user.avatar_url)}
                   alt=""
                   className="w-full h-full object-cover"
                 />
