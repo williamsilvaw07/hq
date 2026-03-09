@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'export',
+  trailingSlash: true,
   // In production, set NEXT_PUBLIC_API_URL to your API origin if it's different from the frontend;
   // otherwise leave it empty and use same-origin `/api` calls.
   async rewrites() {
