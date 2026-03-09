@@ -9,9 +9,8 @@
 
 name: Build and deploy frontend
 
+# Run manually from Actions tab (no auto-deploy on push)
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -49,6 +48,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "StrictHostKeyChecking no" > ~/.ssh/config
           chmod 600 ~/.ssh/config
+          sshpass -p "$SFTP_PASS" ssh -p 65002 -o StrictHostKeyChecking=no "$SFTP_USER@$SFTP_HOST" 'mkdir -p public_html/public'
           sshpass -p "$SFTP_PASS" rsync -avz --delete \
             -e "ssh -p 65002 -o StrictHostKeyChecking=no" \
             frontend/out/ "$SFTP_USER@$SFTP_HOST:public_html/public/"

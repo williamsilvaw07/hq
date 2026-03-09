@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark fintech palette – section colors slightly lighter, minimal borders */
+  --background: #0b0b0b;
+  --foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #0b0b0b;
+  --secondary: #181818;
+  --secondary-foreground: #ffffff;
+  --muted: #1c1c1c;
+  --muted-foreground: #a0a0a0;
+  --accent: #1a1a1a;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --card: #161616;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --border: #1a1a1a;
+  --input: #1a1a1a;
+  --ring: rgba(255, 255, 255, 0.15);
+  --chart-1: #4ade80;
+  --chart-2: #f87171;
+  --chart-3: #60a5fa;
+  --chart-4: #c084fc;
+  --chart-5: #fbbf24;
+  --radius: 0.75rem;
+  /* Typography */
+  --page-title: 1.5rem;
+  --section-title: 0.75rem;
+  --label: 0.625rem;
+}
+
+body {
+  @apply bg-background text-foreground antialiased tracking-tight font-sans;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Dark scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #252525 #161616;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: #161616;
+}
+*::-webkit-scrollbar-thumb {
+  background: #252525;
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+
+/* Consistent focus ring for inputs/buttons */
+input:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Design system utilities */
+.section-title {
+  @apply text-[11px] font-bold text-muted-foreground uppercase tracking-widest;
+}
+.label {
+  @apply text-[10px] font-bold text-muted-foreground uppercase tracking-wider;
+}
+.card-base {
+  @apply bg-card rounded-2xl;
+}
+.page-title {
+  @apply text-xl font-bold text-foreground;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Dashboard skeleton fade-in */
+@keyframes dashboard-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.dashboard-skeleton {
+  animation: dashboard-fade-in 0.3s ease-out;
+}

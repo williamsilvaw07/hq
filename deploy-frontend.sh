@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Build the frontend and upload to Hostinger (public_html/public/).
+# Run from repo root when you have frontend changes:
+#   ./deploy-frontend.sh
+#
+# Requires: FTP_HOST, FTP_USERNAME, FTP_PASSWORD (env or .env.deploy).
+# On Mac: brew install sshpass  (for password-based SSH)
+
+set -e
+cd "$(dirname "$0")"
+
+# Load credentials from .env.deploy if it exists (optional)
+if [ -f .env.deploy ]; then
+  set -a
+  source .env.deploy
+  set +a
+fi
+
+for v in FTP_HOST FTP_USERNAME FTP_PASSWORD; do
+  if [ -z "${!v}" ]; then
+    echo "Error: $v is not set. Export it or add to .env.deploy"
+    exit 1
+  fi
+done
+
+echo "Building frontend..."
+(cd frontend && NEXT_PUBLIC_API_URL= npm run build)
+
+if [ ! -f frontend/out/index.html ]; then
+  echo "Build failed: frontend/out/index.html missing"
+  exit 1
+fi
+
+echo "Creating remote directory (if needed)..."
+sshpass -p "$FTP_PASSWORD" ssh -p 65002 -o StrictHostKeyChecking=no \
+  "$FTP_USERNAME@$FTP_HOST" 'mkdir -p public_html/public'
+
+echo "Uploading to $FTP_HOST:public_html/public/ ..."
+sshpass -p "$FTP_PASSWORD" rsync -avz --delete \
+  -e "ssh -p 65002 -o StrictHostKeyChecking=no" \
+  frontend/out/ "$FTP_USERNAME@$FTP_HOST:public_html/public/"
+
+echo "Done. Frontend is live."

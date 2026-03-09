@@ -1,43 +1,31 @@
-# Deploy frontend (one-time setup)
+# Deploy frontend to Hostinger
 
-After this setup, **every push to `main`** will automatically build the Next.js app and upload it to Hostinger via **SFTP** (same credentials as FTP; Hostinger uses port 65002 for SFTP).
+Deploy the built Next.js app to **public_html/public/** on your server. Use the **local script** when you have frontend changes (no GitHub Actions required).
 
-## 1. Enable SSH/SFTP on Hostinger (if needed)
+## Option A: Deploy from your Mac (recommended)
 
-In hPanel → **Advanced** → **SSH Access**: ensure SSH/SFTP is enabled. You use the same FTP username and password for SFTP.
+When you change the frontend, run from the repo root:
 
-## 2. Add GitHub secrets
+```bash
+./deploy-frontend.sh
+```
 
-In your repo: **Settings → Secrets and variables → Actions → New repository secret.**
+### One-time setup
 
-Add these **3** secrets (same as before):
+1. **Install sshpass** (for password-based SFTP): `brew install sshpass`
+2. **Create `.env.deploy`** in the repo root (copy from `.env.deploy.example`), set `FTP_HOST`, `FTP_USERNAME`, `FTP_PASSWORD`. Or export them before running the script.
+3. **Enable SSH/SFTP** on Hostinger: hPanel → **Advanced** → **SSH Access** → enable. Port **65002** is used automatically.
 
-| Secret            | Where to get it |
-|-------------------|-----------------|
-| `FTP_HOST`        | Hostinger hPanel → **FTP** or **SSH** → hostname (e.g. `server123.hostinger.com` or your server hostname; no `ftp://`). |
-| `FTP_USERNAME`    | Your FTP username (e.g. `u752162317`). |
-| `FTP_PASSWORD`    | Your FTP password. |
+The script builds the frontend, creates `public_html/public` on the server if needed, then uploads `frontend/out/` there.
 
-The workflow deploys to `public_html/public/` on the server. To use a different path, edit the `rsync` line in `.github/workflows/deploy-frontend.yml` (the part after `$SFTP_HOST:`).
+## Option B: GitHub Actions (manual only)
 
-## 3. Push to deploy
-
-From then on:
-
-- **Push to `main`** → workflow runs, builds with `NEXT_PUBLIC_API_URL=` (same-origin API), then uploads the contents of `frontend/out/` to your server.
-- Or run it by hand: **Actions** tab → **Build and deploy frontend** → **Run workflow**.
-
-You only need to run the build + upload on your Mac if you’re testing without pushing.
+The workflow does **not** run on push. To run by hand: **Actions** → **Build and deploy frontend** → **Run workflow**. Add secrets `FTP_HOST`, `FTP_USERNAME`, `FTP_PASSWORD` in repo Settings → Secrets.
 
 ---
 
-## If the workflow fails
+## If the deploy fails
 
-1. **Open the failed run** → click the **deploy** job → see which step went red.
-2. **"Install and build" failed**  
-   - Check the log for `npm` or `next build` errors. Fix the issue locally and push again.
-3. **"Deploy to Hostinger (SFTP)" failed**  
-   - **Enable SSH**: In Hostinger hPanel → **Advanced** → **SSH Access**, make sure SSH/SFTP is enabled.
-   - **FTP_HOST**: Use the **server hostname** from Hostinger (e.g. from SSH Access or FTP; often like `server123.hostinger.com`). Not `ftp.williamhq.com` if that was only for FTP.
-   - **Port**: The workflow uses port **65002** (Hostinger SFTP). Change it in the workflow if your plan uses a different port.
-   - **Path**: The workflow uploads to `public_html/public/`. Edit the `rsync` command in the workflow if your site path is different.
+- **Build fails**: Fix the error shown; run `./deploy-frontend.sh` again.
+- **Upload fails (No such file or directory)**: The script runs `mkdir -p public_html/public` on the server first; if it still fails, create that folder in Hostinger File Manager.
+- **Connection refused / Permission denied**: Check FTP_HOST (use server hostname from hPanel), enable SSH in Hostinger, and confirm FTP_USERNAME / FTP_PASSWORD.
