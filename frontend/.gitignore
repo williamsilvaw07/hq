@@ -6,7 +6,8 @@
 
 # Next.js
 /.next/
-# out/ — unignored so built site is committed and deployed from git
+/out
+# out/ — static export output (ignored; built freshly on deploy)
 .npm-cache/
 
 # Production
@@ -36,3 +37,6 @@ next-env.d.ts
 .vscode
 *.swp
 *.swo
+
+# macOS
+.DS_Store
