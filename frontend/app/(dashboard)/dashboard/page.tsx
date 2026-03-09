@@ -180,7 +180,7 @@ function NoWorkspaceEmptyState({ setWorkspaceId }: { setWorkspaceId: (id: number
     <div id="create-workspace" className="min-h-screen pb-32 font-sans flex flex-col items-center justify-center px-6 text-center pt-4 scroll-mt-24">
       <h1 className="text-lg font-bold text-foreground mb-2">Create your workspace</h1>
       <p className="text-xs text-muted-foreground max-w-[280px] mb-6">
-        Create a workspace to start tracking your finances. Enter a name below and click <strong className="text-foreground">Create workspace</strong>.
+        Create a workspace to start following your finances. Enter a name below and click <strong className="text-foreground">Create workspace</strong>.
       </p>
       <h2 className="sr-only">Create workspace</h2>
       <form onSubmit={handleCreate} className="w-full max-w-[280px] space-y-4 text-left">
