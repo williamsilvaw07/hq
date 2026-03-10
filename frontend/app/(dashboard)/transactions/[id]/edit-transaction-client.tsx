@@ -38,6 +38,7 @@ export default function EditTransactionClient() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -50,6 +51,7 @@ export default function EditTransactionClient() {
       .then((r) => {
         const t = r.data;
         if (!t) return;
+        setLoadError("");
         setTransaction(t);
         setAccountId(t.account_id ? String(t.account_id) : "");
         setCategoryId(String(t.category_id));
@@ -58,7 +60,9 @@ export default function EditTransactionClient() {
         setDescription(t.description || "");
         setStatus(t.status);
       })
-      .catch(() => router.push("/transactions"));
+      .catch((err) => {
+        setLoadError(err instanceof Error ? err.message : "Could not load transaction.");
+      });
   }, [workspaceId, id, router]);
 
   useEffect(() => {
@@ -122,6 +126,22 @@ export default function EditTransactionClient() {
     } finally {
       setSavingCategory(false);
     }
+  }
+
+  if (loadError) {
+    return (
+      <div className="max-w-md space-y-4 pb-8">
+        <div className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
+          {loadError}
+        </div>
+        <Link
+          href="/transactions"
+          className="inline-flex items-center text-[11px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground"
+        >
+          ← Back to activity
+        </Link>
+      </div>
+    );
   }
 
   if (!transaction) return <div className="text-muted-foreground">Loading…</div>;
