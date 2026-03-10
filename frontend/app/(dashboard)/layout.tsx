@@ -96,44 +96,7 @@ export default function DashboardLayout({
           </div>
         </header>
       ) : null}
-      {!isSettings ? (
-        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/settings" className="active:scale-95 transition-all outline-none">
-              <div className="w-10 h-10 rounded-full overflow-hidden">
-                {user.avatar_url ? (
-                  <img
-                    src={buildMediaUrl(user.avatar_url)}
-                    alt=""
-                    className="w-full h-full object-cover grayscale"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-card flex items-center justify-center text-sm font-bold text-foreground grayscale">
-                    {user.name?.charAt(0)?.toUpperCase() || "U"}
-                  </div>
-                )}
-              </div>
-            </Link>
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                Workspace
-              </p>
-              <p className="text-sm font-semibold text-foreground">
-                {currentWorkspace?.name ?? "Personal Flow"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/settings"
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
-              aria-label="Notifications and settings"
-            >
-              <Bell className="w-5 h-5 text-muted-foreground" />
-            </Link>
-          </div>
-        </header>
-      ) : null}
+      {/* Per-page headers and navigation are handled by each screen now */}
 
       {workspaceOpen && workspaces.length > 1 && (
         <div className="absolute top-16 left-6 right-6 z-50 bg-card rounded-2xl shadow-xl overflow-hidden">
@@ -154,35 +117,6 @@ export default function DashboardLayout({
       )}
 
       <main className="px-6">{children}</main>
-
-      {!isAddTransaction && (
-        <div className="fixed bottom-0 left-0 w-full z-50 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
-          <div className="mb-1 flex justify-center">
-            <span className="text-[9px] text-muted-foreground">
-              Build {BUILD_VERSION}
-            </span>
-          </div>
-          <div className="bg-card/80 backdrop-blur-2xl rounded-[2.5rem] p-2 flex items-center shadow-2xl shadow-black/50">
-            <Link href="/dashboard" className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 transition-colors ${pathname === "/dashboard" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-              <Home className="w-6 h-6" />
-              <span className="text-[9px] font-bold uppercase tracking-widest">HOME</span>
-            </Link>
-            <Link href="/transactions" className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 transition-colors ${pathname === "/transactions" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-              <History className="w-6 h-6" />
-              <span className="text-[9px] font-bold uppercase tracking-widest">ACTIVITY</span>
-            </Link>
-            <div className="flex-1 flex justify-center relative -top-8">
-              <Link href="/transactions/new" className="w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-4 border-background">
-                <Plus className="w-7 h-7" />
-              </Link>
-            </div>
-            <Link href="/budgets" className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 transition-colors ${pathname === "/budgets" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-              <PieChart className="w-6 h-6" />
-              <span className="text-[9px] font-bold uppercase tracking-widest">BUDGETS</span>
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
