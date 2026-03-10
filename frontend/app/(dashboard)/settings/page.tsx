@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -87,11 +87,12 @@ function WorkspaceSettingsSection() {
         method: "POST",
         body: JSON.stringify({ name: newName.trim() }),
       });
-      if (res.data) {
-        setWorkspaces((prev) => [...prev, res.data]);
+      const workspace = res.data;
+      if (workspace) {
+        setWorkspaces((prev) => [...prev, workspace]);
         setNewName("");
-        setWorkspaceId(res.data.id);
-        setSelectedWorkspaceId(res.data.id);
+        setWorkspaceId(workspace.id);
+        setSelectedWorkspaceId(workspace.id);
         if (typeof window !== "undefined") {
           window.dispatchEvent(new Event("workspaces-refresh"));
         }
@@ -259,9 +260,19 @@ export default function SettingsPage() {
   const { user, logout, workspaceId } = useAuth();
   const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
 
-  useEffect(() => {
+  const refreshFixedBills = useCallback(() => {
     setFixedBills(loadFixedBills(workspaceId ?? null));
   }, [workspaceId]);
+
+  useEffect(() => {
+    refreshFixedBills();
+  }, [refreshFixedBills]);
+
+  useEffect(() => {
+    const onRefresh = () => refreshFixedBills();
+    window.addEventListener("fixed-bills-refresh", onRefresh);
+    return () => window.removeEventListener("fixed-bills-refresh", onRefresh);
+  }, [refreshFixedBills]);
 
   return (
     <div className="space-y-8 pt-4">

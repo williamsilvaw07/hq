@@ -15,7 +15,7 @@ import {
   TrendingUp,
   Repeat,
 } from "lucide-react";
-import { fixedBillsTotal, fixedBillsCount, MOCK_FIXED_BILLS } from "@/lib/fixed-expenses";
+import { fixedBillsTotal, fixedBillsCount, loadFixedBills, type FixedBill } from "@/lib/fixed-expenses";
 
 const PERIOD_OPTIONS = [
   { value: "today", label: "Today" },
@@ -222,6 +222,7 @@ export default function DashboardPage() {
   const [period, setPeriod] = useState<PeriodValue>("this_month");
   const [data, setData] = useState<DashboardData | null>(null);
   const [budgets, setBudgets] = useState<BudgetItem[]>([]);
+  const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -279,6 +280,20 @@ export default function DashboardPage() {
       })
       .catch(() => {});
   }, [workspaceId]);
+
+  const refreshFixedBills = useCallback(() => {
+    setFixedBills(loadFixedBills(workspaceId ?? null));
+  }, [workspaceId]);
+
+  useEffect(() => {
+    refreshFixedBills();
+  }, [refreshFixedBills]);
+
+  useEffect(() => {
+    const onRefresh = () => refreshFixedBills();
+    window.addEventListener("fixed-bills-refresh", onRefresh);
+    return () => window.removeEventListener("fixed-bills-refresh", onRefresh);
+  }, [refreshFixedBills]);
 
   if (!workspaceId) {
     return (
@@ -414,10 +429,10 @@ export default function DashboardPage() {
                 Fixed expenses
               </p>
               <p className="text-lg font-bold text-foreground tabular-nums">
-                {formatMoney(fixedBillsTotal(MOCK_FIXED_BILLS))}
+                {formatMoney(fixedBillsTotal(fixedBills))}
               </p>
               <p className="text-[11px] text-muted-foreground mt-1">
-                {fixedBillsCount(MOCK_FIXED_BILLS)} active bill{fixedBillsCount(MOCK_FIXED_BILLS) !== 1 ? "s" : ""}
+                {fixedBillsCount(fixedBills)} active bill{fixedBillsCount(fixedBills) !== 1 ? "s" : ""}
               </p>
             </div>
           </div>

@@ -25,6 +25,9 @@ export default function FixedExpensesPage() {
 
   useEffect(() => {
     saveFixedBills(workspaceId ?? null, bills);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("fixed-bills-refresh"));
+    }
   }, [workspaceId, bills]);
 
   function handleDelete(id: number) {
