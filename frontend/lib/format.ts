@@ -7,6 +7,14 @@ type MoneyFormatOptions = {
 };
 
 /**
+ * Legacy name kept for backwards compatibility.
+ * Formats number using UK-style separators (10,000.00).
+ */
+export function formatBRL(value: number, options?: MoneyFormatOptions): string {
+  return formatNumberUK(value, options);
+}
+
+/**
  * Format a numeric value like UK/US style (10,000.00) but with the BRL symbol.
  */
 export function formatNumberUK(value: number, options?: MoneyFormatOptions): string {
