@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ArrowLeft, Camera, ChevronRight, Trash2, X } from "lucide-react";
 import { buildMediaUrl } from "@/lib/api";
 
 export default function SettingsProfilePage() {
+  const router = useRouter();
   const { user, updateProfile, uploadAvatar, changePassword } = useAuth();
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -94,12 +96,14 @@ export default function SettingsProfilePage() {
     <div className="min-h-screen bg-background text-foreground pb-10 font-sans tracking-tight">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link
-            href="/settings"
+          <button
+            type="button"
+            onClick={() => router.push("/settings")}
             className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
+            aria-label="Back to settings"
           >
             <ArrowLeft className="w-5 h-5" />
-          </Link>
+          </button>
           <h1 className="text-lg font-bold">Profile Info</h1>
         </div>
         <button

@@ -87,12 +87,14 @@ export default function DashboardLayout({
       {showSettingsHeader ? (
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              href={settingsBackHref}
+            <button
+              type="button"
+              onClick={() => router.push(settingsBackHref)}
               className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
+              aria-label="Back"
             >
               <ArrowLeft className="w-5 h-5" />
-            </Link>
+            </button>
             <div>
               <h1 className="text-lg font-bold">{settingsTitle}</h1>
               {currentWorkspace && (
@@ -102,6 +104,9 @@ export default function DashboardLayout({
               )}
             </div>
           </div>
+          <span className="text-[9px] text-muted-foreground/80" title="Testing only – confirms deploy">
+            v{BUILD_VERSION}
+          </span>
         </header>
       ) : null}
       {!isSettings ? (
@@ -128,6 +133,9 @@ export default function DashboardLayout({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <span className="text-[9px] text-muted-foreground/80 mr-1" title="Testing only – confirms deploy">
+              v{BUILD_VERSION}
+            </span>
             {workspaces.length > 1 && (
               <button
                 type="button"

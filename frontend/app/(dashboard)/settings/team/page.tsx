@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import {
@@ -33,6 +34,7 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function TeamPage() {
+  const router = useRouter();
   const { user, workspaceId } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -142,12 +144,14 @@ export default function TeamPage() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-10 font-sans tracking-tight">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
-        <Link
-          href="/settings"
+        <button
+          type="button"
+          onClick={() => router.push("/settings")}
           className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
+          aria-label="Back to settings"
         >
           <ChevronRight className="w-5 h-5 rotate-180" />
-        </Link>
+        </button>
         <h1 className="text-lg font-bold">Workspace team</h1>
         <div className="w-10" />
       </header>

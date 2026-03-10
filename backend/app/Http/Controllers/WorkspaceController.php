@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Workspace;
 use App\Services\WorkspaceService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class WorkspaceController extends Controller
 {
@@ -23,10 +26,26 @@ class WorkspaceController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:workspaces,slug',
+            'slug' => 'nullable|string|max:255',
         ]);
-        $workspace = $this->workspaceService->create($request->user(), $request->only('name', 'slug'));
-        return response()->json(['data' => $workspace], 201);
+        try {
+            $workspace = $this->workspaceService->create($request->user(), $request->only('name', 'slug'));
+            return response()->json(['data' => $workspace], 201);
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (QueryException $e) {
+            Log::warning('Workspace create query error: ' . $e->getMessage(), ['exception' => $e]);
+            $message = 'A workspace with this name may already exist. Try a different name.';
+            if (str_contains($e->getMessage(), 'Duplicate') || str_contains($e->getMessage(), 'unique')) {
+                return response()->json(['message' => $message], 422);
+            }
+            return response()->json(['message' => $message], 422);
+        } catch (\Throwable $e) {
+            Log::error('Workspace create failed: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'message' => config('app.debug') ? $e->getMessage() : 'Could not create workspace. Please try again.',
+            ], 500);
+        }
     }
 
     public function show(Request $request, int $id): JsonResponse
