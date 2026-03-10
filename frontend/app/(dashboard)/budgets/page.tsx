@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { formatBRL, CURRENCY_SYMBOL } from "@/lib/format";
@@ -133,14 +134,13 @@ export default function BudgetsPage() {
       <header className="sticky top-0 z-30 -mx-6 px-6 pt-4 pb-5 bg-background/80 backdrop-blur-md space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">My Budgets</h1>
-          <button
-            type="button"
-            onClick={() => setShowAddForm(true)}
+          <Link
+            href="/budgets/new"
             className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all active:scale-95 shadow-lg shadow-white/5"
             aria-label="Add budget"
           >
             <Plus className="w-5 h-5" />
-          </button>
+          </Link>
         </div>
         <div className="bg-card p-5 rounded-3xl border border-border/50">
           <div className="flex justify-between items-end mb-3">
@@ -178,168 +178,6 @@ export default function BudgetsPage() {
         </div>
       </header>
 
-      {showAddForm && (
-        <div className="card-base p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-foreground">Add budget</h3>
-            <button
-              type="button"
-              onClick={() => {
-                setShowAddForm(false);
-                setError("");
-              }}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground"
-              aria-label="Close"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <form onSubmit={handleAddBudget} className="space-y-4">
-            <div>
-              <label className="label block mb-2">Category</label>
-              <select
-                value={newCategoryId}
-                onChange={(e) => setNewCategoryId(e.target.value)}
-                required
-                className="w-full bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-              >
-                <option value="">Select category</option>
-                {availableCategories.length === 0 && categories.length > 0 ? (
-                  <option value="" disabled>
-                    All categories have a budget
-                  </option>
-                ) : (
-                  availableCategories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))
-                )}
-              </select>
-              {!showNewCategory ? (
-                <button
-                  type="button"
-                  onClick={() => setShowNewCategory(true)}
-                  className="mt-2 text-xs font-bold text-primary hover:underline"
-                >
-                  + Add custom category
-                </button>
-              ) : (
-                <div className="mt-3 p-3 rounded-xl bg-secondary/50 space-y-2">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    New category
-                  </p>
-                  <form onSubmit={handleAddCategory} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      placeholder="Category name"
-                      className="flex-1 bg-card rounded-xl border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-                      autoFocus
-                    />
-                    <button
-                      type="submit"
-                      disabled={savingCategory || !newCategoryName.trim()}
-                      className="py-2 px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold disabled:opacity-50"
-                    >
-                      {savingCategory ? "…" : "Add"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowNewCategory(false);
-                        setNewCategoryName("");
-                        setCategoryError("");
-                      }}
-                      className="py-2 px-2 rounded-xl border border-border text-muted-foreground text-xs font-bold"
-                    >
-                      Cancel
-                    </button>
-                  </form>
-                  {categoryError && (
-                    <p className="text-xs text-chart-2">{categoryError}</p>
-                  )}
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="label block mb-2">Resets every</label>
-              <div className="flex gap-2">
-                <select
-                  value={newPeriodType}
-                  onChange={(e) =>
-                    setNewPeriodType(
-                      e.target.value as "day" | "week" | "month" | "year",
-                    )
-                  }
-                  className="flex-1 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-                >
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-                </select>
-                <select
-                  value={newPeriodInterval}
-                  onChange={(e) => setNewPeriodInterval(Number(e.target.value))}
-                  className="w-28 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-                >
-                  {newPeriodType === "week" ? (
-                    <option value={1}>Every week</option>
-                  ) : (
-                    <>
-                      <option value={1}>Every month</option>
-                      <option value={3}>Every 3 months</option>
-                    </>
-                  )}
-                </select>
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-1 ml-1">
-                {newPeriodType === "week" && "Resets at the start of each week"}
-                {newPeriodType === "month" &&
-                  newPeriodInterval === 1 &&
-                  "Resets at the start of each month"}
-                {newPeriodType === "month" &&
-                  newPeriodInterval === 3 &&
-                  "Resets every 3 months"}
-              </p>
-            </div>
-            <div>
-              <label className="label block mb-2">
-                Limit ({CURRENCY_SYMBOL})
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={newAmount}
-                onChange={(e) =>
-                  setNewAmount(e.target.value.replace(/[^0-9,.]/g, ""))
-                }
-                placeholder="0"
-                required
-                className="w-full bg-card rounded-2xl border border-border px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-              />
-            </div>
-            {error && <p className="text-sm text-chart-2">{error}</p>}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="flex-1 py-3 rounded-xl border border-border text-foreground font-bold text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving || availableCategories.length === 0}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50"
-              >
-                {saving ? "Saving…" : "Add budget"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
       <main className="space-y-8">
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
@@ -357,13 +195,12 @@ export default function BudgetsPage() {
                 <p className="text-muted-foreground text-sm">
                   No budgets set yet.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(true)}
-                  className="mt-4 py-2.5 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-all"
+                <Link
+                  href="/budgets/new"
+                  className="inline-flex items-center justify-center mt-4 py-2.5 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-all"
                 >
                   Add your first budget
-                </button>
+                </Link>
               </div>
             ) : (
               budgets.map((b, i) => {
