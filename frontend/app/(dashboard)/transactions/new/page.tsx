@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -27,9 +27,14 @@ function formatDateLabel(dateStr: string): string {
 export default function NewTransactionPage() {
   const { workspaceId } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialCategoryId = searchParams.get("category_id") ?? "";
+  const initialTypeParam = searchParams.get("type");
+  const initialType: "income" | "expense" =
+    initialTypeParam === "income" ? "income" : "expense";
   const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryId, setCategoryId] = useState("");
-  const [type, setType] = useState<"income" | "expense">("expense");
+  const [categoryId, setCategoryId] = useState(initialCategoryId);
+  const [type, setType] = useState<"income" | "expense">(initialType);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [description, setDescription] = useState("");

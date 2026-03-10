@@ -158,7 +158,7 @@ export default function NewBudgetPage() {
           </div>
         </div>
 
-        <div className="px-2 space-y-2">
+        <div className="px-2 space-y-3">
           <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
             Choose Icon
           </p>
@@ -177,6 +177,19 @@ export default function NewBudgetPage() {
                 {emoji}
               </button>
             ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+              Or custom
+            </span>
+            <input
+              type="text"
+              maxLength={2}
+              value={icon ?? ""}
+              onChange={(e) => setIcon(e.target.value || null)}
+              placeholder="🙂"
+              className="flex-1 bg-card rounded-2xl border border-border px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground/60"
+            />
           </div>
         </div>
 

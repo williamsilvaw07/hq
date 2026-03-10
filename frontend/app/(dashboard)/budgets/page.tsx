@@ -132,6 +132,23 @@ export default function BudgetsPage() {
   const totalSpent = Math.max(0, totalBudget - totalRemaining);
   const totalPct = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
 
+  async function handleDeleteBudget(id: number) {
+    if (!workspaceId) return;
+    if (typeof window !== "undefined") {
+      const ok = window.confirm("Delete this budget? This cannot be undone.");
+      if (!ok) return;
+    }
+    try {
+      await api(`/api/workspaces/${workspaceId}/budgets/${id}`, {
+        method: "DELETE",
+      });
+      const list = await loadBudgets(workspaceId);
+      setBudgets(list);
+    } catch (err) {
+      // Optionally surface error later; for now fail silently to avoid breaking UI.
+    }
+  }
+
   return (
     <div className="space-y-8 pb-8">
       <header className="sticky top-0 z-30 -mx-6 px-6 pt-4 pb-5 bg-background/80 backdrop-blur-md space-y-4">
@@ -252,12 +269,29 @@ export default function BudgetsPage() {
                           </p>
                         </div>
                       </div>
-                      <Link
-                        href={`/budgets/${b.id}/edit`}
-                        className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-xl bg-secondary/40"
-                      >
-                        Edit
-                      </Link>
+                      <div className="flex flex-col items-end gap-1">
+                        <Link
+                          href={`/budgets/${b.id}/edit`}
+                          className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-xl bg-secondary/40"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBudget(b.id)}
+                          className="text-[9px] font-black uppercase tracking-widest text-chart-2 hover:opacity-80 px-3 py-1 rounded-xl bg-chart-2/10"
+                        >
+                          Delete
+                        </button>
+                        {b.category?.id ? (
+                          <Link
+                            href={`/transactions/new?category_id=${b.category.id}&type=expense`}
+                            className="text-[9px] font-black uppercase tracking-widest text-primary hover:opacity-80 px-3 py-1 rounded-xl bg-primary/10"
+                          >
+                            Add Entry
+                          </Link>
+                        ) : null}
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-tight">
