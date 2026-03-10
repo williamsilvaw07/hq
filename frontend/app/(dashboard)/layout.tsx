@@ -96,7 +96,7 @@ export default function DashboardLayout({
                   router.push(settingsBackHref);
                 }
               }}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground transition-all active:scale-95"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
               aria-label="Back"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -109,7 +109,7 @@ export default function DashboardLayout({
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/settings" className="active:scale-95 transition-all outline-none">
-              <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10">
+              <div className="w-10 h-10 rounded-full overflow-hidden">
                 {user.avatar_url ? (
                   <img
                     src={buildMediaUrl(user.avatar_url)}
@@ -135,7 +135,7 @@ export default function DashboardLayout({
           <div className="flex items-center gap-2">
             <Link
               href="/settings"
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground transition-all active:scale-95"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
               aria-label="Notifications and settings"
             >
               <Bell className="w-5 h-5 text-muted-foreground" />
