@@ -154,7 +154,7 @@ export default function DashboardLayout({
                 setWorkspaceId(w.id);
                 setWorkspaceOpen(false);
               }}
-              className="w-full px-4 py-3 text-left text-sm font-medium text-foreground hover:bg-secondary border-b border-white/5 last:border-0"
+              className="w-full px-4 py-3 text-left text-sm font-medium text-foreground hover:bg-secondary last:border-0"
             >
               {w.name}
             </button>

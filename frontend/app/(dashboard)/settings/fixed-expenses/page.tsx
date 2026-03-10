@@ -329,7 +329,7 @@ export default function FixedExpensesPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                  <div className="flex items-center justify-between pt-2">
                     <RecurringPreview bill={display} />
                     <div className="flex items-center gap-2">
                       {isEditing ? (

@@ -173,7 +173,7 @@ export default function AccountsPage() {
 
       {primary && (
         <section>
-          <div className="relative w-full aspect-[1.6/1] rounded-[2.5rem] bg-gradient-to-br from-secondary to-background p-8 border border-white/5 shadow-2xl overflow-hidden flex flex-col justify-between">
+          <div className="relative w-full aspect-[1.6/1] rounded-[2.5rem] bg-gradient-to-br from-secondary to-background p-8 shadow-2xl overflow-hidden flex flex-col justify-between">
             <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-[80px]" />
             <div className="flex justify-between items-start relative z-10">
               <div>

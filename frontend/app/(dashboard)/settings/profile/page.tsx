@@ -211,7 +211,7 @@ export default function SettingsProfilePage() {
             <button
               type="button"
               onClick={() => setShowPasswordModal(true)}
-              className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors border-b border-white/5"
+              className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
             >
               <span className="text-sm font-bold">Change Password</span>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />

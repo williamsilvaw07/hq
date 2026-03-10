@@ -90,7 +90,7 @@ export default function WorkspacesPage() {
         <button
           type="button"
           onClick={() => router.back()}
-          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-secondary/50 border border-white/5 text-muted-foreground active:scale-95 transition-all"
+          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-secondary/50 text-muted-foreground active:scale-95 transition-all"
           aria-label="Back"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -172,7 +172,7 @@ export default function WorkspacesPage() {
                     key={w.id}
                     type="button"
                     onClick={() => handleSelect(w)}
-                    className="w-full p-5 bg-card/40 rounded-[2rem] border border-border/50 flex items-center justify-between hover:bg-card hover:border-border transition-all active:scale-[0.98] text-left"
+                    className="w-full p-5 bg-card/40 rounded-[2rem] flex items-center justify-between hover:bg-card transition-all active:scale-[0.98] text-left"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-chart-1/10 flex items-center justify-center border border-chart-1/20">

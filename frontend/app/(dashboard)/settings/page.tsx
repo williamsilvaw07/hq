@@ -52,7 +52,7 @@ function WorkspaceSettingsSection() {
       <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
         Workspace
       </h3>
-      <div className="bg-secondary rounded-3xl border border-border/50 overflow-hidden">
+      <div className="bg-secondary rounded-3xl overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b border-border/50">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-chart-4/10 flex items-center justify-center">
@@ -148,7 +148,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8 pt-4">
       {/* Profile card */}
-      <section className="flex flex-col items-center py-6 bg-secondary rounded-[2.5rem] border border-border/50 overflow-hidden">
+      <section className="flex flex-col items-center py-6 bg-secondary rounded-[2.5rem] overflow-hidden">
         <div className="relative group">
           <div className="w-24 h-24 rounded-full bg-secondary border-2 border-primary/20 flex items-center justify-center text-2xl font-bold text-foreground">
             {user?.name?.charAt(0)?.toUpperCase() || "U"}
@@ -178,7 +178,7 @@ export default function SettingsPage() {
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
           Financial Setup
         </h3>
-        <div className="bg-secondary rounded-3xl border border-border/50 overflow-hidden">
+        <div className="bg-secondary rounded-3xl overflow-hidden">
           <Link
             href="/budgets"
             className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors border-b border-border/50"
@@ -285,7 +285,7 @@ export default function SettingsPage() {
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
           App Settings
         </h3>
-        <div className="bg-secondary rounded-3xl border border-border/50 overflow-hidden">
+        <div className="bg-secondary rounded-3xl overflow-hidden">
           <button
             type="button"
             className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
