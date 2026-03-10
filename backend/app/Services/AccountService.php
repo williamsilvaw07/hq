@@ -22,6 +22,12 @@ class AccountService
     {
         $data['workspace_id'] = $workspaceId;
         $data['balance'] = $data['balance'] ?? 0;
+        // Default behavior:
+        // - Bank & savings accounts → included in net balance
+        // - Credit card accounts → excluded by default
+        if (!array_key_exists('include_in_net_balance', $data)) {
+            $data['include_in_net_balance'] = $data['type'] !== Account::TYPE_CREDIT_CARD;
+        }
         return $this->accountRepository->create($data);
     }
 

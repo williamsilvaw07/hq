@@ -33,8 +33,9 @@ class AccountController extends Controller
             'type' => 'required|in:' . implode(',', Account::types()),
             'currency' => 'nullable|string|size:3',
             'balance' => 'nullable|numeric',
+            'include_in_net_balance' => 'sometimes|boolean',
         ]);
-        $data = $request->only('name', 'type', 'currency', 'balance');
+        $data = $request->only('name', 'type', 'currency', 'balance', 'include_in_net_balance');
         $data['currency'] = $data['currency'] ?? 'BRL';
         $account = $this->accountService->store($workspace, $data);
         return response()->json(['data' => $account], 201);
@@ -60,8 +61,9 @@ class AccountController extends Controller
             'type' => 'sometimes|in:' . implode(',', Account::types()),
             'currency' => 'sometimes|string|size:3',
             'balance' => 'sometimes|numeric',
+            'include_in_net_balance' => 'sometimes|boolean',
         ]);
-        $account = $this->accountService->update($account, $request->only('name', 'type', 'currency', 'balance'));
+        $account = $this->accountService->update($account, $request->only('name', 'type', 'currency', 'balance', 'include_in_net_balance'));
         return response()->json(['data' => $account]);
     }
 

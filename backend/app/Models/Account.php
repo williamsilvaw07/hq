@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Account extends Model
 {
-    protected $fillable = ['workspace_id', 'name', 'type', 'currency', 'balance'];
+    protected $fillable = ['workspace_id', 'name', 'type', 'currency', 'balance', 'include_in_net_balance'];
 
     protected function casts(): array
     {
         return [
             'balance' => 'decimal:4',
+            'include_in_net_balance' => 'boolean',
         ];
     }
 

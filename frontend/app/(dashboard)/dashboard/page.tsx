@@ -250,12 +250,6 @@ export default function DashboardPage() {
     setDashboardMode(mode);
   }, [workspaceId]);
 
-  useEffect(() => {
-    if (dashboardMode === "monthly_focus" && period !== "this_month") {
-      setPeriod("this_month");
-    }
-  }, [dashboardMode, period]);
-
   const fetchDashboard = useCallback(() => {
     if (!workspaceId) {
       setLoading(false);
@@ -353,11 +347,6 @@ export default function DashboardPage() {
   const hasPeriodActivity = periodIncome + periodExpense > 0;
   const periodNetChange = periodIncome - periodExpense;
 
-  const periodOptionsForMode =
-    dashboardMode === "monthly_focus"
-      ? PERIOD_OPTIONS.filter((opt) => opt.value === "this_month")
-      : PERIOD_OPTIONS;
-
   return (
     <div className="min-h-screen pb-32 font-sans selection:bg-primary/20 tracking-tight">
       <main className="px-6 space-y-8">
@@ -391,7 +380,7 @@ export default function DashboardPage() {
 
         {/* Period selector */}
         <section className="bg-secondary/20 p-1 rounded-2xl flex">
-          {periodOptionsForMode.map((opt) => (
+          {PERIOD_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               type="button"
