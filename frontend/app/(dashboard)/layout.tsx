@@ -62,6 +62,10 @@ export default function DashboardLayout({
   const isSettings = pathname?.startsWith("/settings");
   const isSettingsProfile = pathname === "/settings/profile";
   const isSettingsTeam = pathname === "/settings/team";
+  const isDashboard = pathname === "/dashboard";
+  const isTransactions = pathname === "/transactions";
+  const isBudgets = pathname === "/budgets";
+  const isSetupRoot = pathname === "/settings";
   const settingsTitle =
     pathname === "/settings"
       ? "Settings"
@@ -117,6 +121,55 @@ export default function DashboardLayout({
       )}
 
       <main className="px-6">{children}</main>
+      <div className="fixed bottom-0 left-0 w-full z-40 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+        <div className="bg-card/80 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-2 flex items-center justify-between shadow-2xl shadow-black/50">
+          <Link
+            href="/dashboard"
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+              isDashboard ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
+            }`}
+          >
+            <Home className="text-2xl" />
+            <span>Home</span>
+          </Link>
+          <Link
+            href="/transactions"
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+              isTransactions ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
+            }`}
+          >
+            <History className="text-2xl" />
+            <span>History</span>
+          </Link>
+          <div className="flex-1 flex justify-center relative -top-8">
+            <Link
+              href="/transactions/new"
+              className="w-16 h-16 rounded-full bg-white text-black shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-4 border-background"
+              aria-label="Add transaction"
+            >
+              <Plus className="text-2xl" />
+            </Link>
+          </div>
+          <Link
+            href="/budgets"
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+              isBudgets ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
+            }`}
+          >
+            <PieChart className="text-2xl" />
+            <span>Budgets</span>
+          </Link>
+          <Link
+            href="/settings"
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+              isSetupRoot || isSettings ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
+            }`}
+          >
+            <Bell className="text-2xl" />
+            <span>Setup</span>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
