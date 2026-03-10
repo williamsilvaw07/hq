@@ -70,7 +70,7 @@ export default function TransactionsPage() {
     { id: "expense" as const, label: "Expenses" },
   ];
 
-  const list = result.data;
+  const list = Array.isArray(result.data) ? result.data : [];
   const byDate = list.reduce<Record<string, Transaction[]>>((acc, t) => {
     const d = t.date;
     if (!acc[d]) acc[d] = [];
