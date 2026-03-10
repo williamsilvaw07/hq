@@ -63,6 +63,14 @@ export default function DashboardPage() {
     return null;
   }
 
+  const refreshBudgets = useCallback(async () => {
+    if (!workspaceId) return;
+    const res = await api<BudgetSummary[]>(
+      `/api/workspaces/${workspaceId}/budgets?with_summaries=true`,
+    );
+    setBudgets(Array.isArray(res.data) ? res.data : []);
+  }, [workspaceId]);
+
   const periodExpense = dashboard?.period_expense ?? 0;
   const totalBudgetFromBudgets = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
   const totalSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
@@ -192,6 +200,29 @@ export default function DashboardPage() {
                       >
                         Edit
                       </Link>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!workspaceId) return;
+                          if (typeof window !== "undefined") {
+                            const ok = window.confirm(
+                              "Delete this budget? This cannot be undone.",
+                            );
+                            if (!ok) return;
+                          }
+                          try {
+                            await api(`/api/workspaces/${workspaceId}/budgets/${b.id}`, {
+                              method: "DELETE",
+                            });
+                            await refreshBudgets();
+                          } catch {
+                            // ignore for now
+                          }
+                        }}
+                        className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-chart-2/10 text-[9px] font-black uppercase tracking-widest text-chart-2 hover:opacity-80"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                   <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">

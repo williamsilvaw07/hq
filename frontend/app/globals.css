@@ -29,21 +29,21 @@
   --chart-5: #fbbf24;
   --radius: 0.75rem;
   /* Typography */
-  --page-title: 1.35rem;
+  --page-title: 1.2rem;
   --section-title: 0.7rem;
-  --label: 0.6rem;
+  --label: 0.55rem;
 }
 
 body {
   @apply bg-background text-foreground antialiased tracking-tight font-sans;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
 @media (min-width: 640px) {
   body {
-    font-size: 15px;
+    font-size: 14px;
   }
 }
 
