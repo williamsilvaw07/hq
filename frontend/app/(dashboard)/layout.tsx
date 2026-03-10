@@ -83,13 +83,19 @@ export default function DashboardLayout({
   const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20">
+    <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">
       {showSettingsHeader ? (
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               type="button"
-              onClick={() => router.push(settingsBackHref)}
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push(settingsBackHref);
+                }
+              }}
               className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
               aria-label="Back"
             >
@@ -113,41 +119,33 @@ export default function DashboardLayout({
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/settings" className="active:scale-95 transition-all outline-none">
-              <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center text-sm font-bold text-foreground overflow-hidden">
+              <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10">
                 {user.avatar_url ? (
                   <img
                     src={buildMediaUrl(user.avatar_url)}
                     alt=""
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover grayscale"
                   />
                 ) : (
-                  <span className="grayscale">{user.name?.charAt(0)?.toUpperCase() || "U"}</span>
+                  <div className="w-full h-full bg-card flex items-center justify-center text-sm font-bold text-foreground grayscale">
+                    {user.name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
                 )}
               </div>
             </Link>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                Workspace: {currentWorkspace?.name ?? "No workspace"}
+                Workspace
               </p>
-              <p className="text-sm font-semibold text-foreground">{user.name}</p>
+              <p className="text-sm font-semibold text-foreground">
+                {currentWorkspace?.name ?? "Personal Flow"}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[9px] text-muted-foreground/80 mr-1" title="Testing only – confirms deploy">
-              v{BUILD_VERSION}
-            </span>
-            {workspaces.length > 1 && (
-              <button
-                type="button"
-                onClick={() => setWorkspaceOpen(!workspaceOpen)}
-                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-card text-xs text-muted-foreground"
-              >
-                {currentWorkspace?.name} <ChevronDown className="w-3 h-3" />
-              </button>
-            )}
             <Link
               href="/settings"
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground transition-all active:scale-95"
               aria-label="Notifications and settings"
             >
               <Bell className="w-5 h-5 text-muted-foreground" />

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { api } from "@/lib/api";
+import { api, buildMediaUrl } from "@/lib/api";
 import {
   CreditCard,
   ShoppingBag,
@@ -227,7 +227,7 @@ function NoWorkspaceEmptyState({ setWorkspaceId }: { setWorkspaceId: (id: number
 }
 
 export default function DashboardPage() {
-  const { workspaceId, setWorkspaceId } = useAuth();
+  const { workspaceId, setWorkspaceId, user } = useAuth();
   const [period, setPeriod] = useState<PeriodValue>("this_month");
   const [data, setData] = useState<DashboardData | null>(null);
   const [budgets, setBudgets] = useState<BudgetItem[]>([]);
@@ -342,221 +342,144 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen pb-32 font-sans selection:bg-primary/20 tracking-tight">
       <main className="px-6 space-y-8">
-        {/* Period filter + Balance hero */}
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-card to-card/80 border border-border px-5 py-6 shadow-lg">
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
-              <div
-                className="flex rounded-xl bg-muted/80 p-1 gap-0.5"
-                role="tablist"
-                aria-label="Time period"
-              >
-                {PERIOD_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    role="tab"
-                    aria-selected={period === opt.value}
-                    onClick={() => setPeriod(opt.value)}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                      period === opt.value
-                        ? "bg-background text-foreground shadow-md"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+        {/* Net balance hero */}
+        <section className="flex flex-col items-center justify-center pt-6 pb-2">
+          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mb-2 opacity-60">
+            Net Balance
+          </p>
+          <div className="flex items-baseline gap-1 mb-4">
+            <span className="text-2xl font-light text-muted-foreground/50 tracking-tighter">
+              {sym}
+            </span>
+            <h1 className="text-6xl font-heading font-black tracking-tighter">
+              {formatMoneyBRL(displayData.net_position).replace(sym, "")}
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-2xl border border-white/5">
+            <div className="flex items-center gap-1.5">
+              <ArrowUpRight className="w-4 h-4 text-chart-1" aria-hidden />
+              <span className="text-[11px] font-bold text-chart-1">
+                {periodNetChange >= 0 ? "+" : "-"}
+                {formatMoney(Math.abs(periodNetChange))}
+              </span>
             </div>
-            <p className="text-xs text-muted-foreground font-medium mb-1">
-              Total Balance
-            </p>
-            <div
-              className={`flex items-baseline gap-1 transition-opacity duration-200 ${loading ? "opacity-70" : "opacity-100"}`}
-            >
-              <h1 className="text-5xl font-heading font-bold tracking-tighter">
-                {formatMoneyBRL(displayData.net_position)}
-              </h1>
-            </div>
-            {hasPeriodActivity && (
-              <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                Net change {periodLabel(period)}:{" "}
-                <span className={periodNetChange >= 0 ? "text-chart-1" : "text-chart-2"}>
-                  {periodNetChange >= 0 ? "+" : "-"}
-                  {formatMoney(Math.abs(periodNetChange))}
-                </span>
-              </p>
-            )}
+            <div className="w-px h-3 bg-white/10 mx-1" />
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+              {periodLabel(period)}
+            </span>
           </div>
         </section>
 
+        {/* Period selector */}
+        <section className="bg-secondary/20 p-1 rounded-2xl border border-white/5 flex">
+          {PERIOD_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setPeriod(opt.value)}
+              className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all ${
+                period === opt.value
+                  ? "rounded-xl bg-white text-black shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {opt.label.replace("This ", "")}
+            </button>
+          ))}
+        </section>
+
+        {/* Period income / expenses cards */}
         <section className="grid grid-cols-2 gap-4">
-          <div className="bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 transition-all duration-200 hover:border-chart-1/30 hover:shadow-md active:scale-[0.98]">
-            <div className="w-10 h-10 rounded-xl bg-chart-1/15 flex items-center justify-center ring-1 ring-chart-1/20">
-              <ArrowUpRight className="w-5 h-5 text-chart-1" aria-hidden />
+          <div className="bg-card p-5 rounded-[2rem] border border-border/50 flex flex-col gap-4 active:scale-[0.98] transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-chart-1/10 flex items-center justify-center border border-chart-1/20">
+              <ArrowUpRight className="text-chart-1 text-2xl" />
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
-                INCOME
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5">
+                Period Income
               </p>
-              <p className="text-lg font-bold text-foreground tabular-nums">
+              <p className="text-xl font-bold text-foreground tracking-tight">
                 {formatMoney(periodIncome)}
               </p>
             </div>
           </div>
-          <div className="bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 transition-all duration-200 hover:border-chart-2/30 hover:shadow-md active:scale-[0.98]">
-            <div className="w-10 h-10 rounded-xl bg-chart-2/15 flex items-center justify-center ring-1 ring-chart-2/20">
-              <ShoppingBag className="w-5 h-5 text-chart-2" aria-hidden />
+          <div className="bg-card p-5 rounded-[2rem] border border-border/50 flex flex-col gap-4 active:scale-[0.98] transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-chart-2/10 flex items-center justify-center border border-chart-2/20">
+              <ShoppingBag className="text-chart-2 text-2xl" />
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
-                EXPENSES
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5">
+                Period Expenses
               </p>
-              <p className="text-lg font-bold text-foreground tabular-nums">
+              <p className="text-xl font-bold text-foreground tracking-tight">
                 {formatMoney(periodExpense)}
-              </p>
-            </div>
-          </div>
-          <div className="bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 transition-all duration-200 hover:border-primary/30 hover:shadow-md active:scale-[0.98]">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
-              <Repeat className="w-5 h-5 text-primary" aria-hidden />
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
-                Fixed expenses
-              </p>
-              <p className="text-lg font-bold text-foreground tabular-nums">
-                {formatMoney(fixedBillsTotal(fixedBills))}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                {fixedBillsCount(fixedBills)} active bill{fixedBillsCount(fixedBills) !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
         </section>
 
+        {/* Recurring & Fixed + Credit usage */}
         <section className="space-y-8">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-foreground">
-                Monthly Budgets
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h2 className="text-sm font-bold text-foreground tracking-tight">
+                Recurring &amp; Fixed
               </h2>
               <Link
-                href="/budgets"
-                className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+                href="/settings/fixed-expenses"
+                className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors"
               >
-                EDIT LIMITS
+                Details
               </Link>
             </div>
-            <div className="space-y-4">
-              {budgets.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border bg-muted/30 py-10 px-4 flex flex-col items-center justify-center gap-3 text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-muted-foreground" aria-hidden />
-                  </div>
-                  <p className="text-sm font-medium text-foreground">No budgets set</p>
-                  <p className="text-xs text-muted-foreground max-w-[220px]">
-                    Set spending limits by category to track your progress.
-                  </p>
-                  <Link
-                    href="/budgets"
-                    className="text-xs font-bold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring rounded"
-                  >
-                    Set up budgets →
-                  </Link>
-                </div>
-              ) : (
-                budgets.slice(0, 4).map((b, i) => {
-                  const spent = 0;
-                  const pct =
-                    b.amount > 0
-                      ? Math.min(100, (spent / b.amount) * 100)
-                      : 0;
-                  const isOrange = i % 2 === 0;
-                  const Icon = isOrange ? ShoppingBag : Car;
-                  return (
-                    <div
-                      key={b.id}
-                      className="bg-secondary/80 border border-border p-4 rounded-2xl transition-colors hover:bg-secondary"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={
-                              isOrange
-                                ? "w-6 h-6 rounded-lg bg-orange-500/20 flex items-center justify-center"
-                                : "w-6 h-6 rounded-lg bg-blue-500/20 flex items-center justify-center"
-                            }
-                          >
-                            <Icon
-                              className={
-                                isOrange
-                                  ? "w-3.5 h-3.5 text-orange-500"
-                                  : "w-3.5 h-3.5 text-blue-500"
-                              }
-                            />
-                          </div>
-                          <span className="text-xs font-bold">
-                            {b.category?.name ?? "Category"}
-                          </span>
-                        </div>
-                        <span className="text-xs font-bold text-foreground">
-                          {sym} {formatMoneyShort(spent)}{" "}
-                          <span className="text-muted-foreground font-medium">
-                            / {formatMoneyShort(b.amount)}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
-                        <div
-                          style={{ width: `${pct}%` }}
-                          className={
-                            isOrange
-                              ? "h-full bg-orange-500 rounded-full"
-                              : "h-full bg-blue-500 rounded-full"
-                          }
-                        />
-                      </div>
+            <div className="space-y-3">
+              <div className="bg-secondary/40 p-4 rounded-3xl border border-border/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                      <Store className="text-orange-500 text-xl" />
                     </div>
-                  );
-                })
-              )}
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Fixed Bills</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                        Fixed Monthly
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm font-bold text-foreground">
+                    {formatMoney(fixedBillsTotal(fixedBills))}
+                  </p>
+                </div>
+                <div className="w-full h-1 bg-background rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-500 rounded-full opacity-30" style={{ width: "100%" }} />
+                </div>
+              </div>
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-4 px-1">
-              <h2 className="text-sm font-bold text-foreground">
-                Credit Card Usage
-              </h2>
+              <h2 className="text-sm font-bold text-foreground tracking-tight">Credit Card Usage</h2>
               <Link
                 href="/accounts"
-                className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-ring rounded"
+                className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors"
               >
-                MANAGE CARDS
+                Manage
               </Link>
             </div>
-            <div className="relative -mx-6 px-6">
-              <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 no-scrollbar">
-                {displayData.credit_usage.length === 0 ? (
-                  <div className="min-w-full snap-center rounded-2xl border border-dashed border-border bg-muted/30 py-10 px-4 flex flex-col items-center justify-center gap-3 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-                      <CreditCard className="w-6 h-6 text-muted-foreground" aria-hidden />
-                    </div>
-                    <p className="text-sm font-medium text-foreground">No credit cards</p>
-                    <p className="text-xs text-muted-foreground max-w-[220px]">
-                      Add accounts to see usage and limits here.
-                    </p>
-                    <Link
-                      href="/accounts"
-                      className="text-xs font-bold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring rounded"
-                    >
-                      Add cards →
-                    </Link>
-                  </div>
-                ) : (
+            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6">
+              {displayData.credit_usage.length === 0 ? (
+                <div className="min-w-[280px] bg-card p-5 rounded-[2rem] border border-dashed border-border/60 flex flex-col items-center justify-center text-center gap-3">
+                  <CreditCard className="w-6 h-6 text-muted-foreground" />
+                  <p className="text-sm font-medium text-foreground">No credit cards</p>
+                  <p className="text-xs text-muted-foreground max-w-[220px]">
+                    Add cards to see usage and limits here.
+                  </p>
+                  <Link href="/accounts" className="text-xs font-bold text-primary hover:underline">
+                    Add cards →
+                  </Link>
+                </div>
+              ) : (
                 displayData.credit_usage.map((c, i) => {
                   const total = c.available + c.used;
                   const pct = total > 0 ? (c.used / total) * 100 : 0;
@@ -566,13 +489,15 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={i}
-                      className="min-w-[280px] snap-center snap-always bg-card border border-border p-5 rounded-3xl flex flex-col gap-4 shrink-0 shadow-lg transition-shadow hover:shadow-xl"
+                      className="min-w-[280px] bg-card p-5 rounded-[2rem] border border-border/50 flex flex-col gap-5"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              isAmber ? "bg-amber-500/10" : "bg-blue-500/10"
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                              isAmber
+                                ? "bg-amber-500/10 border-amber-500/20"
+                                : "bg-blue-500/10 border-blue-500/20"
                             }`}
                           >
                             <CreditCard
@@ -582,86 +507,73 @@ export default function DashboardPage() {
                             />
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-foreground">
+                            <p className="text-xs font-bold text-foreground tracking-tight">
                               {c.name ?? `Card ${i + 1}`}
                             </p>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
                               **** {lastFour}
                             </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          {dueLabel ? (
-                            <p className="text-[10px] text-destructive font-bold uppercase">
+                        {dueLabel && (
+                          <div className="px-2 py-0.5 bg-secondary border border-white/5 rounded-md">
+                            <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest">
                               {dueLabel}
                             </p>
-                          ) : (
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase">
-                              —
-                            </p>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="flex justify-between items-end mb-2">
-                          <p className="text-lg font-bold text-foreground">
+                          <p className="text-lg font-bold text-foreground tracking-tight">
                             {formatMoney(c.used)}{" "}
                             <span className="text-xs text-muted-foreground font-medium">
-                              / {formatMoneyShort(c.available + c.used)}
+                              / {formatMoneyShort(total)}
                             </span>
+                          </p>
+                          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                            {pct.toFixed(0)}% Used
                           </p>
                         </div>
                         <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
                           <div
                             style={{ width: `${Math.min(100, pct)}%` }}
                             className={`h-full rounded-full ${
-                              isAmber ? "bg-amber-500" : "bg-blue-500"
+                              isAmber
+                                ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                                : "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]"
                             }`}
                           />
                         </div>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1.5">
-                          {pct.toFixed(0)}% used
-                        </p>
                       </div>
                     </div>
                   );
                 })
               )}
-              </div>
-              {/* Scroll fade hint when there are cards */}
-              {displayData.credit_usage.length > 1 && (
-                <div className="pointer-events-none absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-background to-transparent" aria-hidden />
-              )}
             </div>
           </div>
         </section>
 
+        {/* Recent activity */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-foreground">
-              Recent Activity
-            </h2>
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-sm font-bold text-foreground tracking-tight">Recent Activity</h2>
             <Link
               href="/transactions"
-              className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-ring rounded"
+              className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors"
             >
-              SEE ALL
+              See all
             </Link>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {displayData.recent_transactions.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border bg-muted/30 py-10 px-4 flex flex-col items-center justify-center gap-3 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-                  <Receipt className="w-6 h-6 text-muted-foreground" aria-hidden />
-                </div>
+              <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 py-8 px-4 flex flex-col items-center justify-center gap-3 text-center">
+                <Receipt className="w-6 h-6 text-muted-foreground" />
                 <p className="text-sm font-medium text-foreground">No transactions yet</p>
                 <p className="text-xs text-muted-foreground max-w-[220px]">
                   Your income and expenses for this period will appear here.
                 </p>
-                <Link
-                  href="/transactions/new"
-                  className="text-xs font-bold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring rounded"
-                >
+                <Link href="/transactions/new" className="text-xs font-bold text-primary hover:underline">
                   Add transaction →
                 </Link>
               </div>
@@ -670,45 +582,37 @@ export default function DashboardPage() {
                 <Link
                   key={t.id}
                   href={`/transactions/${t.id}`}
-                  className="flex items-center justify-between py-3 px-4 rounded-2xl bg-card border border-border transition-all hover:bg-secondary/80 hover:border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background group"
+                  className="flex items-center justify-between p-4 hover:bg-white/5 rounded-[1.8rem] transition-all group active:scale-[0.98]"
                 >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105 ${
-                        t.type === "income"
-                          ? "bg-chart-1/10 ring-1 ring-chart-1/20"
-                          : "bg-muted ring-1 ring-border/50"
-                      }`}
-                    >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-card border border-border/50 flex items-center justify-center transition-all group-hover:bg-background">
                       {t.type === "income" ? (
-                        <ArrowUpRight className="w-5 h-5 text-chart-1" aria-hidden />
+                        <ArrowUpRight className="text-chart-1 text-xl" aria-hidden />
                       ) : (
-                        <Store className="w-5 h-5 text-muted-foreground" aria-hidden />
+                        <Store className="text-muted-foreground text-xl" aria-hidden />
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-foreground">
+                      <p className="text-sm font-bold text-foreground tracking-tight">
                         {t.description || "—"}
                       </p>
-                      <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">
-                        {t.date}
+                      <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-widest">
+                        {t.type === "income" ? "Income" : "Expense"} • {t.date}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right flex items-center gap-2">
+                  <div className="text-right">
                     <p
-                      className={`text-sm font-bold tabular-nums ${
-                        t.type === "income"
-                          ? "text-chart-1"
-                          : "text-foreground"
+                      className={`text-sm font-bold tracking-tight ${
+                        t.type === "income" ? "text-chart-1" : "text-foreground"
                       }`}
                     >
                       {t.type === "income" ? "+" : "-"}
                       {formatMoney(Math.abs(t.amount))}
                     </p>
-                    <span className="text-[10px] text-muted-foreground font-medium">
+                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
                       {formatRelativeDay(t.date)}
-                    </span>
+                    </p>
                   </div>
                 </Link>
               ))

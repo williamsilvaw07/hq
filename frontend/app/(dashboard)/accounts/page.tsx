@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { Wallet, CreditCard, Building2, Plus, X } from "lucide-react";
+import { formatMoney } from "@/lib/format";
 
 type Account = { id: number; name: string; type: string; currency: string; balance: number };
 type CreditCardItem = {
@@ -158,7 +159,7 @@ export default function AccountsPage() {
       <header className="sticky top-0 z-30 -mx-6 px-6 py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
         <div>
           <h1 className="page-title">Accounts</h1>
-          <p className="section-title mt-1">Net worth: {sym} {netWorth.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+          <p className="section-title mt-1">Net worth: {formatMoney(netWorth)}</p>
         </div>
         <button
           type="button"
@@ -183,10 +184,9 @@ export default function AccountsPage() {
             </div>
             <div className="relative z-10">
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mb-1">Available Balance</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-light text-white/40">{sym}</span>
-                <p className="text-4xl font-bold text-white tracking-tighter">{Number(primary.balance).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
-              </div>
+              <p className="text-4xl font-bold text-white tracking-tighter">
+                {formatMoney(Number(primary.balance))}
+              </p>
             </div>
           </div>
         </section>
@@ -227,7 +227,9 @@ export default function AccountsPage() {
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{a.currency} · {a.type}</p>
                   </div>
                 </div>
-                <p className="text-sm font-bold text-foreground">{sym} {Number(a.balance).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                <p className="text-sm font-bold text-foreground">
+                  {formatMoney(Number(a.balance))}
+                </p>
               </div>
             ))
           )}
@@ -279,8 +281,8 @@ export default function AccountsPage() {
                   <div>
                     <p className="text-sm font-bold text-foreground">{c.name}</p>
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
-                      Used {sym} {Number(c.current_balance).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} / Limit {sym}{" "}
-                      {Number(c.credit_limit).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      Used {formatMoney(Number(c.current_balance))} / Limit{" "}
+                      {formatMoney(Number(c.credit_limit))}
                     </p>
                   </div>
                 </div>
