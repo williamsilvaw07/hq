@@ -78,7 +78,7 @@ export default function DashboardLayout({
   const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">
+    <div className="min-h-screen bg-background text-foreground pb-28 font-sans selection:bg-primary/20 tracking-tight">
       {showSettingsHeader ? (
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -103,7 +103,7 @@ export default function DashboardLayout({
       {/* Per-page headers and navigation are handled by each screen now */}
 
       {workspaceOpen && workspaces.length > 1 && (
-        <div className="absolute top-16 left-6 right-6 z-50 bg-card rounded-2xl shadow-xl overflow-hidden">
+        <div className="absolute top-16 left-4 right-4 z-50 bg-card rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto w-[calc(100%-2rem)]">
           {workspaces.map((w) => (
             <button
               key={w.id}
@@ -120,52 +120,54 @@ export default function DashboardLayout({
         </div>
       )}
 
-      <main className="px-6">{children}</main>
-      <div className="fixed bottom-0 left-0 w-full z-40 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
-        <div className="bg-card/80 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-2 flex items-center justify-between shadow-2xl shadow-black/50">
+      <main className="px-4 pt-4 pb-24 max-w-md mx-auto w-full">
+        {children}
+      </main>
+      <div className="fixed bottom-0 left-0 w-full z-40 px-4 pb-6 pt-3 bg-gradient-to-t from-background via-background/95 to-transparent">
+        <div className="max-w-md mx-auto bg-card/80 backdrop-blur-2xl border border-white/5 rounded-[2.25rem] px-2 py-1.5 flex items-center justify-between shadow-2xl shadow-black/50">
           <Link
             href="/dashboard"
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[11px] font-black uppercase tracking-widest ${
               isDashboard ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <Home className="text-2xl" />
+            <Home className="w-5 h-5" />
             <span>Home</span>
           </Link>
           <Link
             href="/transactions"
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[11px] font-black uppercase tracking-widest ${
               isTransactions ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <History className="text-2xl" />
+            <History className="w-5 h-5" />
             <span>History</span>
           </Link>
-          <div className="flex-1 flex justify-center relative -top-8">
+          <div className="flex-1 flex justify-center relative -top-7">
             <Link
               href="/transactions/new"
-              className="w-16 h-16 rounded-full bg-white text-black shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-4 border-background"
+              className="w-14 h-14 rounded-full bg-white text-black shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-[3px] border-background"
               aria-label="Add transaction"
             >
-              <Plus className="text-2xl" />
+              <Plus className="w-6 h-6" />
             </Link>
           </div>
           <Link
             href="/budgets"
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[11px] font-black uppercase tracking-widest ${
               isBudgets ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <PieChart className="text-2xl" />
+            <PieChart className="w-5 h-5" />
             <span>Budgets</span>
           </Link>
           <Link
             href="/settings"
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[11px] font-black uppercase tracking-widest ${
               isSetupRoot || isSettings ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <Bell className="text-2xl" />
+            <Bell className="w-5 h-5" />
             <span>Setup</span>
           </Link>
         </div>
