@@ -48,6 +48,10 @@ export default function FixedExpensesPage() {
       amount: 0,
       due: `${day}/${month}/${year}`,
       dueSoon: false,
+      frequency: "monthly",
+      dayOfMonth: today.getDate(),
+      dayOfWeek: null,
+      endDate: null,
     };
     setBills((prev) => [...prev, newBill]);
     setEditingId(newBill.id);
@@ -133,8 +137,102 @@ export default function FixedExpensesPage() {
                           </p>
                         )}
                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">
-                          {display.category} • Monthly
+                          {display.category} •{" "}
+                          {display.frequency === "weekly" ? "Weekly" : "Monthly"}
                         </p>
+                        {isEditing && (
+                          <div className="mt-2 flex flex-wrap gap-2 text-[10px]">
+                            <label className="flex items-center gap-1">
+                              <span className="text-muted-foreground">Frequency</span>
+                              <select
+                                value={display.frequency}
+                                onChange={(e) =>
+                                  setDraft((prev) =>
+                                    prev && prev.id === bill.id
+                                      ? {
+                                          ...prev,
+                                          frequency: e.target.value === "weekly" ? "weekly" : "monthly",
+                                        }
+                                      : prev,
+                                  )
+                                }
+                                className="bg-background border border-border rounded-lg px-2 py-1"
+                              >
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                              </select>
+                            </label>
+                            {display.frequency === "monthly" ? (
+                              <label className="flex items-center gap-1">
+                                <span className="text-muted-foreground">Day of month</span>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={31}
+                                  value={display.dayOfMonth ?? ""}
+                                  onChange={(e) => {
+                                    const value = Number(e.target.value);
+                                    setDraft((prev) =>
+                                      prev && prev.id === bill.id
+                                        ? {
+                                            ...prev,
+                                            dayOfMonth:
+                                              Number.isNaN(value) || value <= 0 || value > 31
+                                                ? prev.dayOfMonth
+                                                : value,
+                                            dayOfWeek: null,
+                                          }
+                                        : prev,
+                                    );
+                                  }}
+                                  className="w-14 bg-background border border-border rounded-lg px-2 py-1 text-right"
+                                />
+                              </label>
+                            ) : (
+                              <label className="flex items-center gap-1">
+                                <span className="text-muted-foreground">Weekday</span>
+                                <select
+                                  value={display.dayOfWeek ?? 1}
+                                  onChange={(e) =>
+                                    setDraft((prev) =>
+                                      prev && prev.id === bill.id
+                                        ? {
+                                            ...prev,
+                                            dayOfWeek: Number(e.target.value),
+                                            dayOfMonth: null,
+                                          }
+                                        : prev,
+                                    )
+                                  }
+                                  className="bg-background border border-border rounded-lg px-2 py-1"
+                                >
+                                  <option value={1}>Monday</option>
+                                  <option value={2}>Tuesday</option>
+                                  <option value={3}>Wednesday</option>
+                                  <option value={4}>Thursday</option>
+                                  <option value={5}>Friday</option>
+                                  <option value={6}>Saturday</option>
+                                  <option value={0}>Sunday</option>
+                                </select>
+                              </label>
+                            )}
+                            <label className="flex items-center gap-1">
+                              <span className="text-muted-foreground">Ends on</span>
+                              <input
+                                type="date"
+                                value={display.endDate ?? ""}
+                                onChange={(e) =>
+                                  setDraft((prev) =>
+                                    prev && prev.id === bill.id
+                                      ? { ...prev, endDate: e.target.value || null }
+                                      : prev,
+                                  )
+                                }
+                                className="bg-background border border-border rounded-lg px-2 py-1"
+                              />
+                            </label>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
@@ -164,7 +262,15 @@ export default function FixedExpensesPage() {
                       >
                         {display.dueSoon
                           ? "Due in 5 days"
-                          : `Day ${display.due.split("/")[0]}`}
+                          : display.frequency === "weekly" && display.dayOfWeek !== null
+                            ? `Every ${
+                                ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][
+                                  display.dayOfWeek
+                                ]
+                              }`
+                            : display.dayOfMonth
+                              ? `Day ${display.dayOfMonth}`
+                              : `Day ${display.due.split("/")[0]}`}
                       </p>
                     </div>
                   </div>
