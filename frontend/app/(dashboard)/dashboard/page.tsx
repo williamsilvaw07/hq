@@ -109,8 +109,8 @@ export default function DashboardPage() {
             Total Spent this Month
           </p>
           <div className="flex items-baseline gap-1 mb-4">
-            <span className="text-2xl font-light text-muted-foreground/50 tracking-tighter">$</span>
-            <h1 className="text-6xl font-heading font-black tracking-tighter text-chart-2">
+            <span className="text-xl font-light text-muted-foreground/50 tracking-tighter">$</span>
+            <h1 className="text-5xl font-heading font-black tracking-tighter text-foreground">
               {periodExpense.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
@@ -162,7 +162,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={b.id}
-                  className="bg-card p-5 rounded-[2.5rem] border border-border/50 space-y-4 group active:scale-[0.98] transition-all"
+                  className="bg-card p-5 rounded-[2.5rem] space-y-4 group active:scale-[0.98] transition-all"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -247,7 +247,7 @@ export default function DashboardPage() {
               See all
             </Link>
           </div>
-          <div className="bg-card/50 p-4 rounded-[1.8rem] border border-border/30 flex items-center justify-between group active:scale-[0.98] transition-all">
+          <div className="bg-card/50 p-4 rounded-[1.8rem] flex items-center justify-between group active:scale-[0.98] transition-all">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
                 <span className="text-muted-foreground text-xl">🏠</span>

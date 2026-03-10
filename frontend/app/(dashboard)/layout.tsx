@@ -124,7 +124,7 @@ export default function DashboardLayout({
         {children}
       </main>
       <div className="fixed bottom-0 left-0 w-full z-40 px-3 pb-5 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent">
-        <div className="w-full sm:max-w-md sm:mx-auto bg-card/80 backdrop-blur-2xl border border-white/5 rounded-[2.1rem] px-1.5 py-1 flex items-center justify-between shadow-2xl shadow-black/50">
+        <div className="w-full sm:max-w-md sm:mx-auto bg-card/80 backdrop-blur-2xl rounded-[2.1rem] px-1.5 py-1 flex items-center justify-between shadow-2xl shadow-black/50">
           <Link
             href="/dashboard"
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-black uppercase tracking-widest ${
