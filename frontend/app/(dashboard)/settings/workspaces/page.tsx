@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -21,6 +21,10 @@ export default function WorkspacesPage() {
   const { workspaceId, setWorkspaceId } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
+   const [showCreate, setShowCreate] = useState(false);
+   const [newName, setNewName] = useState("");
+   const [creating, setCreating] = useState(false);
+   const [createError, setCreateError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +57,33 @@ export default function WorkspacesPage() {
     router.back();
   }
 
+  async function handleCreate(e: FormEvent) {
+    e.preventDefault();
+    if (!newName.trim() || creating) return;
+    setCreateError("");
+    setCreating(true);
+    try {
+      const res = await api<Workspace>("/api/workspaces", {
+        method: "POST",
+        body: JSON.stringify({ name: newName.trim() }),
+      });
+      const workspace = res.data;
+      if (workspace) {
+        setWorkspaces((prev) => [...prev, workspace]);
+        setWorkspaceId(workspace.id);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("workspaces-refresh"));
+        }
+        setNewName("");
+        setShowCreate(false);
+      }
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Failed to create workspace.");
+    } finally {
+      setCreating(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans tracking-tight">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl px-6 py-5 flex items-center justify-between">
@@ -72,7 +103,7 @@ export default function WorkspacesPage() {
         </div>
         <button
           type="button"
-          onClick={() => router.push("/settings")}
+          onClick={() => setShowCreate(true)}
           className="w-10 h-10 flex items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary active:scale-95 transition-all"
           aria-label="New workspace"
         >
@@ -167,6 +198,70 @@ export default function WorkspacesPage() {
           Long press a workspace to edit settings
         </p>
       </div>
+
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6 bg-black/70">
+          <div className="w-full max-w-sm bg-card rounded-2xl border border-border/60 p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                  Workspace
+                </p>
+                <h2 className="text-sm font-bold text-foreground mt-1">Create New Space</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCreate(false);
+                  setCreateError("");
+                }}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Close
+              </button>
+            </div>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">
+                  Workspace name
+                </label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="e.g. Family, Personal"
+                  className="w-full rounded-2xl border border-border/60 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  autoFocus
+                />
+              </div>
+              {createError && (
+                <p className="text-xs text-chart-2">
+                  {createError}
+                </p>
+              )}
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreate(false);
+                    setCreateError("");
+                  }}
+                  className="flex-1 py-3 rounded-2xl border border-border text-xs font-bold text-foreground uppercase tracking-widest active:scale-[0.98]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating || !newName.trim()}
+                  className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {creating ? "Creating…" : "Create"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -96,23 +96,13 @@ export default function DashboardLayout({
                   router.push(settingsBackHref);
                 }
               }}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground transition-all active:scale-95"
               aria-label="Back"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-lg font-bold">{settingsTitle}</h1>
-              {currentWorkspace && (
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-0.5">
-                  Workspace: {currentWorkspace.name}
-                </p>
-              )}
-            </div>
+            <h1 className="text-lg font-bold">Settings</h1>
           </div>
-          <span className="text-[9px] text-muted-foreground/80" title="Testing only – confirms deploy">
-            v{BUILD_VERSION}
-          </span>
         </header>
       ) : null}
       {!isSettings ? (

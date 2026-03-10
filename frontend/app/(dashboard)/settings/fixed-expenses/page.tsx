@@ -71,7 +71,7 @@ function RecurringEditor({ bill, originalId, setDraft }: RecurringEditorProps) {
               return {
                 ...prev,
                 due: iso,
-                dayOfMonth: prev.frequency === "monthly" ? d.getDate() : prev.dayOfMonth,
+                dayOfMonth: prev.frequency === "monthly" ? null : prev.dayOfMonth,
                 dayOfWeek: prev.frequency === "weekly" ? d.getDay() : prev.dayOfWeek,
               };
             });
@@ -80,33 +80,7 @@ function RecurringEditor({ bill, originalId, setDraft }: RecurringEditorProps) {
         />
       </label>
 
-      {bill.frequency === "monthly" ? (
-        <label className="flex items-center gap-1">
-          <span className="text-muted-foreground">Day of month</span>
-          <input
-            type="number"
-            min={1}
-            max={31}
-            value={bill.dayOfMonth ?? ""}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              setDraft((prev) =>
-                prev && prev.id === originalId
-                  ? {
-                      ...prev,
-                      dayOfMonth:
-                        Number.isNaN(value) || value <= 0 || value > 31
-                          ? prev.dayOfMonth
-                          : value,
-                      dayOfWeek: null,
-                    }
-                  : prev,
-              );
-            }}
-            className="w-14 bg-background border border-border rounded-lg px-2 py-1 text-right"
-          />
-        </label>
-      ) : (
+      {bill.frequency === "weekly" && (
         <label className="flex items-center gap-1">
           <span className="text-muted-foreground">Day of week</span>
           <select
@@ -347,9 +321,11 @@ export default function FixedExpensesPage() {
                                   display.dayOfWeek
                                 ]
                               }`
-                            : display.dayOfMonth
-                              ? `Day ${display.dayOfMonth}`
-                              : `Day ${display.due.split("/")[0]}`}
+                            : (() => {
+                                const parsed = parseBillDate(display.due);
+                                const day = parsed ? parsed.getDate() : null;
+                                return day ? `Day ${day}` : "Day --";
+                              })()}
                       </p>
                     </div>
                   </div>

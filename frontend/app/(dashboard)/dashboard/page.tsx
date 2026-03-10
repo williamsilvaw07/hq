@@ -485,7 +485,6 @@ export default function DashboardPage() {
                   const pct = total > 0 ? (c.used / total) * 100 : 0;
                   const isAmber = i % 2 === 0;
                   const dueLabel = c.next_reset ? dueInDays(c.next_reset) : null;
-                  const lastFour = c.last_four && c.last_four.length === 4 ? c.last_four : "••••";
                   return (
                     <div
                       key={i}
@@ -509,9 +508,6 @@ export default function DashboardPage() {
                           <div>
                             <p className="text-xs font-bold text-foreground tracking-tight">
                               {c.name ?? `Card ${i + 1}`}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                              **** {lastFour}
                             </p>
                           </div>
                         </div>
