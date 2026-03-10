@@ -48,7 +48,11 @@ export default function BudgetsPage() {
   const currentYear = now.getFullYear();
 
   useEffect(() => {
-    if (!workspaceId) return;
+    if (!workspaceId) {
+      setLoading(false);
+      setBudgets([]);
+      return;
+    }
     setLoading(true);
     loadBudgets(workspaceId, currentMonth, currentYear)
       .then(setBudgets)
@@ -257,7 +261,7 @@ export default function BudgetsPage() {
           <h2 className="section-title text-foreground">Monthly Budgets</h2>
         </div>
         <div className="space-y-4">
-          {loading ? (
+          {loading && workspaceId ? (
             <p className="text-muted-foreground text-sm py-4">Loading…</p>
           ) : budgets.length === 0 ? (
             <div className="card-base p-8 text-center">

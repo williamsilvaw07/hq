@@ -74,9 +74,6 @@ export default function LoginPage() {
           Register
         </Link>
       </p>
-      <p className="mt-2 text-center text-xs text-muted-foreground/80">
-        Demo: user1@example.com / password
-      </p>
     </>
   );
 }

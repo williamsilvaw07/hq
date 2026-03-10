@@ -32,7 +32,8 @@ class WorkspaceRepository
     public function create(array $data, int $ownerUserId): Workspace
     {
         return DB::transaction(function () use ($data, $ownerUserId) {
-            $data['slug'] = $data['slug'] ?? Str::slug($data['name']);
+            $baseSlug = $data['slug'] ?? Str::slug($data['name']) ?: 'workspace';
+            $data['slug'] = $this->uniqueSlug($baseSlug);
             $workspace = Workspace::create($data);
             $workspace->workspaceUsers()->create([
                 'user_id' => $ownerUserId,
@@ -162,6 +163,17 @@ class WorkspaceRepository
             ->whereNull('accepted_at')
             ->where('expires_at', '>', now())
             ->exists();
+    }
+
+    private function uniqueSlug(string $base): string
+    {
+        $slug = $base;
+        $n = 1;
+        while ($this->findBySlug($slug) !== null) {
+            $slug = $base . '-' . $n;
+            $n++;
+        }
+        return $slug;
     }
 
     private function seedDefaultsForWorkspace(int $workspaceId): void

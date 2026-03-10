@@ -128,14 +128,6 @@ export default function DashboardLayout({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {workspaces.length === 0 && (
-              <a
-                href="#create-workspace"
-                className="text-xs font-bold text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/30 rounded px-2 py-1"
-              >
-                Create workspace →
-              </a>
-            )}
             {workspaces.length > 1 && (
               <button
                 type="button"

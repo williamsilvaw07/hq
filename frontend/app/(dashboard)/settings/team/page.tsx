@@ -14,6 +14,7 @@ import {
   User,
 } from "lucide-react";
 
+type Workspace = { id: number; name: string; slug: string };
 type Member = { id: number; user_id: number; role: string; name: string; email: string };
 type Invitation = { id: number; email: string; role: string; expires_at: string; invited_by?: { name: string; email: string } };
 
@@ -33,15 +34,32 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
 
 export default function TeamPage() {
   const { user, workspaceId } = useAuth();
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteWorkspaceId, setInviteWorkspaceId] = useState<number | null>(null);
   const [inviteRole, setInviteRole] = useState<"admin" | "member" | "viewer">("member");
   const [inviting, setInviting] = useState(false);
   const [inviteError, setInviteError] = useState("");
   const [inviteLink, setInviteLink] = useState("");
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    api<Workspace[]>("/api/workspaces")
+      .then((r) => {
+        const list = Array.isArray(r?.data) ? r.data : [];
+        setWorkspaces(list);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (workspaces.length > 0 && inviteWorkspaceId === null) {
+      setInviteWorkspaceId(workspaceId ?? workspaces[0].id);
+    }
+  }, [workspaces, workspaceId, inviteWorkspaceId]);
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -53,12 +71,14 @@ export default function TeamPage() {
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
+    const targetWorkspaceId = inviteWorkspaceId ?? workspaceId;
+    if (!targetWorkspaceId) return;
     setInviteError("");
     setInviting(true);
     setInviteLink("");
     try {
       const base = typeof window !== "undefined" ? window.location.origin : "";
-      const res = await api<{ invite_link: string }>(`/api/workspaces/${workspaceId}/members/invite`, {
+      const res = await api<{ invite_link: string }>(`/api/workspaces/${targetWorkspaceId}/members/invite`, {
         method: "POST",
         body: JSON.stringify({
           email: inviteEmail.trim(),
@@ -137,6 +157,21 @@ export default function TeamPage() {
             <h2 className="section-title px-1">Invite by email</h2>
             <form onSubmit={handleInvite} className="card-base p-4 space-y-4">
               <div>
+                <label className="label block mb-2">Workspace</label>
+                <select
+                  value={inviteWorkspaceId ?? ""}
+                  onChange={(e) => setInviteWorkspaceId(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                >
+                  {workspaces.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-muted-foreground mt-1">Choose which workspace to add this person to.</p>
+              </div>
+              <div>
                 <label className="label block mb-2">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -175,7 +210,7 @@ export default function TeamPage() {
               )}
               <button
                 type="submit"
-                disabled={inviting}
+                disabled={inviting || !(inviteWorkspaceId ?? workspaceId)}
                 className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <UserPlus className="w-4 h-4" />
