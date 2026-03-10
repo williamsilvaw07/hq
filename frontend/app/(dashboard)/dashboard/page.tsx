@@ -59,6 +59,26 @@ export default function DashboardPage() {
     setFixedBills(loadFixedBills(workspaceId ?? null));
   }, [workspaceId]);
 
+  // #region agent log
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const section = document.querySelector('section');
+      if (!section) return;
+      const heading = Array.from(section.querySelectorAll('p')).find((p) => p.textContent?.includes('Total Spent this Month'));
+      if (!heading) return;
+      const container = heading.parentElement;
+      const h1 = container?.querySelector('h1');
+      const span = container?.querySelector('span');
+      const h1Class = h1?.className ?? '';
+      const h1Color = h1 ? window.getComputedStyle(h1).color : '';
+      const spanColor = span ? window.getComputedStyle(span).color : '';
+      const parentColor = container ? window.getComputedStyle(container).color : '';
+      fetch('http://127.0.0.1:7615/ingest/da303532-0e08-486a-895e-4daefa467a25', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '96b1df' }, body: JSON.stringify({ sessionId: '96b1df', location: 'dashboard/page.tsx:TotalSpent', message: 'Total Spent value styles', data: { h1Class, h1Color, spanColor, parentColor }, timestamp: Date.now(), hypothesisId: 'H1-class-and-computed' }) }).catch(() => {});
+    }, 500);
+    return () => clearTimeout(t);
+  }, []);
+  // #endregion
+
   if (!workspaceId) {
     return null;
   }
@@ -112,7 +132,10 @@ export default function DashboardPage() {
           </p>
           <div className="flex items-baseline gap-1 mb-4">
             <span className="text-xl font-light text-muted-foreground/50 tracking-tighter">$</span>
-            <h1 className="text-5xl font-heading font-black tracking-tighter text-white">
+            <h1
+              className="text-5xl font-heading font-black tracking-tighter text-white"
+              style={{ color: "#ffffff" }}
+            >
               {periodExpense.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
