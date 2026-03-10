@@ -113,3 +113,30 @@ export async function register(name: string, email: string, password: string, pa
     throw err;
   }
 }
+
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  const res = await fetch(buildApiUrl("/api/forgot-password"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = (await res.json().catch(() => ({}))) as { message?: string };
+  if (!res.ok) throw new Error(data.message || "Request failed");
+  return { message: data.message ?? "If that email is registered, we sent a password reset link." };
+}
+
+export async function resetPassword(
+  token: string,
+  email: string,
+  password: string,
+  password_confirmation: string
+): Promise<{ message: string }> {
+  const res = await fetch(buildApiUrl("/api/reset-password"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ token, email, password, password_confirmation }),
+  });
+  const data = (await res.json().catch(() => ({}))) as { message?: string };
+  if (!res.ok) throw new Error(data.message || "Reset failed");
+  return { message: data.message ?? "Password has been reset." };
+}

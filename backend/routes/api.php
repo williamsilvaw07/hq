@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\DashboardController;
@@ -21,6 +23,8 @@ Route::post('/webhooks/whatsapp', [WhatsAppWebhookController::class, 'inbound'])
 
 Route::post('/login', LoginController::class);
 Route::post('/register', RegisterController::class);
+Route::post('/forgot-password', ForgotPasswordController::class);
+Route::post('/reset-password', ResetPasswordController::class);
 
 Route::get('/invitations/accept', [InvitationAcceptController::class, 'show']);
 
