@@ -123,28 +123,74 @@ export default function BudgetsPage() {
   const existingCategoryIds = new Set(budgets.map((b) => b.category?.id).filter(Boolean) as number[]);
   const availableCategories = categories.filter((c) => !existingCategoryIds.has(c.id));
 
+  const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
+  const totalRemaining = budgets.reduce((sum, b) => sum + Number(b.remaining || 0), 0);
+  const totalSpent = Math.max(0, totalBudget - totalRemaining);
+  const totalPct = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
+
   return (
-    <div className="space-y-8 pb-4">
-      <header className="sticky top-0 z-30 -mx-6 px-6 py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
-        <div>
-          <h1 className="page-title">Budgets</h1>
-          <p className="section-title mt-1">Monthly spending limits</p>
+    <div className="space-y-8 pb-8">
+      <header className="sticky top-0 z-30 -mx-6 px-6 pt-4 pb-5 bg-background/80 backdrop-blur-md space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-foreground">My Budgets</h1>
+          <button
+            type="button"
+            onClick={() => setShowAddForm(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all active:scale-95 shadow-lg shadow-white/5"
+            aria-label="Add budget"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowAddForm(true)}
-          className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-white/10 active:scale-95 transition-all"
-          aria-label="Add budget"
-        >
-          <Plus className="w-5 h-5" />
-        </button>
+        <div className="bg-card p-5 rounded-3xl border border-border/50">
+          <div className="flex justify-between items-end mb-3">
+            <div>
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1">
+                Total Monthly Budget
+              </p>
+              <p className="text-2xl font-black">
+                {CURRENCY_SYMBOL}{" "}
+                {formatBRL(totalBudget, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1">
+                Remaining
+              </p>
+              <p className="text-xl font-bold text-chart-1">
+                {CURRENCY_SYMBOL}{" "}
+                {formatBRL(totalRemaining, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+            </div>
+          </div>
+          <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+            <div
+              style={{ width: `${totalPct}%` }}
+              className="h-full bg-white rounded-full"
+            />
+          </div>
+        </div>
       </header>
 
       {showAddForm && (
         <div className="card-base p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-foreground">Add budget</h3>
-            <button type="button" onClick={() => { setShowAddForm(false); setError(""); }} className="p-2 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Close">
+            <button
+              type="button"
+              onClick={() => {
+                setShowAddForm(false);
+                setError("");
+              }}
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground"
+              aria-label="Close"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -159,10 +205,14 @@ export default function BudgetsPage() {
               >
                 <option value="">Select category</option>
                 {availableCategories.length === 0 && categories.length > 0 ? (
-                  <option value="" disabled>All categories have a budget</option>
+                  <option value="" disabled>
+                    All categories have a budget
+                  </option>
                 ) : (
                   availableCategories.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
                   ))
                 )}
               </select>
@@ -176,7 +226,9 @@ export default function BudgetsPage() {
                 </button>
               ) : (
                 <div className="mt-3 p-3 rounded-xl bg-secondary/50 space-y-2">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">New category</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    New category
+                  </p>
                   <form onSubmit={handleAddCategory} className="flex gap-2">
                     <input
                       type="text"
@@ -186,56 +238,82 @@ export default function BudgetsPage() {
                       className="flex-1 bg-card rounded-xl border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
                       autoFocus
                     />
-                    <button type="submit" disabled={savingCategory || !newCategoryName.trim()} className="py-2 px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold disabled:opacity-50">
+                    <button
+                      type="submit"
+                      disabled={savingCategory || !newCategoryName.trim()}
+                      className="py-2 px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold disabled:opacity-50"
+                    >
                       {savingCategory ? "…" : "Add"}
                     </button>
-                    <button type="button" onClick={() => { setShowNewCategory(false); setNewCategoryName(""); setCategoryError(""); }} className="py-2 px-2 rounded-xl border border-border text-muted-foreground text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewCategory(false);
+                        setNewCategoryName("");
+                        setCategoryError("");
+                      }}
+                      className="py-2 px-2 rounded-xl border border-border text-muted-foreground text-xs font-bold"
+                    >
                       Cancel
                     </button>
                   </form>
-                  {categoryError && <p className="text-xs text-chart-2">{categoryError}</p>}
+                  {categoryError && (
+                    <p className="text-xs text-chart-2">{categoryError}</p>
+                  )}
                 </div>
               )}
             </div>
-              <div>
-                <label className="label block mb-2">Resets every</label>
-                <div className="flex gap-2">
-                  <select
-                    value={newPeriodType}
-                    onChange={(e) => setNewPeriodType(e.target.value as "day" | "week" | "month" | "year")}
-                    className="flex-1 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-                  >
-                    <option value="week">Week</option>
-                    <option value="month">Month</option>
-                  </select>
-                  <select
-                    value={newPeriodInterval}
-                    onChange={(e) => setNewPeriodInterval(Number(e.target.value))}
-                    className="w-28 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-                  >
-                    {newPeriodType === "week" ? (
-                      <option value={1}>Every week</option>
-                    ) : (
-                      <>
-                        <option value={1}>Every month</option>
-                        <option value={3}>Every 3 months</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-1 ml-1">
-                  {newPeriodType === "week" && "Resets at the start of each week"}
-                  {newPeriodType === "month" && newPeriodInterval === 1 && "Resets at the start of each month"}
-                  {newPeriodType === "month" && newPeriodInterval === 3 && "Resets every 3 months"}
-                </p>
-              </div>
             <div>
-              <label className="label block mb-2">Limit ({CURRENCY_SYMBOL})</label>
+              <label className="label block mb-2">Resets every</label>
+              <div className="flex gap-2">
+                <select
+                  value={newPeriodType}
+                  onChange={(e) =>
+                    setNewPeriodType(
+                      e.target.value as "day" | "week" | "month" | "year",
+                    )
+                  }
+                  className="flex-1 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                >
+                  <option value="week">Week</option>
+                  <option value="month">Month</option>
+                </select>
+                <select
+                  value={newPeriodInterval}
+                  onChange={(e) => setNewPeriodInterval(Number(e.target.value))}
+                  className="w-28 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                >
+                  {newPeriodType === "week" ? (
+                    <option value={1}>Every week</option>
+                  ) : (
+                    <>
+                      <option value={1}>Every month</option>
+                      <option value={3}>Every 3 months</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1 ml-1">
+                {newPeriodType === "week" && "Resets at the start of each week"}
+                {newPeriodType === "month" &&
+                  newPeriodInterval === 1 &&
+                  "Resets at the start of each month"}
+                {newPeriodType === "month" &&
+                  newPeriodInterval === 3 &&
+                  "Resets every 3 months"}
+              </p>
+            </div>
+            <div>
+              <label className="label block mb-2">
+                Limit ({CURRENCY_SYMBOL})
+              </label>
               <input
                 type="text"
                 inputMode="decimal"
                 value={newAmount}
-                onChange={(e) => setNewAmount(e.target.value.replace(/[^0-9,.]/g, ""))}
+                onChange={(e) =>
+                  setNewAmount(e.target.value.replace(/[^0-9,.]/g, ""))
+                }
                 placeholder="0"
                 required
                 className="w-full bg-card rounded-2xl border border-border px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
@@ -243,10 +321,18 @@ export default function BudgetsPage() {
             </div>
             {error && <p className="text-sm text-chart-2">{error}</p>}
             <div className="flex gap-2">
-              <button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-3 rounded-xl border border-border text-foreground font-bold text-sm">
+              <button
+                type="button"
+                onClick={() => setShowAddForm(false)}
+                className="flex-1 py-3 rounded-xl border border-border text-foreground font-bold text-sm"
+              >
                 Cancel
               </button>
-              <button type="submit" disabled={saving || availableCategories.length === 0} className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50">
+              <button
+                type="submit"
+                disabled={saving || availableCategories.length === 0}
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50"
+              >
                 {saving ? "Saving…" : "Add budget"}
               </button>
             </div>
@@ -254,93 +340,108 @@ export default function BudgetsPage() {
         </div>
       )}
 
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="section-title text-foreground">Monthly Budgets</h2>
-        </div>
-        <div className="space-y-4">
-          {loading && workspaceId ? (
-            <p className="text-muted-foreground text-sm py-4">Loading…</p>
-          ) : budgets.length === 0 ? (
-            <div className="card-base p-8 text-center">
-              <p className="text-muted-foreground text-sm">No budgets set for this month.</p>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(true)}
-                className="mt-4 py-2.5 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-all"
-              >
-                Add your first budget
-              </button>
-            </div>
-          ) : (
-            budgets.map((b, i) => {
-              const amount = Number(b.amount);
-              const spent = Number(b.spent);
-              const remaining = Number(b.remaining);
-              const pct = Number.isFinite(b.spent_percentage) ? b.spent_percentage : amount > 0 ? Math.min(100, (spent / amount) * 100) : 0;
-              const Icon = categoryIcons[b.category?.name ?? ""] ?? ShoppingBag;
-              const colorClass = categoryColors[i % categoryColors.length] ?? "bg-chart-4/20 text-chart-4";
-              const periodLabel =
-                b.period_type === "week"
-                  ? "Weekly"
-                  : b.period_type === "month" && (b.period_interval ?? 1) === 3
-                    ? "Every 3 Months"
-                    : "Monthly";
+      <main className="space-y-8">
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+              Active Budgets
+            </h3>
+          </div>
+          <div className="space-y-3">
+            {loading && workspaceId ? (
+              <p className="text-muted-foreground text-sm py-4 px-1">
+                Loading…
+              </p>
+            ) : budgets.length === 0 ? (
+              <div className="bg-card p-8 rounded-[2rem] border border-border/50 text-center">
+                <p className="text-muted-foreground text-sm">
+                  No budgets set yet.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(true)}
+                  className="mt-4 py-2.5 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-all"
+                >
+                  Add your first budget
+                </button>
+              </div>
+            ) : (
+              budgets.map((b, i) => {
+                const amount = Number(b.amount);
+                const spent = Number(b.spent);
+                const remaining = Number(b.remaining);
+                const pct = Number.isFinite(b.spent_percentage)
+                  ? b.spent_percentage
+                  : amount > 0
+                    ? Math.min(100, (spent / amount) * 100)
+                    : 0;
+                const Icon = categoryIcons[b.category?.name ?? ""] ?? ShoppingBag;
+                const colorClass =
+                  categoryColors[i % categoryColors.length] ??
+                  "bg-chart-4/20 text-chart-4";
+                const periodLabel =
+                  b.period_type === "week"
+                    ? "Weekly"
+                    : b.period_type === "month" &&
+                        (b.period_interval ?? 1) === 3
+                      ? "Every 3 Months"
+                      : "Monthly";
 
-              return (
-                <div key={b.id} className="bg-secondary p-4 rounded-2xl">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${colorClass}`}>
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold">{b.category?.name ?? "Category"}</span>
-                        <p className="text-[10px] text-muted-foreground font-medium">
-                          {periodLabel} • Resets {b.next_reset_date}
-                        </p>
+                return (
+                  <div
+                    key={b.id}
+                    className="bg-card p-5 rounded-[2rem] border border-border/50 space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${colorClass}`}
+                        >
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold">
+                            {b.category?.name ?? "Category"}
+                          </h4>
+                          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                            {periodLabel} • Resets {b.next_reset_date}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-foreground">
-                      {CURRENCY_SYMBOL}{" "}
-                      {formatBRL(remaining, {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      })}{" "}
-                      <span className="text-muted-foreground font-medium">
-                        / {CURRENCY_SYMBOL}{" "}
-                        {formatBRL(amount, {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        })}
-                      </span>
-                    </span>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-tight">
+                        <span className="text-muted-foreground">
+                          Spent{" "}
+                          {CURRENCY_SYMBOL}{" "}
+                          {formatBRL(spent, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                        <span className="text-foreground">
+                          {CURRENCY_SYMBOL}{" "}
+                          {formatBRL(remaining, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}{" "}
+                          left
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                        <div
+                          style={{ width: `${pct}%` }}
+                          className="h-full bg-chart-4 rounded-full"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
-                    <div
-                      style={{ width: `${pct}%` }}
-                      className="h-full bg-chart-4 rounded-full transition-all"
-                    />
-                  </div>
-                  <div className="flex justify-between mt-2">
-                    <p className="text-[10px] text-muted-foreground font-medium">
-                      {pct.toFixed(0)}% spent
-                    </p>
-                    <p className="text-[10px] text-muted-foreground font-medium">
-                      {CURRENCY_SYMBOL}{" "}
-                      {formatBRL(remaining, {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      })}{" "}
-                      remaining
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </section>
+                );
+              })
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
