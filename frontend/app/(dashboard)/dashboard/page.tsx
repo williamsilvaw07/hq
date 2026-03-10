@@ -94,7 +94,9 @@ export default function DashboardPage() {
             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
               Budget Tracker
             </p>
-            <p className="text-sm font-semibold text-foreground">Overview</p>
+            <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-[0.18em]">
+              Overview
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
