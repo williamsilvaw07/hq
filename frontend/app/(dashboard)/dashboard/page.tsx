@@ -110,7 +110,7 @@ export default function DashboardPage() {
           </p>
           <div className="flex items-baseline gap-1 mb-4">
             <span className="text-2xl font-light text-muted-foreground/50 tracking-tighter">$</span>
-            <h1 className="text-6xl font-heading font-black tracking-tighter">
+            <h1 className="text-6xl font-heading font-black tracking-tighter text-chart-2">
               {periodExpense.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
