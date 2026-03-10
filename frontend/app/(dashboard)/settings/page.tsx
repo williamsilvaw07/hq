@@ -14,6 +14,7 @@ import {
   LogOut,
   Users,
   Flag,
+  LineChart,
 } from "lucide-react";
 import { loadFixedBills, type FixedBill } from "@/lib/fixed-expenses";
 import { formatMoney } from "@/lib/format";
@@ -286,6 +287,23 @@ export default function SettingsPage() {
           App Settings
         </h3>
         <div className="bg-secondary rounded-3xl overflow-hidden">
+          <Link
+            href="/settings/dashboard"
+            className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-chart-1/10 flex items-center justify-center">
+                <LineChart className="w-5 h-5 text-chart-1" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold">Dashboard Mode</p>
+                <p className="text-[10px] text-muted-foreground font-medium">
+                  Choose how your dashboard behaves
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          </Link>
           <button
             type="button"
             className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { fixedBillsTotal, fixedBillsCount, loadFixedBills, type FixedBill } from "@/lib/fixed-expenses";
 import { formatMoney as formatMoneyBRL } from "@/lib/format";
+import { loadDashboardMode, type DashboardMode } from "@/lib/dashboard-preferences";
 
 const PERIOD_OPTIONS = [
   { value: "today", label: "Today" },
@@ -229,6 +230,7 @@ function NoWorkspaceEmptyState({ setWorkspaceId }: { setWorkspaceId: (id: number
 export default function DashboardPage() {
   const { workspaceId, setWorkspaceId, user } = useAuth();
   const [period, setPeriod] = useState<PeriodValue>("this_month");
+  const [dashboardMode, setDashboardMode] = useState<DashboardMode>("monthly_focus");
   const [data, setData] = useState<DashboardData | null>(null);
   const [budgets, setBudgets] = useState<BudgetItem[]>([]);
   const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
@@ -241,6 +243,18 @@ export default function DashboardPage() {
       if (typeof document !== "undefined") document.title = prev || "Fintech Tracker";
     };
   }, []);
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    const mode = loadDashboardMode(workspaceId);
+    setDashboardMode(mode);
+  }, [workspaceId]);
+
+  useEffect(() => {
+    if (dashboardMode === "monthly_focus" && period !== "this_month") {
+      setPeriod("this_month");
+    }
+  }, [dashboardMode, period]);
 
   const fetchDashboard = useCallback(() => {
     if (!workspaceId) {
@@ -339,6 +353,11 @@ export default function DashboardPage() {
   const hasPeriodActivity = periodIncome + periodExpense > 0;
   const periodNetChange = periodIncome - periodExpense;
 
+  const periodOptionsForMode =
+    dashboardMode === "monthly_focus"
+      ? PERIOD_OPTIONS.filter((opt) => opt.value === "this_month")
+      : PERIOD_OPTIONS;
+
   return (
     <div className="min-h-screen pb-32 font-sans selection:bg-primary/20 tracking-tight">
       <main className="px-6 space-y-8">
@@ -372,7 +391,7 @@ export default function DashboardPage() {
 
         {/* Period selector */}
         <section className="bg-secondary/20 p-1 rounded-2xl flex">
-          {PERIOD_OPTIONS.map((opt) => (
+          {periodOptionsForMode.map((opt) => (
             <button
               key={opt.value}
               type="button"
@@ -420,8 +439,8 @@ export default function DashboardPage() {
 
         {/* Recurring & Fixed + Credit usage */}
         <section className="space-y-8">
-          <div>
-            <div className="flex items-center justify-between mb-4 px-1">
+          <div className="bg-secondary/40 rounded-3xl px-4 py-4">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-foreground tracking-tight">
                 Recurring &amp; Fixed
               </h2>
@@ -433,7 +452,7 @@ export default function DashboardPage() {
               </Link>
             </div>
             <div className="space-y-3">
-              <div className="bg-secondary/40 p-4 rounded-3xl">
+              <div className="p-4 rounded-3xl">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
@@ -551,8 +570,8 @@ export default function DashboardPage() {
         </section>
 
         {/* Recent activity */}
-        <section>
-          <div className="flex items-center justify-between mb-4 px-1">
+        <section className="bg-secondary/40 rounded-3xl px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-foreground tracking-tight">Recent Activity</h2>
             <Link
               href="/transactions"
