@@ -46,7 +46,8 @@ export default function FixedExpensesPage() {
       name: "New bill",
       category: "General",
       amount: 0,
-      due: `${day}/${month}/${year}`,
+      // Store next date in ISO so it works well with <input type="date" />
+      due: `${year}-${month}-${day}`,
       dueSoon: false,
       frequency: "monthly",
       dayOfMonth: today.getDate(),
@@ -279,9 +280,53 @@ export default function FixedExpensesPage() {
                       <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                         Next date:
                       </span>
-                      <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">
-                        {display.due}
-                      </span>
+                      {isEditing ? (
+                        <input
+                          type="date"
+                          value={
+                            (() => {
+                              const value = display.due ?? "";
+                              if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+                              const parts = value.split("/");
+                              if (parts.length === 3) {
+                                const [dd, mm, yyyy] = parts;
+                                if (dd && mm && yyyy) {
+                                  return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+                                }
+                              }
+                              return "";
+                            })()
+                          }
+                          onChange={(e) => {
+                            const iso = e.target.value;
+                            setDraft((prev) => {
+                              if (!prev || prev.id !== bill.id) return prev;
+                              if (!iso) {
+                                return { ...prev, due: "" };
+                              }
+                              const d = new Date(iso + "T00:00:00");
+                              if (Number.isNaN(d.getTime())) {
+                                return { ...prev, due: iso };
+                              }
+                              const nextDayOfMonth =
+                                prev.frequency === "monthly" ? d.getDate() : null;
+                              const nextDayOfWeek =
+                                prev.frequency === "weekly" ? d.getDay() : null;
+                              return {
+                                ...prev,
+                                due: iso,
+                                dayOfMonth: nextDayOfMonth,
+                                dayOfWeek: nextDayOfWeek,
+                              };
+                            });
+                          }}
+                          className="text-[10px] font-bold text-foreground bg-background border border-border rounded-lg px-2 py-1"
+                        />
+                      ) : (
+                        <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">
+                          {display.due}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       {isEditing ? (
