@@ -170,7 +170,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right space-y-1">
                       <p className="text-sm font-bold">
                         $
                         {remaining.toLocaleString("en-US", {
@@ -186,6 +186,12 @@ export default function DashboardPage() {
                           maximumFractionDigits: 0,
                         })}
                       </p>
+                      <Link
+                        href={`/budgets/${b.id}/edit`}
+                        className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-secondary/60 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      >
+                        Edit
+                      </Link>
                     </div>
                   </div>
                   <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
