@@ -1,13 +1,22 @@
 /** Brazilian Real (BRL) - used across the app */
 export const CURRENCY_SYMBOL = "R$";
 
-export function formatBRL(value: number, options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }): string {
-  return value.toLocaleString("pt-BR", {
+type MoneyFormatOptions = {
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
+};
+
+/**
+ * Format a numeric value like UK/US style (10,000.00) but with the BRL symbol.
+ */
+export function formatNumberUK(value: number, options?: MoneyFormatOptions): string {
+  return value.toLocaleString("en-GB", {
     minimumFractionDigits: options?.minimumFractionDigits ?? 2,
     maximumFractionDigits: options?.maximumFractionDigits ?? 2,
   });
 }
 
-export function formatMoney(value: number, options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }): string {
-  return `${CURRENCY_SYMBOL} ${formatBRL(value, options)}`;
+export function formatMoney(value: number, options?: MoneyFormatOptions): string {
+  return `${CURRENCY_SYMBOL} ${formatNumberUK(value, options)}`;
 }
+

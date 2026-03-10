@@ -31,7 +31,10 @@ class DashboardService
                 'name' => $card->name,
                 'used' => (float) $card->current_balance,
                 'available' => (float) ($card->credit_limit - $card->current_balance),
-                'next_reset' => $card->next_billing_cycle_reset_date->format('Y-m-d'),
+                // Use next payment due date for "DUE IN" label
+                'next_reset' => $card->next_payment_due_date->format('Y-m-d'),
+                // Optional: last four digits, if the backend later supports it.
+                'last_four' => method_exists($card, 'getAttribute') ? ($card->getAttribute('last_four') ?? null) : null,
             ];
         }
 

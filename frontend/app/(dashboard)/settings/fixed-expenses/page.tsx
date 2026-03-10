@@ -10,7 +10,175 @@ import {
   fixedBillsTotal,
   loadFixedBills,
   saveFixedBills,
+  computeNextOccurrence,
+  formatBillDisplayDate,
+  formatBillInputDate,
+  formatRecurrenceRule,
+  parseBillDate,
 } from "@/lib/fixed-expenses";
+
+type DraftSetter = React.Dispatch<React.SetStateAction<FixedBill | null>>;
+
+type RecurringEditorProps = {
+  bill: FixedBill;
+  originalId: number;
+  setDraft: DraftSetter;
+};
+
+function RecurringEditor({ bill, originalId, setDraft }: RecurringEditorProps) {
+  const startDate = parseBillDate(bill.due);
+  const startInputValue = startDate ? formatBillInputDate(startDate) : "";
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2 text-[10px]">
+      <label className="flex items-center gap-1">
+        <span className="text-muted-foreground">Frequency</span>
+        <select
+          value={bill.frequency}
+          onChange={(e) =>
+            setDraft((prev) =>
+              prev && prev.id === originalId
+                ? {
+                    ...prev,
+                    frequency: e.target.value === "weekly" ? "weekly" : "monthly",
+                  }
+                : prev,
+            )
+          }
+          className="bg-background border border-border rounded-lg px-2 py-1"
+        >
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </label>
+
+      <label className="flex items-center gap-1">
+        <span className="text-muted-foreground">Starts on</span>
+        <input
+          type="date"
+          value={startInputValue}
+          onChange={(e) => {
+            const iso = e.target.value;
+            setDraft((prev) => {
+              if (!prev || prev.id !== originalId) return prev;
+              if (!iso) {
+                return { ...prev, due: "" };
+              }
+              const d = new Date(iso + "T00:00:00");
+              if (Number.isNaN(d.getTime())) {
+                return { ...prev, due: iso };
+              }
+              return {
+                ...prev,
+                due: iso,
+                dayOfMonth: prev.frequency === "monthly" ? d.getDate() : prev.dayOfMonth,
+                dayOfWeek: prev.frequency === "weekly" ? d.getDay() : prev.dayOfWeek,
+              };
+            });
+          }}
+          className="bg-background border border-border rounded-lg px-2 py-1"
+        />
+      </label>
+
+      {bill.frequency === "monthly" ? (
+        <label className="flex items-center gap-1">
+          <span className="text-muted-foreground">Day of month</span>
+          <input
+            type="number"
+            min={1}
+            max={31}
+            value={bill.dayOfMonth ?? ""}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              setDraft((prev) =>
+                prev && prev.id === originalId
+                  ? {
+                      ...prev,
+                      dayOfMonth:
+                        Number.isNaN(value) || value <= 0 || value > 31
+                          ? prev.dayOfMonth
+                          : value,
+                      dayOfWeek: null,
+                    }
+                  : prev,
+              );
+            }}
+            className="w-14 bg-background border border-border rounded-lg px-2 py-1 text-right"
+          />
+        </label>
+      ) : (
+        <label className="flex items-center gap-1">
+          <span className="text-muted-foreground">Day of week</span>
+          <select
+            value={bill.dayOfWeek ?? 1}
+            onChange={(e) =>
+              setDraft((prev) =>
+                prev && prev.id === originalId
+                  ? {
+                      ...prev,
+                      dayOfWeek: Number(e.target.value),
+                      dayOfMonth: null,
+                    }
+                  : prev,
+              )
+            }
+            className="bg-background border border-border rounded-lg px-2 py-1"
+          >
+            <option value={1}>Monday</option>
+            <option value={2}>Tuesday</option>
+            <option value={3}>Wednesday</option>
+            <option value={4}>Thursday</option>
+            <option value={5}>Friday</option>
+            <option value={6}>Saturday</option>
+            <option value={0}>Sunday</option>
+          </select>
+        </label>
+      )}
+
+      <label className="flex items-center gap-1">
+        <span className="text-muted-foreground">Ends on</span>
+        <input
+          type="date"
+          value={bill.endDate ?? ""}
+          onChange={(e) =>
+            setDraft((prev) =>
+              prev && prev.id === originalId
+                ? { ...prev, endDate: e.target.value || null }
+                : prev,
+            )
+          }
+          className="bg-background border border-border rounded-lg px-2 py-1"
+        />
+      </label>
+    </div>
+  );
+}
+
+type RecurringPreviewProps = {
+  bill: FixedBill;
+};
+
+function RecurringPreview({ bill }: RecurringPreviewProps) {
+  const next = computeNextOccurrence(bill);
+  const rule = formatRecurrenceRule(bill);
+  const nextLabel = next ? formatBillDisplayDate(next) : "No upcoming date";
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <div className="flex items-center gap-2">
+        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+          Next:
+        </span>
+        <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">
+          {nextLabel}
+        </span>
+      </div>
+      <span className="text-[9px] text-muted-foreground uppercase tracking-widest">
+        {rule}
+      </span>
+    </div>
+  );
+}
 
 export default function FixedExpensesPage() {
   const { workspaceId } = useAuth();
@@ -142,97 +310,7 @@ export default function FixedExpensesPage() {
                           {display.frequency === "weekly" ? "Weekly" : "Monthly"}
                         </p>
                         {isEditing && (
-                          <div className="mt-2 flex flex-wrap gap-2 text-[10px]">
-                            <label className="flex items-center gap-1">
-                              <span className="text-muted-foreground">Frequency</span>
-                              <select
-                                value={display.frequency}
-                                onChange={(e) =>
-                                  setDraft((prev) =>
-                                    prev && prev.id === bill.id
-                                      ? {
-                                          ...prev,
-                                          frequency: e.target.value === "weekly" ? "weekly" : "monthly",
-                                        }
-                                      : prev,
-                                  )
-                                }
-                                className="bg-background border border-border rounded-lg px-2 py-1"
-                              >
-                                <option value="monthly">Monthly</option>
-                                <option value="weekly">Weekly</option>
-                              </select>
-                            </label>
-                            {display.frequency === "monthly" ? (
-                              <label className="flex items-center gap-1">
-                                <span className="text-muted-foreground">Day of month</span>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={31}
-                                  value={display.dayOfMonth ?? ""}
-                                  onChange={(e) => {
-                                    const value = Number(e.target.value);
-                                    setDraft((prev) =>
-                                      prev && prev.id === bill.id
-                                        ? {
-                                            ...prev,
-                                            dayOfMonth:
-                                              Number.isNaN(value) || value <= 0 || value > 31
-                                                ? prev.dayOfMonth
-                                                : value,
-                                            dayOfWeek: null,
-                                          }
-                                        : prev,
-                                    );
-                                  }}
-                                  className="w-14 bg-background border border-border rounded-lg px-2 py-1 text-right"
-                                />
-                              </label>
-                            ) : (
-                              <label className="flex items-center gap-1">
-                                <span className="text-muted-foreground">Weekday</span>
-                                <select
-                                  value={display.dayOfWeek ?? 1}
-                                  onChange={(e) =>
-                                    setDraft((prev) =>
-                                      prev && prev.id === bill.id
-                                        ? {
-                                            ...prev,
-                                            dayOfWeek: Number(e.target.value),
-                                            dayOfMonth: null,
-                                          }
-                                        : prev,
-                                    )
-                                  }
-                                  className="bg-background border border-border rounded-lg px-2 py-1"
-                                >
-                                  <option value={1}>Monday</option>
-                                  <option value={2}>Tuesday</option>
-                                  <option value={3}>Wednesday</option>
-                                  <option value={4}>Thursday</option>
-                                  <option value={5}>Friday</option>
-                                  <option value={6}>Saturday</option>
-                                  <option value={0}>Sunday</option>
-                                </select>
-                              </label>
-                            )}
-                            <label className="flex items-center gap-1">
-                              <span className="text-muted-foreground">Ends on</span>
-                              <input
-                                type="date"
-                                value={display.endDate ?? ""}
-                                onChange={(e) =>
-                                  setDraft((prev) =>
-                                    prev && prev.id === bill.id
-                                      ? { ...prev, endDate: e.target.value || null }
-                                      : prev,
-                                  )
-                                }
-                                className="bg-background border border-border rounded-lg px-2 py-1"
-                              />
-                            </label>
-                          </div>
+                          <RecurringEditor bill={display} originalId={bill.id} setDraft={setDraft} />
                         )}
                       </div>
                     </div>
@@ -276,58 +354,7 @@ export default function FixedExpensesPage() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                        Next date:
-                      </span>
-                      {isEditing ? (
-                        <input
-                          type="date"
-                          value={
-                            (() => {
-                              const value = display.due ?? "";
-                              if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-                              const parts = value.split("/");
-                              if (parts.length === 3) {
-                                const [dd, mm, yyyy] = parts;
-                                if (dd && mm && yyyy) {
-                                  return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
-                                }
-                              }
-                              return "";
-                            })()
-                          }
-                          onChange={(e) => {
-                            const iso = e.target.value;
-                            setDraft((prev) => {
-                              if (!prev || prev.id !== bill.id) return prev;
-                              if (!iso) {
-                                return { ...prev, due: "" };
-                              }
-                              const d = new Date(iso + "T00:00:00");
-                              if (Number.isNaN(d.getTime())) {
-                                return { ...prev, due: iso };
-                              }
-                              const nextDayOfMonth =
-                                prev.frequency === "monthly" ? d.getDate() : null;
-                              const nextDayOfWeek =
-                                prev.frequency === "weekly" ? d.getDay() : null;
-                              return {
-                                ...prev,
-                                due: iso,
-                                dayOfMonth: nextDayOfMonth,
-                                dayOfWeek: nextDayOfWeek,
-                              };
-                            });
-                          }}
-                          className="text-[10px] font-bold text-foreground bg-background border border-border rounded-lg px-2 py-1"
-                        />
-                      ) : (
-                        <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">
-                          {display.due}
-                        </span>
-                      )}
-                    </div>
+                    <RecurringPreview bill={display} />
                     <div className="flex items-center gap-2">
                       {isEditing ? (
                         <>

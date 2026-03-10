@@ -16,6 +16,7 @@ import {
   Repeat,
 } from "lucide-react";
 import { fixedBillsTotal, fixedBillsCount, loadFixedBills, type FixedBill } from "@/lib/fixed-expenses";
+import { formatMoney as formatMoneyBRL } from "@/lib/format";
 
 const PERIOD_OPTIONS = [
   { value: "today", label: "Today" },
@@ -88,9 +89,17 @@ function DashboardSkeleton() {
   );
 }
 
+type DashboardCreditUsageItem = {
+  name?: string;
+  used: number;
+  available: number;
+  next_reset?: string;
+  last_four?: string | null;
+};
+
 type DashboardData = {
   cash_bank_balance: number;
-  credit_usage: { used: number; available: number; next_reset?: string; name?: string }[];
+  credit_usage: DashboardCreditUsageItem[];
   net_position: number;
   period?: string;
   period_income?: number;
@@ -323,16 +332,12 @@ export default function DashboardPage() {
   const periodExpense = displayData.period_expense ?? displayData.monthly_expense ?? 0;
 
   const sym = "R$";
-  const formatMoney = (n: number) =>
-    `${sym} ${n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatMoney = (n: number) => formatMoneyBRL(n);
   const formatMoneyShort = (n: number) =>
-    n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    n.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const hasPeriodActivity = periodIncome + periodExpense > 0;
-  const periodPct =
-    periodExpense > 0
-      ? Math.round(((periodIncome - periodExpense) / periodExpense) * 100)
-      : 0;
+  const periodNetChange = periodIncome - periodExpense;
 
   return (
     <div className="min-h-screen pb-32 font-sans selection:bg-primary/20 tracking-tight">
@@ -371,24 +376,18 @@ export default function DashboardPage() {
             <div
               className={`flex items-baseline gap-1 transition-opacity duration-200 ${loading ? "opacity-70" : "opacity-100"}`}
             >
-              <span className="text-2xl font-light text-muted-foreground">
-                {sym}
-              </span>
               <h1 className="text-5xl font-heading font-bold tracking-tighter">
-                {displayData.net_position.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {formatMoneyBRL(displayData.net_position)}
               </h1>
             </div>
             {hasPeriodActivity && (
-              <div className="mt-4 flex items-center gap-2 bg-chart-1/10 border border-chart-1/20 px-3 py-1.5 rounded-full">
-                <span className="w-2 h-2 rounded-full bg-chart-1" aria-hidden />
-                <span className="text-[11px] font-bold text-chart-1 uppercase tracking-wider">
-                  {periodPct >= 0 ? "+" : ""}
-                  {periodPct}% {periodLabel(period)}
+              <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Net change {periodLabel(period)}:{" "}
+                <span className={periodNetChange >= 0 ? "text-chart-1" : "text-chart-2"}>
+                  {periodNetChange >= 0 ? "+" : "-"}
+                  {formatMoney(Math.abs(periodNetChange))}
                 </span>
-              </div>
+              </p>
             )}
           </div>
         </section>
@@ -563,7 +562,7 @@ export default function DashboardPage() {
                   const pct = total > 0 ? (c.used / total) * 100 : 0;
                   const isAmber = i % 2 === 0;
                   const dueLabel = c.next_reset ? dueInDays(c.next_reset) : null;
-                  const lastFour = String(8001 + i).slice(-4);
+                  const lastFour = c.last_four && c.last_four.length === 4 ? c.last_four : "••••";
                   return (
                     <div
                       key={i}

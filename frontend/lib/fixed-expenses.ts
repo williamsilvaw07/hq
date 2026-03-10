@@ -123,5 +123,160 @@ export function saveFixedBills(workspaceId: number | null, bills: FixedBill[]): 
     // ignore storage errors
   }
 }
+/**
+ * Parse a stored bill date string into a Date.
+ * Supports both "YYYY-MM-DD" and "DD/MM/YYYY" formats.
+ */
+export function parseBillDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
 
+  // ISO date: YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const d = new Date(trimmed + "T00:00:00");
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  // DD/MM/YYYY
+  const parts = trimmed.split("/");
+  if (parts.length === 3) {
+    const [dd, mm, yyyy] = parts;
+    const day = Number.parseInt(dd, 10);
+    const month = Number.parseInt(mm, 10) - 1;
+    const year = Number.parseInt(yyyy, 10);
+    if (!Number.isNaN(day) && !Number.isNaN(month) && !Number.isNaN(year)) {
+      const d = new Date(year, month, day);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+  }
+
+  return null;
+}
+
+/** Format a Date as DD/MM/YYYY for display. */
+export function formatBillDisplayDate(date: Date): string {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+/** Format a Date as YYYY-MM-DD for `<input type="date" />` values. */
+export function formatBillInputDate(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${year}-${month}-${day}`;
+}
+
+function parseEndDate(endDate: string | null): Date | null {
+  if (!endDate) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    const d = new Date(endDate + "T00:00:00");
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const parsed = parseBillDate(endDate);
+  return parsed;
+}
+
+/**
+ * Compute the next occurrence date for a bill, starting from `fromDate` (defaults to today).
+ * Returns null if no future occurrences exist (e.g. after endDate or missing configuration).
+ */
+export function computeNextOccurrence(
+  bill: FixedBill,
+  fromDate: Date = new Date(),
+): Date | null {
+  const start = parseBillDate(bill.due);
+  if (!start) return null;
+
+  const end = parseEndDate(bill.endDate);
+
+  // Base date is the later of "today" and the start date.
+  const base = fromDate > start ? fromDate : start;
+
+  if (end && base > end) {
+    return null;
+  }
+
+  if (bill.frequency === "weekly") {
+    const weekday = typeof bill.dayOfWeek === "number" ? bill.dayOfWeek : start.getDay();
+    if (weekday < 0 || weekday > 6) return null;
+
+    const baseMidnight = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+    const baseWeekday = baseMidnight.getDay();
+    let delta = (weekday - baseWeekday + 7) % 7;
+    const candidate = new Date(
+      baseMidnight.getFullYear(),
+      baseMidnight.getMonth(),
+      baseMidnight.getDate() + delta,
+    );
+
+    // Ensure we never schedule before start date
+    const next = candidate < start ? new Date(candidate.getTime() + 7 * 24 * 60 * 60 * 1000) : candidate;
+
+    if (end && next > end) {
+      return null;
+    }
+    return next;
+  }
+
+  // Monthly
+  const targetDay =
+    typeof bill.dayOfMonth === "number" && bill.dayOfMonth >= 1 && bill.dayOfMonth <= 31
+      ? bill.dayOfMonth
+      : start.getDate();
+
+  const baseYear = base.getFullYear();
+  const baseMonth = base.getMonth();
+
+  // Candidate in current month
+  let candidate = new Date(baseYear, baseMonth, targetDay);
+
+  // If that spills into next month (e.g. Feb 31) clamp to last day of month
+  if (candidate.getMonth() !== baseMonth) {
+    candidate = new Date(baseYear, baseMonth + 1, 0);
+  }
+
+  if (candidate < base || candidate < start) {
+    // Move to next month
+    const nextMonthYear = baseMonth === 11 ? baseYear + 1 : baseYear;
+    const nextMonth = (baseMonth + 1) % 12;
+    candidate = new Date(nextMonthYear, nextMonth, targetDay);
+    if (candidate.getMonth() !== nextMonth) {
+      candidate = new Date(nextMonthYear, nextMonth + 1, 0);
+    }
+  }
+
+  if (end && candidate > end) {
+    return null;
+  }
+
+  return candidate;
+}
+
+const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
+
+/** Human-readable recurrence rule description for a bill. */
+export function formatRecurrenceRule(bill: FixedBill): string {
+  const start = parseBillDate(bill.due);
+
+  if (bill.frequency === "weekly") {
+    const weekday =
+      typeof bill.dayOfWeek === "number" && bill.dayOfWeek >= 0 && bill.dayOfWeek <= 6
+        ? bill.dayOfWeek
+        : start?.getDay();
+    if (weekday == null) return "Weekly";
+    return `Weekly on ${WEEKDAY_NAMES[weekday]}`;
+  }
+
+  const day =
+    typeof bill.dayOfMonth === "number" && bill.dayOfMonth >= 1 && bill.dayOfMonth <= 31
+      ? bill.dayOfMonth
+      : start?.getDate();
+
+  if (!day) return "Monthly";
+  return `Monthly on day ${day}`;
+}
 

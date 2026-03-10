@@ -52,4 +52,15 @@ class CreditCard extends Model
         }
         return $next;
     }
+
+    public function getNextPaymentDueDateAttribute(): Carbon
+    {
+        $today = Carbon::today();
+        $day = (int) $this->payment_due_day;
+        $next = $today->copy()->day($day);
+        if ($next->lte($today)) {
+            $next->addMonth();
+        }
+        return $next;
+    }
 }

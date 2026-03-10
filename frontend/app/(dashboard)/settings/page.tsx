@@ -365,7 +365,11 @@ export default function SettingsPage() {
                   <div>
                     <p className="text-sm font-bold">{bill.name}</p>
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                      Day {bill.due.split("/")[0]} • Monthly
+                      {bill.frequency === "weekly"
+                        ? "Weekly"
+                        : bill.dayOfMonth
+                          ? `Day ${bill.dayOfMonth} • Monthly`
+                          : "Monthly"}
                     </p>
                   </div>
                 </div>

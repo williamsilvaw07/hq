@@ -6,7 +6,14 @@ import { api } from "@/lib/api";
 import { Wallet, CreditCard, Building2, Plus, X } from "lucide-react";
 
 type Account = { id: number; name: string; type: string; currency: string; balance: number };
-type CreditCardItem = { id: number; name: string; credit_limit: number; current_balance: number; currency: string };
+type CreditCardItem = {
+  id: number;
+  name: string;
+  credit_limit: number;
+  current_balance: number;
+  currency: string;
+  payment_due_day?: number;
+};
 
 const ACCOUNT_TYPES = [
   { value: "cash", label: "Cash" },
@@ -31,6 +38,7 @@ export default function AccountsPage() {
   const [creditCards, setCreditCards] = useState<CreditCardItem[]>([]);
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showAddCard, setShowAddCard] = useState(false);
+  const [editingCard, setEditingCard] = useState<CreditCardItem | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -41,7 +49,6 @@ export default function AccountsPage() {
   const [cardName, setCardName] = useState("");
   const [cardLimit, setCardLimit] = useState("");
   const [cardBalance, setCardBalance] = useState("0");
-  const [billingStartDay, setBillingStartDay] = useState("1");
   const [paymentDueDay, setPaymentDueDay] = useState("10");
 
   useEffect(() => {
@@ -89,27 +96,58 @@ export default function AccountsPage() {
     setError("");
     setSaving(true);
     try {
+      const body = {
+        name: cardName.trim(),
+        credit_limit: parseFloat(cardLimit.replace(",", ".")) || 0,
+        current_balance: parseFloat(cardBalance.replace(",", ".")) || 0,
+        payment_due_day: Math.min(31, Math.max(1, parseInt(paymentDueDay, 10) || 10)),
+        currency: "BRL",
+      };
       await api(`/api/workspaces/${workspaceId}/credit-cards`, {
         method: "POST",
-        body: JSON.stringify({
-          name: cardName.trim(),
-          credit_limit: parseFloat(cardLimit.replace(",", ".")) || 0,
-          current_balance: parseFloat(cardBalance.replace(",", ".")) || 0,
-          billing_cycle_start_day: Math.min(31, Math.max(1, parseInt(billingStartDay, 10) || 1)),
-          payment_due_day: Math.min(31, Math.max(1, parseInt(paymentDueDay, 10) || 10)),
-          currency: "BRL",
-        }),
+        body: JSON.stringify(body),
       });
       const { creditCards: c } = await loadAccountsAndCards(workspaceId);
       setCreditCards(c);
       setShowAddCard(false);
+      setEditingCard(null);
       setCardName("");
       setCardLimit("");
       setCardBalance("0");
-      setBillingStartDay("1");
       setPaymentDueDay("10");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add credit card");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleEditCard(e: React.FormEvent) {
+    e.preventDefault();
+    if (!workspaceId || !editingCard) return;
+    setError("");
+    setSaving(true);
+    try {
+      const body = {
+        name: cardName.trim(),
+        credit_limit: parseFloat(cardLimit.replace(",", ".")) || 0,
+        current_balance: parseFloat(cardBalance.replace(",", ".")) || 0,
+        payment_due_day: Math.min(31, Math.max(1, parseInt(paymentDueDay, 10) || 10)),
+      };
+      await api(`/api/workspaces/${workspaceId}/credit-cards/${editingCard.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+      const { creditCards: c } = await loadAccountsAndCards(workspaceId);
+      setCreditCards(c);
+      setShowAddCard(false);
+      setEditingCard(null);
+      setCardName("");
+      setCardLimit("");
+      setCardBalance("0");
+      setPaymentDueDay("10");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update credit card");
     } finally {
       setSaving(false);
     }
@@ -221,17 +259,32 @@ export default function AccountsPage() {
             </div>
           ) : (
             creditCards.map((c) => (
-              <div key={c.id} className="bg-card p-5 rounded-3xl flex items-center justify-between active:scale-[0.98] transition-all">
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => {
+                  setEditingCard(c);
+                  setShowAddCard(true);
+                  setCardName(c.name);
+                  setCardLimit(String(c.credit_limit ?? ""));
+                  setCardBalance(String(c.current_balance ?? "0"));
+                  setPaymentDueDay(String(c.payment_due_day ?? "10"));
+                }}
+                className="w-full bg-card p-5 rounded-3xl flex items-center justify-between active:scale-[0.98] transition-all text-left"
+              >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
                     <CreditCard className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{c.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Used {sym} {Number(c.current_balance).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} / Limit {sym} {Number(c.credit_limit).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                      Used {sym} {Number(c.current_balance).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} / Limit {sym}{" "}
+                      {Number(c.credit_limit).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </p>
                   </div>
                 </div>
-              </div>
+              </button>
             ))
           )}
         </div>
@@ -312,17 +365,23 @@ export default function AccountsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
           <div className="bg-card border border-border rounded-2xl w-full max-w-sm p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-foreground">Add credit card</h3>
+              <h3 className="text-lg font-bold text-foreground">
+                {editingCard ? "Edit credit card" : "Add credit card"}
+              </h3>
               <button
                 type="button"
-                onClick={() => { setShowAddCard(false); setError(""); }}
+                onClick={() => {
+                  setShowAddCard(false);
+                  setEditingCard(null);
+                  setError("");
+                }}
                 className="p-2 rounded-lg text-muted-foreground hover:text-foreground"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleAddCard} className="space-y-4">
+            <form onSubmit={editingCard ? handleEditCard : handleAddCard} className="space-y-4">
               <div>
                 <label className="label block mb-2">Card name</label>
                 <input
@@ -357,29 +416,16 @@ export default function AccountsPage() {
                   className="w-full bg-background rounded-xl border border-border px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label block mb-2">Billing cycle start (day 1–31)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={31}
-                    value={billingStartDay}
-                    onChange={(e) => setBillingStartDay(e.target.value)}
-                    className="w-full bg-background rounded-xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-                  />
-                </div>
-                <div>
-                  <label className="label block mb-2">Payment due (day 1–31)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={31}
-                    value={paymentDueDay}
-                    onChange={(e) => setPaymentDueDay(e.target.value)}
-                    className="w-full bg-background rounded-xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-                  />
-                </div>
+              <div>
+                <label className="label block mb-2">Payment day (1–31)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={31}
+                  value={paymentDueDay}
+                  onChange={(e) => setPaymentDueDay(e.target.value)}
+                  className="w-full bg-background rounded-xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                />
               </div>
               {error && <p className="text-sm text-chart-2">{error}</p>}
               <div className="flex gap-2">
@@ -395,7 +441,7 @@ export default function AccountsPage() {
                   disabled={saving}
                   className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50"
                 >
-                  {saving ? "Saving…" : "Add card"}
+                  {saving ? "Saving…" : editingCard ? "Save changes" : "Add card"}
                 </button>
               </div>
             </form>

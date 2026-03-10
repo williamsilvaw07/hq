@@ -64,7 +64,6 @@ export default function TransactionsPage() {
     return <div className="text-muted-foreground text-sm py-8">Loading…</div>;
   }
 
-  const sym = "R$";
   const filterPills = [
     { id: "all" as const, label: "All Activity" },
     { id: "income" as const, label: "Income" },
@@ -173,7 +172,10 @@ export default function TransactionsPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-sm font-bold ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>{t.type === "income" ? "+" : "-"}{sym} {Math.abs(t.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                    <p className={`text-sm font-bold ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
+                      {t.type === "income" ? "+" : "-"}R${" "}
+                      {Math.abs(t.amount).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
                     <p className="text-[10px] text-muted-foreground font-medium">{t.account?.name ?? "—"}</p>
                   </div>
                 </Link>

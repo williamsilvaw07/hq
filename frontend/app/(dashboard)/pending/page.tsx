@@ -29,8 +29,6 @@ export default function PendingPage() {
       .catch(() => {});
   }, [workspaceId]);
 
-  const sym = "R$";
-
   return (
     <div className="space-y-6 pb-4">
       <header className="sticky top-0 z-30 -mx-6 px-6 py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
@@ -64,7 +62,10 @@ export default function PendingPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <p className={`text-sm font-bold ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>{t.type === "income" ? "+" : "-"}{sym} {Math.abs(t.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                <p className={`text-sm font-bold ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
+                  {t.type === "income" ? "+" : "-"}R${" "}
+                  {Math.abs(t.amount).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
                 <Link href={`/transactions/${t.id}`} className="flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-xs font-bold shadow-lg shadow-white/5 active:scale-95 transition-all">
                   <PenLine className="w-3.5 h-3.5" /> Confirm / Edit
                 </Link>

@@ -25,7 +25,7 @@ class CreditCardController extends Controller
             'account_id' => 'nullable|exists:accounts,id',
             'credit_limit' => 'required|numeric|min:0',
             'current_balance' => 'nullable|numeric|min:0',
-            'billing_cycle_start_day' => 'required|integer|min:1|max:31',
+            'billing_cycle_start_day' => 'nullable|integer|min:1|max:31',
             'payment_due_day' => 'required|integer|min:1|max:31',
             'currency' => 'nullable|string|size:3',
         ]);
@@ -35,6 +35,10 @@ class CreditCardController extends Controller
         );
         $data['current_balance'] = $data['current_balance'] ?? 0;
         $data['currency'] = $data['currency'] ?? 'BRL';
+        // If billing cycle start is not provided, default it to the payment due day
+        if (!isset($data['billing_cycle_start_day'])) {
+            $data['billing_cycle_start_day'] = $data['payment_due_day'];
+        }
         $card = $this->accountService->storeCreditCard($workspace, $data);
         return response()->json(['data' => $card], 201);
     }
