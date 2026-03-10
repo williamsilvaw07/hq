@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
@@ -31,21 +32,29 @@ class DashboardService
                 'name' => $card->name,
                 'used' => (float) $card->current_balance,
                 'available' => (float) ($card->credit_limit - $card->current_balance),
-                // Use next payment due date for "DUE IN" label
-                'next_reset' => $card->next_payment_due_date->format('Y-m-d'),
+                // Use next payment due date for "DUE IN" label (nullable-safe)
+                'next_reset' => $card->next_payment_due_date?->format('Y-m-d'),
                 // Optional: last four digits, if the backend later supports it.
                 'last_four' => method_exists($card, 'getAttribute') ? ($card->getAttribute('last_four') ?? null) : null,
             ];
         }
 
         $creditUsed = array_sum(array_column($creditUsage, 'used'));
-        // Net Balance = sum(account.balance where include_in_net_balance = true)
-        $netPosition = Account::where('workspace_id', $workspaceId)
-            ->where(function ($query) {
-                $query->whereNull('include_in_net_balance')
-                    ->orWhere('include_in_net_balance', true);
-            })
-            ->sum('balance');
+
+        // Net Balance:
+        // - Prefer: sum(account.balance where include_in_net_balance = true)
+        // - Backward compatible: if column doesn't exist, fall back to previous behavior
+        if (Schema::hasColumn('accounts', 'include_in_net_balance')) {
+            $netPosition = Account::where('workspace_id', $workspaceId)
+                ->where(function ($query) {
+                    $query->whereNull('include_in_net_balance')
+                        ->orWhere('include_in_net_balance', true);
+                })
+                ->sum('balance');
+        } else {
+            // Legacy behavior: liquid account balance minus used credit
+            $netPosition = $cashBankBalance - $creditUsed;
+        }
 
         $periodQuery = Transaction::where('workspace_id', $workspaceId)
             ->where('status', Transaction::STATUS_CONFIRMED)
