@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   // Use the default server/standalone output so dynamic routes,
   // authenticated dashboards, and API-driven pages work correctly.
-  output: 'export',
+  output: 'standalone',
   trailingSlash: true,
   // In production, set NEXT_PUBLIC_API_URL to your API origin if it's different from the frontend;
   // otherwise leave it empty and use same-origin `/api` calls.
