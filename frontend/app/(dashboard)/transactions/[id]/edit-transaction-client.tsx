@@ -26,7 +26,8 @@ export default function EditTransactionClient() {
   const { workspaceId } = useAuth();
   const router = useRouter();
   const params = useParams();
-  const id = Number(params.id);
+  const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const id = rawId ? Number(rawId) : NaN;
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -44,7 +45,7 @@ export default function EditTransactionClient() {
   const [categoryError, setCategoryError] = useState("");
 
   useEffect(() => {
-    if (!workspaceId || !id) return;
+    if (!workspaceId || !Number.isFinite(id)) return;
     api<Transaction>(`/api/workspaces/${workspaceId}/transactions/${id}`)
       .then((r) => {
         const t = r.data;
@@ -73,7 +74,7 @@ export default function EditTransactionClient() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!workspaceId || !transaction) return;
+    if (!workspaceId || !transaction || !Number.isFinite(id)) return;
     if (status === "confirmed" && !accountId) {
       setError("Account is required when confirming.");
       return;

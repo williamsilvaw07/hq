@@ -70,10 +70,9 @@ export default function AccountsPage() {
   }, [workspaceId]);
 
   const safeAccounts = Array.isArray(accounts) ? accounts : [];
-  const safeCreditCards = Array.isArray(creditCards) ? creditCards : [];
-  const netWorth =
-    safeAccounts.reduce((s, a) => s + Number(a.balance), 0) -
-    safeCreditCards.reduce((s, c) => s + Number(c.current_balance), 0);
+  const netWorth = safeAccounts
+    .filter((a) => a.include_in_net_balance ?? true)
+    .reduce((s, a) => s + Number(a.balance), 0);
   const primary = accounts[0];
   const sym = "R$";
 
