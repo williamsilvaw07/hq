@@ -71,7 +71,7 @@ export default function DashboardSettingsPage() {
               </div>
               <ul className="mt-3 space-y-1.5 text-[11px] text-muted-foreground">
                 <li>• Default period is <strong>This Month</strong>.</li>
-                <li>• Hides Today and This Week filters.</li>
+                <li>• Keeps things focused on a single month.</li>
                 <li>• Emphasises monthly cashflow and fixed bills.</li>
               </ul>
             </button>
@@ -98,8 +98,8 @@ export default function DashboardSettingsPage() {
                 </div>
               </div>
               <ul className="mt-3 space-y-1.5 text-[11px] text-muted-foreground">
-                <li>• Shows Today, This Week, and This Month filters.</li>
-                <li>• Better for detailed transaction and cashflow analysis.</li>
+                <li>• Shows <strong>Lifetime</strong>, <strong>3 Months</strong>, <strong>6 Months</strong>, and more timeline filters.</li>
+                <li>• Better for detailed transaction and cashflow analysis over longer periods.</li>
                 <li>• Keeps all timeline-based dashboard options visible.</li>
               </ul>
             </button>

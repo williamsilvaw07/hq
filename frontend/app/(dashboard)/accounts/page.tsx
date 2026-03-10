@@ -6,7 +6,14 @@ import { api } from "@/lib/api";
 import { Wallet, CreditCard, Building2, Plus, X } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 
-type Account = { id: number; name: string; type: string; currency: string; balance: number };
+type Account = {
+  id: number;
+  name: string;
+  type: string;
+  currency: string;
+  balance: number;
+  include_in_net_balance?: boolean | null;
+};
 type CreditCardItem = {
   id: number;
   name: string;
@@ -40,12 +47,14 @@ export default function AccountsPage() {
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showAddCard, setShowAddCard] = useState(false);
   const [editingCard, setEditingCard] = useState<CreditCardItem | null>(null);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   const [accName, setAccName] = useState("");
   const [accType, setAccType] = useState("bank");
   const [accBalance, setAccBalance] = useState("");
+  const [accIncludeInNet, setAccIncludeInNet] = useState(true);
 
   const [cardName, setCardName] = useState("");
   const [cardLimit, setCardLimit] = useState("");
@@ -70,22 +79,34 @@ export default function AccountsPage() {
     setError("");
     setSaving(true);
     try {
-      await api(`/api/workspaces/${workspaceId}/accounts`, {
-        method: "POST",
-        body: JSON.stringify({
-          name: accName.trim(),
-          type: accType,
-          currency: "BRL",
-          balance: parseFloat(accBalance.replace(",", ".")) || 0,
-        }),
-      });
+      const payload = {
+        name: accName.trim(),
+        type: accType,
+        currency: "BRL",
+        balance: parseFloat(accBalance.replace(",", ".")) || 0,
+        include_in_net_balance: accIncludeInNet,
+      };
+
+      if (editingAccount) {
+        await api(`/api/workspaces/${workspaceId}/accounts/${editingAccount.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await api(`/api/workspaces/${workspaceId}/accounts`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
       const { accounts: a } = await loadAccountsAndCards(workspaceId);
       setAccounts(a);
       setShowAddAccount(false);
+      setEditingAccount(null);
       setAccName("");
       setAccBalance("");
+      setAccIncludeInNet(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add account");
+      setError(err instanceof Error ? err.message : "Failed to save account");
     } finally {
       setSaving(false);
     }
@@ -216,22 +237,45 @@ export default function AccountsPage() {
               </button>
             </div>
           ) : (
-            accounts.map((a) => (
-              <div key={a.id} className="bg-card p-5 rounded-3xl flex items-center justify-between active:scale-[0.98] transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
-                    <Wallet className="w-5 h-5 text-muted-foreground" />
+            accounts.map((a) => {
+              const included = a.include_in_net_balance ?? true;
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => {
+                    setEditingAccount(a);
+                    setShowAddAccount(true);
+                    setAccName(a.name);
+                    setAccType(a.type);
+                    setAccBalance(String(a.balance ?? ""));
+                    setAccIncludeInNet(included);
+                    setError("");
+                  }}
+                  className="w-full bg-card p-5 rounded-3xl flex items-center justify-between active:scale-[0.98] transition-all text-left"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
+                      <Wallet className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{a.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                        {a.currency} · {a.type}
+                      </p>
+                      {!included && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          Excluded from Net Balance
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-foreground">{a.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{a.currency} · {a.type}</p>
-                  </div>
-                </div>
-                <p className="text-sm font-bold text-foreground">
-                  {formatMoney(Number(a.balance))}
-                </p>
-              </div>
-            ))
+                  <p className="text-sm font-bold text-foreground">
+                    {formatMoney(Number(a.balance))}
+                  </p>
+                </button>
+              );
+            })
           )}
         </div>
       </section>
@@ -296,10 +340,16 @@ export default function AccountsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
           <div className="bg-card rounded-2xl w-full max-w-sm p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-foreground">Add account</h3>
+              <h3 className="text-lg font-bold text-foreground">
+                {editingAccount ? "Edit account" : "Add account"}
+              </h3>
               <button
                 type="button"
-                onClick={() => { setShowAddAccount(false); setError(""); }}
+                onClick={() => {
+                  setShowAddAccount(false);
+                  setEditingAccount(null);
+                  setError("");
+                }}
                 className="p-2 rounded-lg text-muted-foreground hover:text-foreground"
                 aria-label="Close"
               >
@@ -329,6 +379,32 @@ export default function AccountsPage() {
                     <option key={t.value} value={t.value}>{t.label}</option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="label block mb-2">Include in Net Balance</label>
+                <button
+                  type="button"
+                  onClick={() => setAccIncludeInNet((v) => !v)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm ${
+                    accIncludeInNet
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border bg-background text-muted-foreground"
+                  }`}
+                >
+                  <span>Include this account in Net Balance</span>
+                  <span
+                    className={`inline-flex w-9 h-5 items-center rounded-full transition-colors ${
+                      accIncludeInNet ? "bg-primary" : "bg-muted"
+                    }`}
+                    aria-hidden
+                  >
+                    <span
+                      className={`inline-block w-4 h-4 bg-background rounded-full shadow transform transition-transform ${
+                        accIncludeInNet ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </span>
+                </button>
               </div>
               <div>
                 <label className="label block mb-2">Initial balance (optional)</label>
