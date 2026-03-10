@@ -8,12 +8,18 @@ use App\Repositories\BudgetRepository;
 class BudgetService
 {
     public function __construct(
-        private BudgetRepository $budgetRepository
+        private BudgetRepository $budgetRepository,
+        private BudgetSummaryService $budgetSummaryService,
     ) {}
 
     public function list(int $workspaceId, ?int $month = null, ?int $year = null)
     {
         return $this->budgetRepository->getForWorkspace($workspaceId, $month, $year);
+    }
+
+    public function listWithSummaries(int $workspaceId): array
+    {
+        return $this->budgetSummaryService->listForWorkspace($workspaceId);
     }
 
     public function store(int $workspaceId, array $data): Budget

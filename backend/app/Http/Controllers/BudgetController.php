@@ -15,9 +15,13 @@ class BudgetController extends Controller
 
     public function index(Request $request, int $workspace): JsonResponse
     {
-        $month = $request->has('month') ? (int) $request->get('month') : null;
-        $year = $request->has('year') ? (int) $request->get('year') : null;
-        $budgets = $this->budgetService->list($workspace, $month, $year);
+        if ($request->boolean('with_summaries')) {
+            $budgets = $this->budgetService->listWithSummaries($workspace);
+        } else {
+            $month = $request->has('month') ? (int) $request->get('month') : null;
+            $year = $request->has('year') ? (int) $request->get('year') : null;
+            $budgets = $this->budgetService->list($workspace, $month, $year);
+        }
         return response()->json(['data' => $budgets]);
     }
 

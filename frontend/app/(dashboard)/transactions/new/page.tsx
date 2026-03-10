@@ -5,18 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import {
-  X,
-  Check,
-  LayoutGrid,
-  Wallet,
-  Calendar,
-  FileText,
-  ChevronRight,
-  ArrowUpRight,
-} from "lucide-react";
+import { X, Check, LayoutGrid, Calendar, FileText, ChevronRight, ArrowUpRight } from "lucide-react";
 
-type Account = { id: number; name: string; type: string };
 type Category = { id: number; name: string; type: string };
 
 const sym = "R$";
@@ -37,9 +27,7 @@ function formatDateLabel(dateStr: string): string {
 export default function NewTransactionPage() {
   const { workspaceId } = useAuth();
   const router = useRouter();
-  const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [accountId, setAccountId] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
@@ -54,11 +42,6 @@ export default function NewTransactionPage() {
 
   useEffect(() => {
     if (!workspaceId) return;
-    api<{ accounts: Account[]; credit_cards: unknown[] }>(`/api/workspaces/${workspaceId}/accounts`)
-      .then((r) => {
-        if (r.data?.accounts) setAccounts(r.data.accounts);
-      })
-      .catch(() => {});
     api<Category[]>(`/api/workspaces/${workspaceId}/categories`)
       .then((r) => {
         if (Array.isArray(r.data)) setCategories(r.data);
@@ -69,8 +52,8 @@ export default function NewTransactionPage() {
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     setError("");
-    if (!workspaceId || !accountId || !categoryId || !amount) {
-      setError("Account, category and amount are required.");
+    if (!workspaceId || !categoryId || !amount) {
+      setError("Category and amount are required.");
       return;
     }
     setLoading(true);
@@ -78,7 +61,6 @@ export default function NewTransactionPage() {
       await api(`/api/workspaces/${workspaceId}/transactions`, {
         method: "POST",
         body: JSON.stringify({
-          account_id: Number(accountId),
           category_id: Number(categoryId),
           type,
           amount: parseFloat(amount),
@@ -269,33 +251,6 @@ export default function NewTransactionPage() {
               + Add custom category
             </button>
           )}
-
-          <label className="block">
-            <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
-              <div className="w-10 h-10 rounded-xl bg-chart-3/20 flex items-center justify-center shrink-0">
-                <Wallet className="w-5 h-5 text-chart-3" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-0.5">
-                  ACCOUNT
-                </p>
-                <select
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  required
-                  className="w-full bg-transparent text-sm font-medium text-foreground outline-none cursor-pointer appearance-none"
-                >
-                  <option value="">Select Account</option>
-                  {accounts.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
-            </div>
-          </label>
 
           <label className="block cursor-pointer">
             <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BudgetController;
@@ -8,7 +7,6 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\TransactionController;
@@ -42,10 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('workspace:workspace')->group(function () {
         Route::get('workspaces/{workspace}/dashboard', DashboardController::class);
-        Route::apiResource('workspaces.accounts', AccountController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
-        Route::get('workspaces/{workspace}/credit-cards', [CreditCardController::class, 'index']);
-        Route::post('workspaces/{workspace}/credit-cards', [CreditCardController::class, 'store']);
-        Route::patch('workspaces/{workspace}/credit-cards/{credit_card}', [CreditCardController::class, 'update']);
         Route::apiResource('workspaces.categories', CategoryController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
         Route::get('workspaces/{workspace}/transactions/pending', [TransactionController::class, 'pending']);
         Route::apiResource('workspaces.transactions', TransactionController::class);

@@ -8,21 +8,25 @@ import { ShoppingBag, Bus, Coffee, Plus, X } from "lucide-react";
 
 type Budget = {
   id: number;
-  category_id: number;
-  month: number;
-  year: number;
   amount: number;
+  currency: string;
   period_type?: string;
   period_interval?: number;
-  category?: { name: string };
+  current_period_start: string;
+  current_period_end: string;
+  next_reset_date: string;
+  spent: number;
+  remaining: number;
+  spent_percentage: number;
+  category?: { id: number; name: string; icon?: string | null; color?: string | null };
 };
 type Category = { id: number; name: string; type: string };
 
 const categoryIcons: Record<string, typeof ShoppingBag> = { Shopping: ShoppingBag, Transport: Bus, Food: Coffee };
 const categoryColors = ["bg-orange-500/20 text-orange-500", "bg-chart-3/20 text-chart-3", "bg-chart-4/20 text-chart-4"];
 
-function loadBudgets(workspaceId: number, month: number, year: number): Promise<Budget[]> {
-  return api<Budget[]>(`/api/workspaces/${workspaceId}/budgets?month=${month}&year=${year}`)
+function loadBudgets(workspaceId: number): Promise<Budget[]> {
+  return api<Budget[]>(`/api/workspaces/${workspaceId}/budgets?with_summaries=true`)
     .then((r) => (Array.isArray(r.data) ? r.data : []));
 }
 
@@ -43,10 +47,6 @@ export default function BudgetsPage() {
   const [newPeriodType, setNewPeriodType] = useState<"day" | "week" | "month" | "year">("month");
   const [newPeriodInterval, setNewPeriodInterval] = useState(1);
 
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
-
   useEffect(() => {
     if (!workspaceId) {
       setLoading(false);
@@ -54,7 +54,7 @@ export default function BudgetsPage() {
       return;
     }
     setLoading(true);
-    loadBudgets(workspaceId, currentMonth, currentYear)
+    loadBudgets(workspaceId)
       .then(setBudgets)
       .catch(() => setBudgets([]))
       .finally(() => setLoading(false));
@@ -77,15 +77,13 @@ export default function BudgetsPage() {
         method: "POST",
         body: JSON.stringify({
           category_id: Number(newCategoryId),
-          month: currentMonth,
-          year: currentYear,
           period_type: newPeriodType,
           period_interval: newPeriodInterval,
           amount: parseFloat(newAmount.replace(",", ".")) || 0,
           currency: "BRL",
         }),
       });
-      const list = await loadBudgets(workspaceId, currentMonth, currentYear);
+      const list = await loadBudgets(workspaceId);
       setBudgets(list);
       setShowAddForm(false);
       setNewCategoryId("");
@@ -122,7 +120,7 @@ export default function BudgetsPage() {
     }
   }
 
-  const existingCategoryIds = new Set(budgets.map((b) => b.category_id));
+  const existingCategoryIds = new Set(budgets.map((b) => b.category?.id).filter(Boolean) as number[]);
   const availableCategories = categories.filter((c) => !existingCategoryIds.has(c.id));
 
   return (
@@ -199,38 +197,38 @@ export default function BudgetsPage() {
                 </div>
               )}
             </div>
-            <div>
-              <label className="label block mb-2">Resets every</label>
-              <div className="flex gap-2">
-                <select
-                  value={newPeriodType}
-                  onChange={(e) => setNewPeriodType(e.target.value as "day" | "week" | "month" | "year")}
-                  className="flex-1 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
-                >
-                  <option value="day">Day</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-                  <option value="year">Year</option>
-                </select>
-                {(newPeriodType === "week" || newPeriodType === "month") && (
+              <div>
+                <label className="label block mb-2">Resets every</label>
+                <div className="flex gap-2">
+                  <select
+                    value={newPeriodType}
+                    onChange={(e) => setNewPeriodType(e.target.value as "day" | "week" | "month" | "year")}
+                    className="flex-1 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                  >
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                  </select>
                   <select
                     value={newPeriodInterval}
                     onChange={(e) => setNewPeriodInterval(Number(e.target.value))}
-                    className="w-24 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                    className="w-28 bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
                   >
-                    {newPeriodType === "week"
-                      ? [1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)
-                      : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => <option key={n} value={n}>{n}</option>)}
+                    {newPeriodType === "week" ? (
+                      <option value={1}>Every week</option>
+                    ) : (
+                      <>
+                        <option value={1}>Every month</option>
+                        <option value={3}>Every 3 months</option>
+                      </>
+                    )}
                   </select>
-                )}
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1 ml-1">
+                  {newPeriodType === "week" && "Resets at the start of each week"}
+                  {newPeriodType === "month" && newPeriodInterval === 1 && "Resets at the start of each month"}
+                  {newPeriodType === "month" && newPeriodInterval === 3 && "Resets every 3 months"}
+                </p>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1 ml-1">
-                {newPeriodType === "day" && "Resets daily"}
-                {newPeriodType === "week" && `Resets every ${newPeriodInterval} week(s)`}
-                {newPeriodType === "month" && `Resets every ${newPeriodInterval} month(s)`}
-                {newPeriodType === "year" && "Resets yearly"}
-              </p>
-            </div>
             <div>
               <label className="label block mb-2">Limit ({CURRENCY_SYMBOL})</label>
               <input
@@ -277,18 +275,18 @@ export default function BudgetsPage() {
           ) : (
             budgets.map((b, i) => {
               const amount = Number(b.amount);
-              const spent = 0;
-              const pct = amount > 0 ? Math.min(100, (spent / amount) * 100) : 0;
+              const spent = Number(b.spent);
+              const remaining = Number(b.remaining);
+              const pct = Number.isFinite(b.spent_percentage) ? b.spent_percentage : amount > 0 ? Math.min(100, (spent / amount) * 100) : 0;
               const Icon = categoryIcons[b.category?.name ?? ""] ?? ShoppingBag;
               const colorClass = categoryColors[i % categoryColors.length] ?? "bg-chart-4/20 text-chart-4";
               const periodLabel =
-                b.period_type === "day"
-                  ? "Resets daily"
-                  : b.period_type === "week"
-                    ? `Resets every ${b.period_interval ?? 1} week(s)`
-                    : b.period_type === "year"
-                      ? "Resets yearly"
-                      : `Resets every ${b.period_interval ?? 1} month(s)`;
+                b.period_type === "week"
+                  ? "Weekly"
+                  : b.period_type === "month" && (b.period_interval ?? 1) === 3
+                    ? "Every 3 Months"
+                    : "Monthly";
+
               return (
                 <div key={b.id} className="bg-secondary p-4 rounded-2xl">
                   <div className="flex items-center justify-between mb-3">
@@ -298,20 +296,44 @@ export default function BudgetsPage() {
                       </div>
                       <div>
                         <span className="text-xs font-bold">{b.category?.name ?? "Category"}</span>
-                        <p className="text-[10px] text-muted-foreground font-medium">{periodLabel}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium">
+                          {periodLabel} • Resets {b.next_reset_date}
+                        </p>
                       </div>
                     </div>
                     <span className="text-xs font-bold text-foreground">
-                      {CURRENCY_SYMBOL} {formatBRL(spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}{" "}
-                      <span className="text-muted-foreground font-medium">/ {CURRENCY_SYMBOL} {formatBRL(amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                      {CURRENCY_SYMBOL}{" "}
+                      {formatBRL(remaining, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}{" "}
+                      <span className="text-muted-foreground font-medium">
+                        / {CURRENCY_SYMBOL}{" "}
+                        {formatBRL(amount, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        })}
+                      </span>
                     </span>
                   </div>
                   <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
-                    <div style={{ width: `${pct}%` }} className="h-full bg-chart-4 rounded-full transition-all" />
+                    <div
+                      style={{ width: `${pct}%` }}
+                      className="h-full bg-chart-4 rounded-full transition-all"
+                    />
                   </div>
                   <div className="flex justify-between mt-2">
-                    <p className="text-[10px] text-muted-foreground font-medium">{pct.toFixed(0)}% spent</p>
-                    <p className="text-[10px] text-muted-foreground font-medium">{CURRENCY_SYMBOL} {formatBRL(amount - spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} remaining</p>
+                    <p className="text-[10px] text-muted-foreground font-medium">
+                      {pct.toFixed(0)}% spent
+                    </p>
+                    <p className="text-[10px] text-muted-foreground font-medium">
+                      {CURRENCY_SYMBOL}{" "}
+                      {formatBRL(remaining, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}{" "}
+                      remaining
+                    </p>
                   </div>
                 </div>
               );

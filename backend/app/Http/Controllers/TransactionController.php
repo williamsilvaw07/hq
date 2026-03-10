@@ -16,7 +16,7 @@ class TransactionController extends Controller
 
     public function index(Request $request, int $workspace): JsonResponse
     {
-        $filters = $request->only('status', 'type', 'search', 'category_id', 'account_id', 'from', 'to');
+        $filters = $request->only('status', 'type', 'search', 'category_id', 'from', 'to');
         $perPage = min((int) $request->get('per_page', 15), 100);
         $result = $this->transactionService->list($workspace, $filters, $perPage);
         return response()->json($result);
@@ -40,12 +40,6 @@ class TransactionController extends Controller
     public function store(Request $request, int $workspace): JsonResponse
     {
         $request->validate([
-            'account_id' => [
-                'required_without:is_draft',
-                'nullable',
-                'integer',
-                Rule::exists('accounts', 'id')->where('workspace_id', $workspace),
-            ],
             'category_id' => [
                 'required',
                 'integer',
@@ -59,16 +53,13 @@ class TransactionController extends Controller
             'status' => 'nullable|in:draft,confirmed',
         ]);
         $data = $request->only(
-            'account_id', 'category_id', 'type', 'amount', 'currency', 'date', 'description', 'status'
+            'category_id', 'type', 'amount', 'currency', 'date', 'description', 'status'
         );
         $data['currency'] = $data['currency'] ?? 'BRL';
         $data['exchange_rate'] = 1;
         $data['base_amount'] = $data['amount'];
         $data['source'] = Transaction::SOURCE_WEB_MANUAL;
         $data['status'] = $data['status'] ?? Transaction::STATUS_CONFIRMED;
-        if ($data['status'] === Transaction::STATUS_CONFIRMED && empty($data['account_id'])) {
-            return response()->json(['message' => 'Account is required for confirmed transactions.'], 422);
-        }
         $transaction = $this->transactionService->store($workspace, $request->user()->id, $data);
         return response()->json(['data' => $transaction], 201);
     }
@@ -80,11 +71,6 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Transaction not found.'], 404);
         }
         $request->validate([
-            'account_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('accounts', 'id')->where('workspace_id', $workspace),
-            ],
             'category_id' => [
                 'sometimes',
                 'integer',
@@ -98,11 +84,8 @@ class TransactionController extends Controller
             'status' => 'sometimes|in:draft,confirmed,needs_review',
         ]);
         $data = $request->only(
-            'account_id', 'category_id', 'type', 'amount', 'currency', 'date', 'description', 'status'
+            'category_id', 'type', 'amount', 'currency', 'date', 'description', 'status'
         );
-        if (isset($data['status']) && $data['status'] === Transaction::STATUS_CONFIRMED && empty($data['account_id']) && !$transaction->account_id) {
-            return response()->json(['message' => 'Account is required when confirming.'], 422);
-        }
         $transaction = $this->transactionService->update(
             $transaction,
             $data,

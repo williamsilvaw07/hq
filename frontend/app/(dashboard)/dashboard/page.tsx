@@ -4,17 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api, buildMediaUrl } from "@/lib/api";
-import {
-  CreditCard,
-  ShoppingBag,
-  ArrowUpRight,
-  Store,
-  Car,
-  Calendar,
-  Receipt,
-  TrendingUp,
-  Repeat,
-} from "lucide-react";
+import { ShoppingBag, ArrowUpRight, Store, Car, Calendar, Receipt } from "lucide-react";
 import { fixedBillsTotal, fixedBillsCount, loadFixedBills, type FixedBill } from "@/lib/fixed-expenses";
 import { formatMoney as formatMoneyBRL } from "@/lib/format";
 import { loadDashboardMode, type DashboardMode } from "@/lib/dashboard-preferences";
@@ -90,18 +80,7 @@ function DashboardSkeleton() {
   );
 }
 
-type DashboardCreditUsageItem = {
-  name?: string;
-  used: number;
-  available: number;
-  next_reset?: string;
-  last_four?: string | null;
-};
-
 type DashboardData = {
-  cash_bank_balance: number;
-  credit_usage: DashboardCreditUsageItem[];
-  net_position: number;
   period?: string;
   period_income?: number;
   period_expense?: number;
@@ -261,9 +240,6 @@ export default function DashboardPage() {
         if (r.data) setData(r.data);
         else
           setData({
-            cash_bank_balance: 0,
-            credit_usage: [],
-            net_position: 0,
             period_income: 0,
             period_expense: 0,
             recent_transactions: [],
@@ -271,9 +247,6 @@ export default function DashboardPage() {
       })
       .catch(() =>
         setData({
-          cash_bank_balance: 0,
-          credit_usage: [],
-          net_position: 0,
           period_income: 0,
           period_expense: 0,
           recent_transactions: [],
@@ -323,16 +296,12 @@ export default function DashboardPage() {
   }
 
   const raw = data ?? {
-    cash_bank_balance: 0,
-    credit_usage: [],
-    net_position: 0,
     period_income: 0,
     period_expense: 0,
     recent_transactions: [],
   };
   const displayData = {
     ...raw,
-    credit_usage: Array.isArray(raw.credit_usage) ? raw.credit_usage : [],
     recent_transactions: Array.isArray(raw.recent_transactions) ? raw.recent_transactions : [],
   };
 
@@ -345,7 +314,6 @@ export default function DashboardPage() {
     n.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const hasPeriodActivity = periodIncome + periodExpense > 0;
-  const periodNetChange = periodIncome - periodExpense;
 
   return (
     <div className="min-h-screen pb-32 font-sans selection:bg-primary/20 tracking-tight">

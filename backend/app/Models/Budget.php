@@ -14,6 +14,7 @@ class Budget extends Model
         'year',
         'period_type',
         'period_interval',
+        'start_date',
         'amount',
         'currency',
     ];
@@ -23,6 +24,7 @@ class Budget extends Model
         return [
             'amount' => 'decimal:4',
             'period_interval' => 'integer',
+            'start_date' => 'date',
         ];
     }
 

@@ -5,16 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
 import { api, buildMediaUrl } from "@/lib/api";
-import {
-  Home,
-  History,
-  Plus,
-  CreditCard,
-  PieChart,
-  Bell,
-  ChevronDown,
-  ArrowLeft,
-} from "lucide-react";
+import { Home, History, Plus, PieChart, Bell, ArrowLeft } from "lucide-react";
 
 type Workspace = { id: number; name: string; slug: string };
 
@@ -185,13 +176,9 @@ export default function DashboardLayout({
                 <Plus className="w-7 h-7" />
               </Link>
             </div>
-            <Link href="/accounts" className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 transition-colors ${pathname === "/accounts" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-              <CreditCard className="w-6 h-6" />
-              <span className="text-[9px] font-bold uppercase tracking-widest">CARDS</span>
-            </Link>
             <Link href="/budgets" className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 transition-colors ${pathname === "/budgets" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
               <PieChart className="w-6 h-6" />
-              <span className="text-[9px] font-bold uppercase tracking-widest">STATS</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest">BUDGETS</span>
             </Link>
           </div>
         </div>

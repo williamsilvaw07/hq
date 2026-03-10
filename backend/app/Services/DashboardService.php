@@ -2,11 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Account;
 use App\Models\Transaction;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
@@ -19,42 +16,6 @@ class DashboardService
     {
         $period = $this->normalizePeriod($period);
         [$start, $end] = $this->dateRangeForPeriod($period);
-
-        $liquidTypes = [Account::TYPE_CASH, Account::TYPE_BANK, Account::TYPE_SAVINGS, Account::TYPE_E_WALLET];
-        $cashBankBalance = Account::where('workspace_id', $workspaceId)
-            ->whereIn('type', $liquidTypes)
-            ->sum('balance');
-
-        $creditCards = \App\Models\CreditCard::where('workspace_id', $workspaceId)->get();
-        $creditUsage = [];
-        foreach ($creditCards as $card) {
-            $creditUsage[] = [
-                'name' => $card->name,
-                'used' => (float) $card->current_balance,
-                'available' => (float) ($card->credit_limit - $card->current_balance),
-                // Use next payment due date for "DUE IN" label (nullable-safe)
-                'next_reset' => $card->next_payment_due_date?->format('Y-m-d'),
-                // Optional: last four digits, if the backend later supports it.
-                'last_four' => method_exists($card, 'getAttribute') ? ($card->getAttribute('last_four') ?? null) : null,
-            ];
-        }
-
-        $creditUsed = array_sum(array_column($creditUsage, 'used'));
-
-        // Net Balance:
-        // - Prefer: sum(account.balance where include_in_net_balance = true)
-        // - Backward compatible: if column doesn't exist, fall back to previous behavior
-        if (Schema::hasColumn('accounts', 'include_in_net_balance')) {
-            $netPosition = Account::where('workspace_id', $workspaceId)
-                ->where(function ($query) {
-                    $query->whereNull('include_in_net_balance')
-                        ->orWhere('include_in_net_balance', true);
-                })
-                ->sum('balance');
-        } else {
-            // Legacy behavior: liquid account balance minus used credit
-            $netPosition = $cashBankBalance - $creditUsed;
-        }
 
         $periodQuery = Transaction::where('workspace_id', $workspaceId)
             ->where('status', Transaction::STATUS_CONFIRMED)
@@ -77,12 +38,13 @@ class DashboardService
                 'date' => $t->date->format('Y-m-d'),
                 'description' => $t->description,
                 'status' => $t->status,
+                'category' => $t->category ? [
+                    'id' => $t->category->id,
+                    'name' => $t->category->name,
+                ] : null,
             ]);
 
         return [
-            'cash_bank_balance' => (float) $cashBankBalance,
-            'credit_usage' => $creditUsage,
-            'net_position' => (float) $netPosition,
             'period' => $period,
             'period_income' => (float) $periodIncome,
             'period_expense' => (float) $periodExpense,
