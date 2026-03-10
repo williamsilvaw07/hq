@@ -69,7 +69,11 @@ export default function AccountsPage() {
     }).catch(() => {});
   }, [workspaceId]);
 
-  const netWorth = accounts.reduce((s, a) => s + Number(a.balance), 0) - creditCards.reduce((s, c) => s + Number(c.current_balance), 0);
+  const safeAccounts = Array.isArray(accounts) ? accounts : [];
+  const safeCreditCards = Array.isArray(creditCards) ? creditCards : [];
+  const netWorth =
+    safeAccounts.reduce((s, a) => s + Number(a.balance), 0) -
+    safeCreditCards.reduce((s, c) => s + Number(c.current_balance), 0);
   const primary = accounts[0];
   const sym = "R$";
 
