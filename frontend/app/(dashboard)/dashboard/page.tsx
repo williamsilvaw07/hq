@@ -64,12 +64,12 @@ export default function DashboardPage() {
   }
 
   const periodExpense = dashboard?.period_expense ?? 0;
-  const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
+  const totalBudgetFromBudgets = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
   const totalSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
   const totalRemaining = budgets.reduce((sum, b) => sum + Number(b.remaining || 0), 0);
-  const percentSpent = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
-
   const monthlyFixedTotal = fixedBillsTotal(fixedBills);
+  const totalBudget = totalBudgetFromBudgets + monthlyFixedTotal;
+  const percentSpent = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">

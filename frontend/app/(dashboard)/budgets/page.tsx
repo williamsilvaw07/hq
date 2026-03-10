@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { formatBRL, CURRENCY_SYMBOL } from "@/lib/format";
-import { ShoppingBag, Bus, Coffee, Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 
 type Budget = {
   id: number;
@@ -23,8 +23,11 @@ type Budget = {
 };
 type Category = { id: number; name: string; type: string };
 
-const categoryIcons: Record<string, typeof ShoppingBag> = { Shopping: ShoppingBag, Transport: Bus, Food: Coffee };
-const categoryColors = ["bg-orange-500/20 text-orange-500", "bg-chart-3/20 text-chart-3", "bg-chart-4/20 text-chart-4"];
+const categoryColors = [
+  "bg-orange-500/10 border-orange-500/40",
+  "bg-chart-3/10 border-chart-3/40",
+  "bg-chart-4/10 border-chart-4/40",
+];
 
 function loadBudgets(workspaceId: number): Promise<Budget[]> {
   return api<Budget[]>(`/api/workspaces/${workspaceId}/budgets?with_summaries=true`)
@@ -212,10 +215,9 @@ export default function BudgetsPage() {
                   : amount > 0
                     ? Math.min(100, (spent / amount) * 100)
                     : 0;
-                const Icon = categoryIcons[b.category?.name ?? ""] ?? ShoppingBag;
                 const colorClass =
                   categoryColors[i % categoryColors.length] ??
-                  "bg-chart-4/20 text-chart-4";
+                  "bg-chart-4/10 border-chart-4/40";
                 const periodLabel =
                   b.period_type === "week"
                     ? "Weekly"
@@ -232,9 +234,14 @@ export default function BudgetsPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div
-                          className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${colorClass}`}
+                          className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border ${colorClass}`}
                         >
-                          <Icon className="w-5 h-5" />
+                          <span>
+                            {b.category?.icon ||
+                              (b.category?.name
+                                ? b.category.name.charAt(0).toUpperCase()
+                                : "💰")}
+                          </span>
                         </div>
                         <div>
                           <h4 className="text-sm font-bold">
@@ -245,6 +252,12 @@ export default function BudgetsPage() {
                           </p>
                         </div>
                       </div>
+                      <Link
+                        href={`/budgets/${b.id}/edit`}
+                        className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-xl bg-secondary/40"
+                      >
+                        Edit
+                      </Link>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-tight">
