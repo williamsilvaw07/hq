@@ -39,7 +39,13 @@ class DashboardService
         }
 
         $creditUsed = array_sum(array_column($creditUsage, 'used'));
-        $netPosition = $cashBankBalance - $creditUsed;
+        // Net Balance = sum(account.balance where include_in_net_balance = true)
+        $netPosition = Account::where('workspace_id', $workspaceId)
+            ->where(function ($query) {
+                $query->whereNull('include_in_net_balance')
+                    ->orWhere('include_in_net_balance', true);
+            })
+            ->sum('balance');
 
         $periodQuery = Transaction::where('workspace_id', $workspaceId)
             ->where('status', Transaction::STATUS_CONFIRMED)
