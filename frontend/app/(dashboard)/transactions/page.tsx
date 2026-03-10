@@ -152,6 +152,29 @@ export default function TransactionsPage() {
       </header>
 
       <div className="space-y-8">
+        {list.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
+            <p className="text-sm font-medium text-foreground">No activity yet for this workspace and filters.</p>
+            <p className="text-xs text-muted-foreground max-w-[260px]">
+              Add a transaction or adjust the filters above to see your income and expenses here.
+            </p>
+            <div className="flex gap-2 mt-2">
+              <Link
+                href="/transactions/new"
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold active:scale-95"
+              >
+                Add transaction
+              </Link>
+              <Link
+                href="/pending"
+                className="px-4 py-2 rounded-xl bg-card text-xs font-bold text-foreground border border-border active:scale-95"
+              >
+                View drafts
+              </Link>
+            </div>
+          </div>
+        )}
+
         {Object.entries(byDate).sort(([a], [b]) => b.localeCompare(a)).map(([date, list]) => (
           <div key={date} className="space-y-4">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">{date}</p>
