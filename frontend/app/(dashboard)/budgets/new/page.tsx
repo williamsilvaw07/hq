@@ -122,7 +122,7 @@ export default function NewBudgetPage() {
             <input
               type="number"
               className="w-full max-w-[240px] text-7xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tighter"
-              placeholder={0}
+              placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
