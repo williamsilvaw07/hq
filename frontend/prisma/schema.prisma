@@ -2,7 +2,8 @@
 // Run against existing DB: prisma db pull (or use migrations if starting fresh).
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
