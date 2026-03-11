@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { comparePassword, createToken, toApiUser } from "@/lib/auth";
+import { findUserByEmail } from "@/lib/repos/user-repo";
 
 export async function POST(req: Request) {
   try {
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await findUserByEmail(email);
     if (!user || !(await comparePassword(password, user.password))) {
       return NextResponse.json(
         { message: "The provided credentials are incorrect.", errors: { email: ["The provided credentials are incorrect."] } },

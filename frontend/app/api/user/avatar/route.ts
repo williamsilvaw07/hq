@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import { prisma } from "@/lib/prisma";
 import { requireAuth, toApiUser } from "@/lib/auth";
+import { updateUserProfile, findUserById } from "@/lib/repos/user-repo";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
@@ -34,13 +34,11 @@ export async function POST(req: Request) {
     await writeFile(path, buffer);
 
     const url = `/uploads/avatars/${authUser.id}/${filename}`;
-    const user = await prisma.user.update({
-      where: { id: authUser.id },
-      data: { avatarUrl: url },
-      select: { id: true, name: true, email: true, avatarUrl: true },
-    });
-
-    return NextResponse.json({ data: toApiUser(user) });
+    await updateUserProfile(authUser.id, { avatar_url: url });
+    const user = await findUserById(authUser.id);
+    return user
+      ? NextResponse.json({ data: toApiUser({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatar_url }) })
+      : NextResponse.json({ message: "User not found." }, { status: 404 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
     if (status === 401) {

@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireAuth, toApiUser } from "@/lib/auth";
+import { findUserById, updateUserProfile, findUserByEmail } from "@/lib/repos/user-repo";
 
 export async function GET(req: Request) {
   try {
     const authUser = await requireAuth(req);
-    const user = await prisma.user.findUnique({
-      where: { id: authUser.id },
-      select: { id: true, name: true, email: true, avatarUrl: true },
-    });
+    const user = await findUserById(authUser.id);
     if (!user) {
       return NextResponse.json({ message: "User not found." }, { status: 404 });
     }
@@ -38,7 +35,8 @@ export async function PATCH(req: Request) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return NextResponse.json({ message: "The email must be a valid email address." }, { status: 422 });
       }
-      const existing = await prisma.user.findFirst({ where: { email, NOT: { id: authUser.id } } });
+      const existing = await findUserByEmail(email);
+      if (existing && existing.id !== authUser.id) {
       if (existing) {
         return NextResponse.json({ message: "The email has already been taken.", errors: { email: ["The email has already been taken."] } }, { status: 422 });
       }
@@ -47,25 +45,21 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ message: "Invalid avatar_url." }, { status: 422 });
     }
 
-    const data: { name?: string; email?: string; avatarUrl?: string | null } = {};
+    const data: { name?: string; email?: string; avatar_url?: string | null } = {};
     if (name !== undefined) data.name = name;
     if (email !== undefined) data.email = email;
-    if (avatarUrl !== undefined) data.avatarUrl = avatarUrl;
+    if (avatarUrl !== undefined) data.avatar_url = avatarUrl;
 
     if (Object.keys(data).length === 0) {
-      const user = await prisma.user.findUnique({
-        where: { id: authUser.id },
-        select: { id: true, name: true, email: true, avatarUrl: true },
-      });
+      const user = await findUserById(authUser.id);
       return user ? NextResponse.json({ data: toApiUser(user) }) : NextResponse.json({ message: "User not found." }, { status: 404 });
     }
 
-    const user = await prisma.user.update({
-      where: { id: authUser.id },
-      data,
-      select: { id: true, name: true, email: true, avatarUrl: true },
-    });
-    return NextResponse.json({ data: toApiUser(user) });
+    await updateUserProfile(authUser.id, data);
+    const user = await findUserById(authUser.id);
+    return user
+      ? NextResponse.json({ data: toApiUser({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatar_url }) })
+      : NextResponse.json({ message: "User not found." }, { status: 404 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
     if (status === 401) {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { hashPassword, createToken, toApiUser } from "@/lib/auth";
+import { createUser, findUserByEmail } from "@/lib/repos/user-repo";
 
 export async function POST(req: Request) {
   try {
@@ -23,15 +23,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "The password confirmation does not match." }, { status: 422 });
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await findUserByEmail(email);
     if (existing) {
       return NextResponse.json({ message: "The email has already been taken.", errors: { email: ["The email has already been taken."] } }, { status: 422 });
     }
 
     const hashed = await hashPassword(password);
-    const user = await prisma.user.create({
-      data: { name, email, password: hashed },
-    });
+    const user = await createUser({ name, email, passwordHash: hashed });
 
     const token = await createToken(user.id, user.email);
     const userPayload = toApiUser(user);

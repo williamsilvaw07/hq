@@ -1,7 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
-import { prisma } from "./prisma";
-import type { User } from "@prisma/client";
+import { findUserById } from "@/lib/repos/user-repo";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "fallback-secret-min-32-chars-long"
@@ -11,7 +10,12 @@ const JWT_ISSUER = "hq-app";
 const JWT_AUDIENCE = "hq-app";
 const JWT_EXPIRY = "7d";
 
-export type AuthUser = Pick<User, "id" | "name" | "email" | "avatarUrl">;
+export type AuthUser = {
+  id: number;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+};
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
@@ -60,16 +64,13 @@ export async function getAuthUser(req: Request): Promise<AuthUser | null> {
   if (!token) return null;
   const payload = await verifyToken(token);
   if (!payload) return null;
-  const user = await prisma.user.findUnique({
-    where: { id: payload.userId },
-    select: { id: true, name: true, email: true, avatarUrl: true },
-  });
+  const user = await findUserById(payload.userId);
   if (!user || user.email !== payload.email) return null;
   return {
     id: user.id,
     name: user.name,
     email: user.email,
-    avatarUrl: user.avatarUrl,
+    avatarUrl: user.avatar_url,
   };
 }
 
@@ -81,7 +82,7 @@ export async function requireAuth(req: Request): Promise<AuthUser & { avatar_url
     (err as unknown as { status: number }).status = 401;
     throw err;
   }
-  return { ...user, avatar_url: (user as unknown as { avatar_url?: string | null }).avatar_url };
+  return { ...user, avatar_url: user.avatarUrl };
 }
 
 /** Shape expected by frontend (id, name, email, avatar_url). */
