@@ -1,14 +1,14 @@
 import mysql from "mysql2/promise";
 
-const url = process.env.DATABASE_URL;
-if (!url) {
-  throw new Error("DATABASE_URL is not set");
-}
-
 let pool: mysql.Pool | null = null;
 
 export function getPool() {
   if (!pool) {
+    const url = process.env.DATABASE_URL;
+    if (!url) {
+      throw new Error("DATABASE_URL is not set");
+    }
+    // url is guaranteed to be a string here
     pool = mysql.createPool(url);
   }
   return pool;
