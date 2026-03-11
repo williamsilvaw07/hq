@@ -1,5 +1,0 @@
-<IfModule mod_rewrite.c>
-    # Document root is public_html. Laravel's web root is public_html/public/.
-    RewriteEngine On
-    RewriteRule ^(.*)$ public/$1 [L]
-</IfModule>

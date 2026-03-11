@@ -1,52 +1,19 @@
 #!/usr/bin/env bash
-# Build the frontend and upload to Hostinger.
-# Run from repo root when you have frontend changes:
-#   ./deploy-frontend.sh           # upload to public_html/public/
-#   ./deploy-frontend.sh frontend  # upload to public_html/frontend/out/
+# Build the Next.js app (standalone). For upload/deploy, use your own process
+# (e.g. rsync standalone + static + public to server and run node server.js).
+# Run from repo root: ./deploy-frontend.sh
 #
-# Requires: FTP_HOST, FTP_USERNAME, FTP_PASSWORD (env or .env.deploy).
-# On Mac: brew install sshpass  (for password-based SSH)
+# Requires: FTP_* only if you use the optional upload step below.
 
 set -e
 cd "$(dirname "$0")"
 
-# Upload target: "public" (default, Laravel public/) or "frontend" (public_html/frontend/out/)
-TARGET="${1:-public}"
-if [ "$TARGET" = "frontend" ]; then
-  REMOTE_DIR="public_html/frontend/out"
-else
-  REMOTE_DIR="public_html/public"
-fi
+echo "Building frontend (standalone)..."
+(cd frontend && npm run build)
 
-# Load credentials from .env.deploy if it exists (optional)
-if [ -f .env.deploy ]; then
-  set -a
-  source .env.deploy
-  set +a
-fi
-
-for v in FTP_HOST FTP_USERNAME FTP_PASSWORD; do
-  if [ -z "${!v}" ]; then
-    echo "Error: $v is not set. Export it or add to .env.deploy"
-    exit 1
-  fi
-done
-
-echo "Building frontend..."
-(cd frontend && NEXT_PUBLIC_API_URL= npm run build)
-
-if [ ! -f frontend/out/index.html ]; then
-  echo "Build failed: frontend/out/index.html missing"
+if [ ! -d frontend/.next/standalone ]; then
+  echo "Build failed: frontend/.next/standalone missing"
   exit 1
 fi
 
-echo "Creating remote directory (if needed)..."
-sshpass -p "$FTP_PASSWORD" ssh -p 65002 -o StrictHostKeyChecking=no \
-  "$FTP_USERNAME@$FTP_HOST" "mkdir -p $REMOTE_DIR"
-
-echo "Uploading to $FTP_HOST:$REMOTE_DIR/ ..."
-sshpass -p "$FTP_PASSWORD" rsync -avz --delete \
-  -e "ssh -p 65002 -o StrictHostKeyChecking=no" \
-  frontend/out/ "$FTP_USERNAME@$FTP_HOST:$REMOTE_DIR/"
-
-echo "Done. Frontend is live at $REMOTE_DIR"
+echo "Done. To run on server: copy frontend/.next/standalone, frontend/.next/static, and frontend/public, then run node server.js (see README)."

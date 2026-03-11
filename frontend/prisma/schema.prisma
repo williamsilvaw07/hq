@@ -1,0 +1,192 @@
+// Prisma schema for MySQL.
+// Run against existing DB: prisma db pull (or use migrations if starting fresh).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Auth & users ---
+model User {
+  id                Int       @id @default(autoincrement())
+  name              String
+  email             String    @unique
+  emailVerifiedAt   DateTime? @map("email_verified_at")
+  password          String
+  avatarUrl         String?   @map("avatar_url")
+  rememberToken     String?   @map("remember_token")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  workspaceUsers    WorkspaceUser[]
+  workspaceInvitationsInvitedBy WorkspaceInvitation[] @relation("InvitedBy")
+  transactionsCreatedBy    Transaction[]              @relation("CreatedByUser")
+  transactionsConfirmedBy Transaction[]             @relation("ConfirmedByUser")
+}
+
+model PasswordResetToken {
+  email     String   @id
+  token     String
+  createdAt DateTime? @map("created_at")
+}
+
+// Legacy API token table (optional; app auth uses JWT)
+// model PersonalAccessToken { ... } — omit to avoid polymorphic complexity; add if needed for introspection
+
+// --- Workspaces ---
+model Workspace {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  workspaceUsers     WorkspaceUser[]
+  workspaceInvitations WorkspaceInvitation[]
+  categories         Category[]
+  accounts           Account[]
+  creditCards        CreditCard[]
+  budgets            Budget[]
+  transactions      Transaction[]
+}
+
+model WorkspaceUser {
+  id          Int      @id @default(autoincrement())
+  workspaceId  Int      @map("workspace_id")
+  userId      Int      @map("user_id")
+  role        String   @default("member") // owner, admin, member, viewer
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_users")
+}
+
+model WorkspaceInvitation {
+  id         Int       @id @default(autoincrement())
+  workspaceId Int      @map("workspace_id")
+  email      String
+  role       String    @default("member")
+  token      String    @unique
+  invitedBy  Int       @map("invited_by")
+  expiresAt  DateTime  @map("expires_at")
+  acceptedAt DateTime? @map("accepted_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  inviter   User      @relation("InvitedBy", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, email])
+  @@map("workspace_invitations")
+}
+
+// --- Categories ---
+model Category {
+  id           Int      @id @default(autoincrement())
+  workspaceId  Int      @map("workspace_id")
+  name         String
+  type         String   // income, expense
+  icon         String?
+  color        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  budgets     Budget[]
+  transactions Transaction[]
+}
+
+// --- Accounts & credit cards ---
+model Account {
+  id                 Int      @id @default(autoincrement())
+  workspaceId        Int      @map("workspace_id")
+  name               String
+  type               String   // cash, bank, credit_card, savings, investment, e_wallet
+  currency           String   @default("BRL") @db.Char(3)
+  balance            Decimal  @default(0) @db.Decimal(18, 4)
+  includeInNetBalance Boolean @default(true) @map("include_in_net_balance")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creditCards CreditCard[]
+  transactions Transaction[]
+}
+
+model CreditCard {
+  id                   Int     @id @default(autoincrement())
+  workspaceId          Int     @map("workspace_id")
+  accountId            Int?    @map("account_id")
+  name                 String
+  creditLimit          Decimal @default(0) @map("credit_limit") @db.Decimal(18, 4)
+  currentBalance       Decimal @default(0) @map("current_balance") @db.Decimal(18, 4)
+  billingCycleStartDay Int     @map("billing_cycle_start_day")
+  paymentDueDay        Int     @map("payment_due_day")
+  currency             String  @default("BRL") @db.Char(3)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  account   Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+}
+
+// --- Budgets ---
+model Budget {
+  id              Int      @id @default(autoincrement())
+  workspaceId     Int      @map("workspace_id")
+  categoryId      Int      @map("category_id")
+  month           Int      // 1-12
+  year            Int
+  periodType      String   @default("month") @map("period_type") // day, week, month, year
+  periodInterval  Int      @default(1) @map("period_interval")
+  startDate       DateTime? @map("start_date") @db.Date
+  amount          Decimal  @db.Decimal(18, 4)
+  currency        String   @default("BRL") @db.Char(3)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category  Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, categoryId, month, year])
+  @@map("budgets")
+}
+
+// --- Transactions ---
+model Transaction {
+  id                  Int       @id @default(autoincrement())
+  workspaceId          Int       @map("workspace_id")
+  accountId           Int?      @map("account_id")
+  categoryId           Int?      @map("category_id")
+  createdByUserId     Int?      @map("created_by_user_id")
+  type                String    // income, expense
+  amount              Decimal   @db.Decimal(18, 4)
+  currency            String    @default("BRL") @db.Char(3)
+  exchangeRate        Decimal   @default(1) @map("exchange_rate") @db.Decimal(18, 8)
+  baseAmount          Decimal   @map("base_amount") @db.Decimal(18, 4)
+  date                DateTime  @db.Date
+  description         String?
+  source              String    @default("web_manual") // web_manual, whatsapp_text, etc.
+  status              String    @default("confirmed")  // draft, confirmed, needs_review
+  inboundMessageId    Int?      @map("inbound_message_id") // optional FK to inbound_messages (WhatsApp)
+  aiConfidenceScore   Decimal?  @map("ai_confidence_score") @db.Decimal(5, 4)
+  rawParsedPayload    Json?     @map("raw_parsed_payload")
+  confirmedAt         DateTime? @map("confirmed_at")
+  confirmedByUserId   Int?      @map("confirmed_by_user_id")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  account     Account?   @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdByUser   User?  @relation("CreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  confirmedByUser User?  @relation("ConfirmedByUser", fields: [confirmedByUserId], references: [id], onDelete: SetNull)
+}

@@ -1,73 +1,91 @@
-
 # William HQ — Fintech Tracker
 
-williamhq.com: **Fintech Tracker** — mobile-first financial tracking with Next.js frontend and Laravel API.
+williamhq.com: **Fintech Tracker** — mobile-first financial tracking (budgets, transactions, categories, workspaces).
 
 ## Stack
 
-- **Frontend**: Next.js (App Router), TailwindCSS, shadcn/ui — built as static export, served from Laravel `backend/public`
-- **Backend**: Laravel API (auth, workspaces, transactions, budgets, WhatsApp webhooks) in `backend/`
-- **Database**: PostgreSQL (or MySQL per `.env`)
-- **Queue**: Redis (optional)
+- **App**: Single Next.js app (App Router) with API route handlers — UI and API in one codebase.
+- **Database**: MySQL (Prisma ORM). Set `DATABASE_URL` in `.env.local`.
+- **Auth**: JWT (Bearer) + optional NextAuth credentials provider. Password reset via email (nodemailer).
 
 ## Repo structure
 
 ```
-backend/             ← Laravel API (Fintech Tracker backend)
+frontend/                 ← Next.js app (UI + API)
   app/
-  bootstrap/
-  config/
-  database/
-  public/            ← Laravel web root + built frontend (index.html, _next/, etc.)
-  public_html/       ← Optional Hostinger helper (.htaccess → public/)
-  routes/
-  storage/
-  artisan
-  composer.json
-  composer.lock
-frontend/            ← Next.js app (Fintech Tracker UI)
+    api/                  ← API route handlers
+    (dashboard)/
+  lib/
+    auth.ts               ← JWT create/verify, password hash
+    prisma.ts             ← Prisma client
+    workspace-auth.ts     ← Workspace membership checks
+  prisma/
+    schema.prisma        ← MySQL schema
+  public/
 ```
 
 ## Local development
 
-### Backend
-
-```bash
-cd backend
-cp .env.example .env
-composer install
-php artisan key:generate
-php artisan migrate
-php artisan serve
-```
-
-### Frontend
-
 ```bash
 cd frontend
 cp .env.local.example .env.local
-# Set NEXT_PUBLIC_API_URL=http://127.0.0.1:8000 in .env.local
+# Edit .env.local: set DATABASE_URL (MySQL), NEXTAUTH_SECRET, NEXTAUTH_URL
 npm install
+npx prisma generate
+# If DB is empty: npx prisma db push   (or run prisma migrate deploy)
 npm run dev
 ```
 
-Visit http://localhost:3000 — the Next.js app will proxy `/api` to the Laravel backend.
+Visit http://localhost:3001 (or the port in `package.json`). All `/api/*` routes are served by Next.js.
 
-## Deploy (williamhq.com)
+## Deploy (single Node.js app)
 
-1. Clone the repo on the server, then run `composer install --no-dev`.
-2. **Build the frontend** and copy the static export into `backend/public/`:
+1. **Build** (standalone output):
 
    ```bash
    cd frontend
    npm ci
    npm run build
-   cp -r out/* ../backend/public/
    ```
 
-   Set `NEXT_PUBLIC_API_URL=` (empty) so the app uses the same origin (e.g. `https://williamhq.com/api`).
+   This produces `.next/standalone/` and `.next/static/`. Copy the standalone folder, `frontend/.next/static`, and `frontend/public` to the server.
 
-3. Set the domain document root to **`backend/public`** (or, if your host requires `public_html` as the root, point it to `public_html` and use `backend/public_html/.htaccess` to rewrite into `public/`).
-4. Create `.env` on the server (copy from `.env.example`), run `php artisan key:generate`, `migrate`, `storage:link`.
+2. **Run on server**:
 
-The home page at williamhq.com is the Fintech Tracker app; the Laravel API is under `/api`.
+   ```bash
+   cd frontend/.next/standalone
+   cp -r ../../.next/static .next/
+   cp -r ../../public ./
+   DATABASE_URL="mysql://..." NEXTAUTH_SECRET="..." NEXTAUTH_URL="https://your-domain.com" node server.js
+   ```
+
+3. **nginx** (reverse proxy to the Node process, one app):
+
+   ```nginx
+   server {
+     listen 80;
+     server_name your-domain.com;
+     location / {
+       proxy_pass http://127.0.0.1:3000;
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection 'upgrade';
+       proxy_set_header Host $host;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header X-Forwarded-Proto $scheme;
+     }
+   }
+   ```
+
+   HTML and `/api` are served by the same Node server.
+
+4. **Migrations**: On the server (or in CI), run `npx prisma migrate deploy` (or `prisma db push` for dev) from the `frontend` directory with `DATABASE_URL` set.
+
+## Environment variables
+
+- `DATABASE_URL` — MySQL connection string (Prisma).
+- `NEXTAUTH_SECRET` — Min 32 characters (JWT and NextAuth).
+- `NEXTAUTH_URL` — App URL (e.g. `https://williamhq.com`).
+- `NEXT_PUBLIC_APP_URL` — Base URL for emails (password reset, invites).
+- Optional: `SMTP_*` / `MAIL_FROM` for sending mail; if unset, reset/invite links are logged only.

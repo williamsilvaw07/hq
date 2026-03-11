@@ -1,21 +1,9 @@
 const isBrowser = typeof window !== "undefined";
 
 function getApiBaseUrl(): string {
-  if (isBrowser) {
-    // Browser: use same-origin `/api` and let Next.js rewrites or the backend handle routing.
-    return "";
-  }
-
   const fromEnv = process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL ?? "";
-  if (fromEnv) {
-    return fromEnv.replace(/\/+$/, "");
-  }
-
-  // Explicit local dev fallback when no env is configured.
-  if (process.env.NODE_ENV === "development") {
-    return "http://127.0.0.1:8000";
-  }
-
+  if (fromEnv) return fromEnv.replace(/\/+$/, "");
+  // Same-origin: API routes are Next.js route handlers under /api.
   return "";
 }
 
@@ -90,7 +78,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
     return data as LoginResponse;
   } catch (err) {
     if (err instanceof TypeError && (err.message === "Load failed" || err.message === "Failed to fetch")) {
-      throw new Error("Cannot reach the API. Is the backend running? (e.g. npm run dev in backend or ./run.sh)");
+      throw new Error("Cannot reach the API. Is the app running? (e.g. npm run dev in frontend)");
     }
     throw err;
   }
@@ -108,7 +96,7 @@ export async function register(name: string, email: string, password: string, pa
     return data as LoginResponse;
   } catch (err) {
     if (err instanceof TypeError && (err.message === "Load failed" || err.message === "Failed to fetch")) {
-      throw new Error("Cannot reach the API. Is the backend running? (e.g. npm run dev in backend or ./run.sh)");
+      throw new Error("Cannot reach the API. Is the app running? (e.g. npm run dev in frontend)");
     }
     throw err;
   }
