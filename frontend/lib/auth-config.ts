@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "./prisma";
 import { comparePassword } from "./auth";
+import { findUserByEmail } from "@/lib/repos/user-repo";
 
 export const nextAuthOptions: NextAuthOptions = {
   providers: [
@@ -14,15 +14,13 @@ export const nextAuthOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
+        const user = await findUserByEmail(credentials.email.trim());
         if (!user || !(await comparePassword(credentials.password, user.password))) return null;
         return {
           id: String(user.id),
           email: user.email,
           name: user.name,
-          image: user.avatarUrl,
+          image: user.avatar_url,
         };
       },
     }),

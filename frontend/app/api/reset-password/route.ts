@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { comparePassword, hashPassword } from "@/lib/auth";
+import { queryOne, getPool } from "@/lib/db";
 
 const EXPIRE_MINUTES = 60;
+
+type ResetTokenRow = { email: string; token: string; created_at: Date | null };
 
 export async function POST(req: Request) {
   try {
@@ -22,16 +24,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "The password confirmation does not match." }, { status: 422 });
     }
 
-    const row = await prisma.passwordResetToken.findUnique({ where: { email } });
+    const row = await queryOne<ResetTokenRow>("SELECT email, token, created_at FROM PasswordResetToken WHERE email = ? LIMIT 1", [email]);
     if (!row) {
       return NextResponse.json({
         message: "This reset link is invalid or has expired. Please request a new one.",
       }, { status: 422 });
     }
 
-    const createdAt = row.createdAt ? new Date(row.createdAt) : null;
+    const createdAt = row.created_at ? new Date(row.created_at) : null;
     if (createdAt && Date.now() - createdAt.getTime() > EXPIRE_MINUTES * 60 * 1000) {
-      await prisma.passwordResetToken.delete({ where: { email } }).catch(() => {});
+      await getPool().query("DELETE FROM PasswordResetToken WHERE email = ?", [email]).catch(() => {});
       return NextResponse.json({
         message: "This reset link is invalid or has expired. Please request a new one.",
       }, { status: 422 });
@@ -44,13 +46,10 @@ export async function POST(req: Request) {
       }, { status: 422 });
     }
 
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { email },
-        data: { password: await hashPassword(password) },
-      }),
-      prisma.passwordResetToken.delete({ where: { email } }),
-    ]);
+    const newHash = await hashPassword(password);
+    const pool = getPool();
+    await pool.query("UPDATE User SET password = ?, updated_at = NOW(3) WHERE email = ?", [newHash, email]);
+    await pool.query("DELETE FROM PasswordResetToken WHERE email = ?", [email]);
 
     return NextResponse.json({
       message: "Password has been reset. You can sign in with your new password.",

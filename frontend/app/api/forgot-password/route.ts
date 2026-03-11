@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
-import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
 import { sendPasswordResetEmail } from "@/lib/mail";
+import { findUserByEmail } from "@/lib/repos/user-repo";
+import { getPool } from "@/lib/db";
 
 const EXPIRE_MINUTES = 60;
 
@@ -14,17 +15,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "The email must be a valid email address." }, { status: 422 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await findUserByEmail(email);
     if (user) {
       const rawToken = randomBytes(32).toString("hex");
       const hashedToken = await hashPassword(rawToken);
-      const expiresAt = new Date(Date.now() + EXPIRE_MINUTES * 60 * 1000);
 
-      await prisma.passwordResetToken.upsert({
-        where: { email },
-        create: { email, token: hashedToken, createdAt: new Date() },
-        update: { token: hashedToken, createdAt: new Date() },
-      });
+      const pool = getPool();
+      await pool.query(
+        "INSERT INTO PasswordResetToken (email, token, created_at) VALUES (?, ?, NOW(3)) ON DUPLICATE KEY UPDATE token = ?, created_at = NOW(3)",
+        [email, hashedToken, hashedToken]
+      );
 
       const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3001").replace(/\/+$/, "");
       const resetLink = `${baseUrl}/reset-password?token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(email)}`;
