@@ -9,7 +9,9 @@ export async function GET(req: Request) {
     if (!user) {
       return NextResponse.json({ message: "User not found." }, { status: 404 });
     }
-    return NextResponse.json({ data: toApiUser(user) });
+    return NextResponse.json({
+      data: toApiUser({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatar_url }),
+    });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
     if (status === 401) {
@@ -37,7 +39,6 @@ export async function PATCH(req: Request) {
       }
       const existing = await findUserByEmail(email);
       if (existing && existing.id !== authUser.id) {
-      if (existing) {
         return NextResponse.json({ message: "The email has already been taken.", errors: { email: ["The email has already been taken."] } }, { status: 422 });
       }
     }
@@ -52,7 +53,9 @@ export async function PATCH(req: Request) {
 
     if (Object.keys(data).length === 0) {
       const user = await findUserById(authUser.id);
-      return user ? NextResponse.json({ data: toApiUser(user) }) : NextResponse.json({ message: "User not found." }, { status: 404 });
+      return user
+        ? NextResponse.json({ data: toApiUser({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatar_url }) })
+        : NextResponse.json({ message: "User not found." }, { status: 404 });
     }
 
     await updateUserProfile(authUser.id, data);
