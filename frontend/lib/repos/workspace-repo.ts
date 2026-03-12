@@ -20,10 +20,14 @@ export async function listWorkspacesForUser(userId: number): Promise<DbWorkspace
 
 export async function createWorkspaceForUser(
   userId: number,
-  name: string
+  name: string,
+  slugInput?: string | null,
 ): Promise<DbWorkspace> {
   const pool = getPool();
-  const base = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "workspace";
+  const base =
+    slugInput ||
+    name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") ||
+    "workspace";
   let slug = base;
   let n = 1;
   while (await queryOne<DbWorkspace>("SELECT id, name, slug FROM Workspace WHERE slug = ? LIMIT 1", [slug])) {

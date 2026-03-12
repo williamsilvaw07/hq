@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { fetchOne, execute } from "@/lib/sql";
 
 type Params = { params: Promise<{ workspaceId: string }> };
 
 export async function GET(req: Request, { params }: Params) {
   try {
     const { workspaceId } = await params;
-    const { user, workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
-    const workspace = await prisma.workspace.findUnique({
-      where: { id: wid },
-    });
+    const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    const workspace = await fetchOne<{ id: number; name: string; slug: string }>(
+      "SELECT id, name, slug FROM Workspace WHERE id = ? LIMIT 1",
+      [wid],
+    );
     if (!workspace) {
       return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
     }
@@ -33,7 +34,10 @@ export async function PATCH(req: Request, { params }: Params) {
     const name = typeof body.name === "string" ? body.name.trim() : undefined;
     const slug = typeof body.slug === "string" ? body.slug.trim() : undefined;
 
-    const workspace = await prisma.workspace.findUnique({ where: { id: workspaceIdNum } });
+    const workspace = await fetchOne<{ id: number; name: string; slug: string }>(
+      "SELECT id, name, slug FROM Workspace WHERE id = ? LIMIT 1",
+      [workspaceIdNum],
+    );
     if (!workspace) {
       return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
     }
@@ -41,7 +45,10 @@ export async function PATCH(req: Request, { params }: Params) {
     const data: { name?: string; slug?: string } = {};
     if (name !== undefined) data.name = name;
     if (slug !== undefined) {
-      const existing = await prisma.workspace.findFirst({ where: { slug, NOT: { id: workspaceIdNum } } });
+      const existing = await fetchOne<{ id: number }>(
+        "SELECT id FROM Workspace WHERE slug = ? AND id <> ? LIMIT 1",
+        [slug, workspaceIdNum],
+      );
       if (existing) {
         return NextResponse.json({ message: "The slug has already been taken." }, { status: 422 });
       }
@@ -51,10 +58,22 @@ export async function PATCH(req: Request, { params }: Params) {
       return NextResponse.json({ data: workspace });
     }
 
-    const updated = await prisma.workspace.update({
-      where: { id: workspaceIdNum },
-      data,
-    });
+    if (data.name !== undefined) {
+      await execute("UPDATE Workspace SET name = ?, updated_at = NOW(3) WHERE id = ?", [
+        data.name,
+        workspaceIdNum,
+      ]);
+    }
+    if (data.slug !== undefined) {
+      await execute("UPDATE Workspace SET slug = ?, updated_at = NOW(3) WHERE id = ?", [
+        data.slug,
+        workspaceIdNum,
+      ]);
+    }
+    const updated = await fetchOne<{ id: number; name: string; slug: string }>(
+      "SELECT id, name, slug FROM Workspace WHERE id = ? LIMIT 1",
+      [workspaceIdNum],
+    );
     return NextResponse.json({ data: updated });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
@@ -69,11 +88,14 @@ export async function PATCH(req: Request, { params }: Params) {
 export async function DELETE(req: Request, { params }: Params) {
   try {
     const { workspaceId } = await params;
-    const { role, workspaceId: workspaceIdNum } = await requireWorkspaceMember(req, workspaceId);
+    const { role, workspaceId: workspaceIdNum } = await requireWorkspaceMember(
+      req,
+      workspaceId,
+    );
     if (role !== "owner") {
       return NextResponse.json({ message: "Unauthorized." }, { status: 403 });
     }
-    await prisma.workspace.delete({ where: { id: workspaceIdNum } });
+    await execute("DELETE FROM Workspace WHERE id = ?", [workspaceIdNum]);
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;

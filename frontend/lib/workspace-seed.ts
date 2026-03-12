@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import { execute } from "@/lib/sql";
 
 const DEFAULT_CATEGORIES = [
   { name: "Food & dining", type: "expense" },
@@ -11,22 +11,15 @@ const DEFAULT_CATEGORIES = [
   { name: "Other income", type: "income" },
 ] as const;
 
-export async function seedDefaultsForWorkspace(
-  tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">,
-  workspaceId: number
-): Promise<void> {
+export async function seedDefaultsForWorkspace(workspaceId: number): Promise<void> {
   for (const c of DEFAULT_CATEGORIES) {
-    await tx.category.create({
-      data: { workspaceId, name: c.name, type: c.type },
-    });
+    await execute(
+      "INSERT INTO Category (workspace_id, name, type, created_at, updated_at) VALUES (?, ?, ?, NOW(3), NOW(3))",
+      [workspaceId, c.name, c.type],
+    );
   }
-  await tx.account.create({
-    data: {
-      workspaceId,
-      name: "Cash",
-      type: "cash",
-      currency: "BRL",
-      balance: 0,
-    },
-  });
+  await execute(
+    "INSERT INTO Account (workspace_id, name, type, currency, balance, include_in_net_balance, created_at, updated_at) VALUES (?, 'Cash', 'cash', 'BRL', 0, 1, NOW(3), NOW(3))",
+    [workspaceId],
+  );
 }

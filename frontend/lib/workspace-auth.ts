@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
 import { requireAuth, type AuthUser } from "@/lib/auth";
+import { fetchOne } from "@/lib/sql";
 
 export type WorkspaceMemberRole = "owner" | "admin" | "member" | "viewer";
 
@@ -25,9 +25,13 @@ export async function requireWorkspaceMember(
     throw err;
   }
 
-  const membership = await prisma.workspaceUser.findUnique({
-    where: { workspaceId_userId: { workspaceId, userId: user.id } },
-  });
+  const membership = await fetchOne<{ id: number; workspace_id: number; user_id: number; role: WorkspaceMemberRole }>(
+    `SELECT id, workspace_id, user_id, role
+     FROM workspace_users
+     WHERE workspace_id = ? AND user_id = ?
+     LIMIT 1`,
+    [workspaceId, user.id],
+  );
   if (!membership) {
     const err = new Error("Workspace not found.");
     (err as unknown as { status: number }).status = 404;

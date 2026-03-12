@@ -1,17 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { seedDefaultsForWorkspace } from "@/lib/workspace-seed";
+import { listWorkspacesForUser, createWorkspaceForUser } from "@/lib/repos/workspace-repo";
 
 export async function GET(req: Request) {
   try {
     const user = await requireAuth(req);
-    const workspaces = await prisma.workspace.findMany({
-      where: {
-        workspaceUsers: { some: { userId: user.id } },
-      },
-      orderBy: { name: "asc" },
-    });
+    const workspaces = await listWorkspacesForUser(user.id);
     return NextResponse.json({ data: workspaces });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
@@ -32,23 +27,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "The name field is required." }, { status: 422 });
     }
 
-    const baseSlug = slugInput || name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "workspace";
-    let slug = baseSlug;
-    let n = 1;
-    while (await prisma.workspace.findUnique({ where: { slug } })) {
-      slug = `${baseSlug}-${n}`;
-      n++;
-    }
-
-    const workspace = await prisma.$transaction(async (tx) => {
-      const ws = await tx.workspace.create({ data: { name, slug } });
-      await tx.workspaceUser.create({
-        data: { workspaceId: ws.id, userId: user.id, role: "owner" },
-      });
-      await seedDefaultsForWorkspace(tx, ws.id);
-      return tx.workspace.findUniqueOrThrow({ where: { id: ws.id } });
-    });
-
+    const workspace = await createWorkspaceForUser(user.id, name, slugInput);
+    await seedDefaultsForWorkspace(workspace.id);
     return NextResponse.json({ data: workspace }, { status: 201 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
