@@ -27,7 +27,7 @@ function getConnectionConfig(): string | mysql.PoolOptions {
 export function getPool() {
   if (!pool) {
     const config = getConnectionConfig();
-    pool = mysql.createPool(config);
+    pool = typeof config === "string" ? mysql.createPool(config) : mysql.createPool(config);
   }
   return pool;
 }
