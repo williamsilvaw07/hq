@@ -148,27 +148,6 @@ export default function NewBudgetPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-            <select
-              value={categoryId}
-              onChange={(e) => {
-                setCategoryId(e.target.value);
-                const next = categories.find(
-                  (c) => String(c.id) === e.target.value,
-                );
-                setIcon(next?.icon ?? null);
-                if (!title && next?.name) {
-                  setTitle(next.name);
-                }
-              }}
-              className="mt-2 w-full bg-card rounded-2xl border border-border px-4 py-2 text-sm text-foreground"
-            >
-              <option value="">Select category</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 
