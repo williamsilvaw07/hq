@@ -55,7 +55,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
           const period = getCurrentPeriod({
             periodType: budget.periodType,
             periodInterval: budget.periodInterval,
-            startDate: budget.startDate ?? undefined,
+            startDate: budget.startDate,
           });
           const startStr = period.start.toISOString().slice(0, 10);
           const endStr = period.end.toISOString().slice(0, 10);
@@ -164,6 +164,34 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
         hypothesisId: "A",
         location: "app/api/workspaces/[workspaceId]/budgets/route.ts:POST:body",
         message: "Budget POST body received",
+        data: {
+          workspaceIdParam: workspaceId,
+          wid,
+          category_id: body.category_id,
+          month: body.month,
+          year: body.year,
+          period_type: body.period_type,
+          period_interval: body.period_interval,
+          amount: body.amount,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion agent log
+
+    // #region agent log
+    fetch("http://127.0.0.1:7615/ingest/da303532-0e08-486a-895e-4daefa467a25", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Debug-Session-Id": "1e4b05",
+      },
+      body: JSON.stringify({
+        sessionId: "1e4b05",
+        runId: "run1",
+        hypothesisId: "H1",
+        location: "app/api/workspaces/[workspaceId]/budgets/route.ts:POST:body",
+        message: "Budget POST body received (current session)",
         data: {
           workspaceIdParam: workspaceId,
           wid,
@@ -322,6 +350,29 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
         hypothesisId: "C",
         location: "app/api/workspaces/[workspaceId]/budgets/route.ts:POST:catch",
         message: "Budget POST threw error",
+        data: {
+          workspaceIdParam: (await params).workspaceId,
+          errorMessage: (e as Error).message,
+          name: (e as Error).name,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion agent log
+
+    // #region agent log
+    fetch("http://127.0.0.1:7615/ingest/da303532-0e08-486a-895e-4daefa467a25", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Debug-Session-Id": "1e4b05",
+      },
+      body: JSON.stringify({
+        sessionId: "1e4b05",
+        runId: "run1",
+        hypothesisId: "H2",
+        location: "app/api/workspaces/[workspaceId]/budgets/route.ts:POST:catch",
+        message: "Budget POST threw error (current session)",
         data: {
           workspaceIdParam: (await params).workspaceId,
           errorMessage: (e as Error).message,
