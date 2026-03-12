@@ -8,6 +8,12 @@ import { api } from "@/lib/api";
 import { X, Check, LayoutGrid, Calendar, FileText, ChevronRight, ArrowUpRight } from "lucide-react";
 
 type Category = { id: number; name: string; type: string };
+type Budget = {
+  id: number;
+  amount: number;
+  remaining: number;
+  category?: { id: number; name: string };
+};
 
 const sym = "R$";
 
@@ -33,6 +39,8 @@ export default function NewTransactionPage() {
   const initialType: "income" | "expense" =
     initialTypeParam === "income" ? "income" : "expense";
   const [categories, setCategories] = useState<Category[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [budgetId, setBudgetId] = useState("");
   const [categoryId, setCategoryId] = useState(initialCategoryId);
   const [type, setType] = useState<"income" | "expense">(initialType);
   const [amount, setAmount] = useState("");
@@ -50,6 +58,16 @@ export default function NewTransactionPage() {
     api<Category[]>(`/api/workspaces/${workspaceId}/categories`)
       .then((r) => {
         if (Array.isArray(r.data)) setCategories(r.data);
+      })
+      .catch(() => {});
+
+    api<Budget[]>(`/api/workspaces/${workspaceId}/budgets?with_summaries=true`)
+      .then((r) => {
+        if (!Array.isArray(r.data)) return;
+        const withCategory = (r.data as Budget[]).filter(
+          (b) => b.category && b.category.id,
+        );
+        setBudgets(withCategory);
       })
       .catch(() => {});
   }, [workspaceId]);
@@ -84,6 +102,7 @@ export default function NewTransactionPage() {
   }
 
   const relevantCategories = categories.filter((c) => c.type === type);
+  const expenseBudgets = budgets;
 
   async function handleAddCategory(e: React.FormEvent) {
     e.preventDefault();
@@ -185,34 +204,73 @@ export default function NewTransactionPage() {
             <p className="text-sm text-chart-2 bg-chart-2/10 rounded-xl p-3">{error}</p>
           )}
 
-          <label className="block">
-            <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
-              <div className="w-10 h-10 rounded-xl bg-chart-1/20 flex items-center justify-center shrink-0">
-                <LayoutGrid className="w-5 h-5 text-chart-1" />
+          {type === "expense" ? (
+            <label className="block">
+              <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
+                <div className="w-10 h-10 rounded-xl bg-chart-1/20 flex items-center justify-center shrink-0">
+                  <LayoutGrid className="w-5 h-5 text-chart-1" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-0.5">
+                    BUDGET
+                  </p>
+                  <select
+                    value={budgetId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setBudgetId(id);
+                      const selected = expenseBudgets.find(
+                        (b) => String(b.id) === id,
+                      );
+                      if (selected?.category?.id) {
+                        setCategoryId(String(selected.category.id));
+                      }
+                    }}
+                    required
+                    className="w-full bg-transparent text-sm font-medium text-foreground outline-none cursor-pointer appearance-none"
+                  >
+                    <option value="">Select Budget</option>
+                    {expenseBudgets.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.category?.name ?? "Budget"} — remaining R$
+                        {b.remaining.toFixed(2)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-0.5">
-                  CATEGORY
-                </p>
-                <select
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  required
-                  className="w-full bg-transparent text-sm font-medium text-foreground outline-none cursor-pointer appearance-none"
-                >
-                  <option value="">Select Category</option>
-                  {relevantCategories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+            </label>
+          ) : (
+            <label className="block">
+              <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
+                <div className="w-10 h-10 rounded-xl bg-chart-1/20 flex items-center justify-center shrink-0">
+                  <LayoutGrid className="w-5 h-5 text-chart-1" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-0.5">
+                    CATEGORY
+                  </p>
+                  <select
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                    required
+                    className="w-full bg-transparent text-sm font-medium text-foreground outline-none cursor-pointer appearance-none"
+                  >
+                    <option value="">Select Category</option>
+                    {relevantCategories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
-            </div>
-          </label>
+            </label>
+          )}
 
-          {showNewCategory ? (
+          {type === "expense" ? null : showNewCategory ? (
             <div className="p-4 bg-card rounded-2xl space-y-2">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 New category
