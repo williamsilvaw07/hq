@@ -44,12 +44,26 @@ export default function NewBudgetPage() {
   }, [workspaceId]);
 
   async function handleSave() {
-    if (!workspaceId || !categoryId || !amount) return;
+    if (!workspaceId || !amount) return;
     setSaving(true);
     setError("");
     try {
+      let effectiveCategoryId = categoryId;
+
+      if (!effectiveCategoryId) {
+        const name = title.trim() || "General";
+        const created = await api<Category>(`/api/workspaces/${workspaceId}/categories`, {
+          method: "POST",
+          body: JSON.stringify({ name, type: "expense" }),
+        });
+        if (created.data) {
+          effectiveCategoryId = String(created.data.id);
+          setCategoryId(effectiveCategoryId);
+        }
+      }
+
       const selected =
-        categories.find((c) => String(c.id) === categoryId) ?? null;
+        categories.find((c) => String(c.id) === effectiveCategoryId) ?? null;
 
       if (icon && selected && icon !== selected.icon) {
         await api(`/api/workspaces/${workspaceId}/categories/${selected.id}`, {
@@ -65,7 +79,7 @@ export default function NewBudgetPage() {
       await api(`/api/workspaces/${workspaceId}/budgets`, {
         method: "POST",
         body: JSON.stringify({
-          category_id: Number(categoryId),
+          category_id: Number(effectiveCategoryId),
           month,
           year,
           period_type: periodType,
@@ -108,7 +122,7 @@ export default function NewBudgetPage() {
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || !categoryId || !amount}
+          disabled={saving || !amount}
           className="text-sm font-bold text-primary hover:opacity-80 disabled:opacity-40 transition-opacity uppercase tracking-widest text-[10px]"
         >
           {saving ? "Saving…" : "Save"}
@@ -277,7 +291,7 @@ export default function NewBudgetPage() {
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || !categoryId || !amount}
+          disabled={saving || !amount}
           className="w-full py-5 rounded-3xl bg-white text-black font-black text-sm uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
         >
           {saving ? "Saving…" : "Confirm Budget"}
