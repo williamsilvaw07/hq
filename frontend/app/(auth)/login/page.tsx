@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 
@@ -9,7 +9,35 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dbHealthy, setDbHealthy] = useState<null | boolean>(null);
+  const [dbMessage, setDbMessage] = useState<string>("");
   const { login } = useAuth();
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkDb() {
+      try {
+        const res = await fetch("/api/health/db");
+        const data = await res.json();
+        if (cancelled) return;
+        if (res.ok && data?.ok) {
+          setDbHealthy(true);
+          setDbMessage("Database connection OK");
+        } else {
+          setDbHealthy(false);
+          setDbMessage(data?.error || "Database check failed");
+        }
+      } catch (e) {
+        if (cancelled) return;
+        setDbHealthy(false);
+        setDbMessage("Database check failed");
+      }
+    }
+    checkDb();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,6 +55,16 @@ export default function LoginPage() {
   return (
     <>
       <h1 className="text-2xl font-bold tracking-tight text-foreground mb-6">Sign in</h1>
+      {dbHealthy === false && (
+        <p className="mb-4 text-xs rounded-2xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-red-300">
+          Database error: {dbMessage}
+        </p>
+      )}
+      {dbHealthy === true && (
+        <p className="mb-4 text-xs rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-emerald-300">
+          Database connection OK.
+        </p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
