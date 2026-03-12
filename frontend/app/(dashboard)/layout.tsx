@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
 import { api, buildMediaUrl } from "@/lib/api";
-import { Home, History, Plus, PieChart, Bell, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 type Workspace = { id: number; name: string; slug: string };
 
@@ -123,51 +124,51 @@ export default function DashboardLayout({
       <main className="px-3 pt-3 pb-24 w-full sm:max-w-md sm:mx-auto sm:px-4">
         {children}
       </main>
-      <div className="fixed bottom-0 left-0 w-full z-40 px-3 pb-5 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent">
-        <div className="w-full sm:max-w-md sm:mx-auto bg-card/80 backdrop-blur-2xl rounded-[2.1rem] px-1.5 py-1 flex items-center justify-between shadow-2xl shadow-black/50">
+      <div className="fixed bottom-0 left-0 w-full z-40 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+        <div className="w-full sm:max-w-md sm:mx-auto bg-card/80 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-2 flex items-center justify-between shadow-2xl shadow-black/50">
           <Link
             href="/dashboard"
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
               isDashboard ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <Home className="w-4 h-4" />
+            <Icon icon="solar:home-2-bold-duotone" className="text-2xl" />
             <span>Home</span>
           </Link>
           <Link
             href="/transactions"
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
               isTransactions ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <History className="w-4 h-4" />
+            <Icon icon="solar:history-bold-duotone" className="text-2xl" />
             <span>History</span>
           </Link>
-          <div className="flex-1 flex justify-center relative -top-6">
+          <div className="flex-1 flex justify-center relative -top-8">
             <Link
               href="/transactions/new"
-              className="w-12 h-12 rounded-full bg-white text-black shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-[3px] border-background"
+              className="w-16 h-16 rounded-full bg-white text-black shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-4 border-background"
               aria-label="Add transaction"
             >
-              <Plus className="w-5 h-5" />
+              <Icon icon="hugeicons:add-01" className="text-2xl" />
             </Link>
           </div>
           <Link
             href="/budgets"
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
               isBudgets ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <PieChart className="w-4 h-4" />
+            <Icon icon="solar:wallet-bold-duotone" className="text-2xl" />
             <span>Budgets</span>
           </Link>
           <Link
             href="/settings"
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
               isSetupRoot || isSettings ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <Bell className="w-4 h-4" />
+            <Icon icon="solar:settings-bold-duotone" className="text-2xl" />
             <span>Setup</span>
           </Link>
         </div>
