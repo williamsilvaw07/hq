@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
 import { getCurrentPeriod } from "@/lib/budget-period";
-import { Decimal } from "@prisma/client/runtime/library";
+import { fetchMany, fetchOne, insertOne } from "@/lib/sql";
 
 export async function GET(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   try {
@@ -14,41 +13,78 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
     const year = url.searchParams.get("year");
 
     if (withSummaries) {
-      const budgets = await prisma.budget.findMany({
-        where: { workspaceId: wid },
-        include: { category: true },
-      });
+      const budgets = await fetchMany<{
+        id: number;
+        workspaceId: number;
+        categoryId: number;
+        month: number;
+        year: number;
+        periodType: string;
+        periodInterval: number;
+        startDate: Date | null;
+        amount: number;
+        currency: string;
+        categoryIdNullable: number | null;
+        categoryName: string | null;
+        categoryIcon: string | null;
+        categoryColor: string | null;
+      }>(
+        `SELECT
+           b.id,
+           b.workspace_id AS workspaceId,
+           b.category_id AS categoryId,
+           b.month,
+           b.year,
+           b.period_type AS periodType,
+           b.period_interval AS periodInterval,
+           b.start_date AS startDate,
+           b.amount,
+           b.currency,
+           c.id AS categoryIdNullable,
+           c.name AS categoryName,
+           c.icon AS categoryIcon,
+           c.color AS categoryColor
+         FROM budgets b
+         LEFT JOIN Category c ON c.id = b.category_id
+         WHERE b.workspace_id = ?`,
+        [wid],
+      );
 
       const result = await Promise.all(
         budgets.map(async (budget) => {
           const period = getCurrentPeriod({
             periodType: budget.periodType,
             periodInterval: budget.periodInterval,
-            startDate: budget.startDate,
+            startDate: budget.startDate ?? undefined,
           });
           const startStr = period.start.toISOString().slice(0, 10);
           const endStr = period.end.toISOString().slice(0, 10);
           const nextResetStr = period.next_reset.toISOString().slice(0, 10);
 
-          const spentAgg = await prisma.transaction.aggregate({
-            where: {
-              workspaceId: wid,
-              status: "confirmed",
-              type: "expense",
-              categoryId: budget.categoryId,
-              date: { gte: period.start, lte: period.end },
-            },
-            _sum: { baseAmount: true },
-          });
-          const spent = Number(spentAgg._sum.baseAmount ?? 0);
-          const amount = Number(budget.amount);
+          const spentRow = await fetchOne<{ spent: number }>(
+            `SELECT COALESCE(SUM(base_amount), 0) AS spent
+             FROM Transaction
+             WHERE workspace_id = ?
+               AND status = 'confirmed'
+               AND type = 'expense'
+               AND category_id = ?
+               AND date BETWEEN ? AND ?`,
+            [wid, budget.categoryId, startStr, endStr],
+          );
+          const spent = Number(spentRow?.spent ?? 0);
+          const amount = Number(budget.amount ?? 0);
           const remaining = Math.max(0, amount - spent);
           const pct = amount > 0 ? Math.min(100, (spent / amount) * 100) : 0;
 
           return {
             id: budget.id,
-            category: budget.category
-              ? { id: budget.category.id, name: budget.category.name, icon: budget.category.icon, color: budget.category.color }
+            category: budget.categoryIdNullable
+              ? {
+                  id: budget.categoryIdNullable,
+                  name: budget.categoryName,
+                  icon: budget.categoryIcon,
+                  color: budget.categoryColor,
+                }
               : null,
             amount,
             currency: budget.currency,
@@ -61,20 +97,44 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
             remaining,
             spent_percentage: pct,
           };
-        })
+        }),
       );
       return NextResponse.json({ data: result });
     }
 
-    const where: { workspaceId: number; month?: number; year?: number } = { workspaceId: wid };
-    if (month) where.month = parseInt(month, 10);
-    if (year) where.year = parseInt(year, 10);
+    const paramsArr: any[] = [wid];
+    let filterSql = "";
+    if (month) {
+      filterSql += " AND b.month = ?";
+      paramsArr.push(parseInt(month, 10));
+    }
+    if (year) {
+      filterSql += " AND b.year = ?";
+      paramsArr.push(parseInt(year, 10));
+    }
 
-    const budgets = await prisma.budget.findMany({
-      where,
-      include: { category: true },
-      orderBy: [{ month: "asc" }, { year: "asc" }],
-    });
+    const budgets = await fetchMany(
+      `SELECT
+         b.id,
+         b.workspace_id AS workspaceId,
+         b.category_id AS categoryId,
+         b.month,
+         b.year,
+         b.period_type AS periodType,
+         b.period_interval AS periodInterval,
+         b.start_date AS startDate,
+         b.amount,
+         b.currency,
+         c.id AS categoryIdNullable,
+         c.name AS categoryName,
+         c.icon AS categoryIcon,
+         c.color AS categoryColor
+       FROM budgets b
+       LEFT JOIN Category c ON c.id = b.category_id
+       WHERE b.workspace_id = ?${filterSql}
+       ORDER BY b.month ASC, b.year ASC`,
+      paramsArr,
+    );
     return NextResponse.json({ data: budgets });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
@@ -96,44 +156,78 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     const periodType = (typeof body.period_type === "string" ? body.period_type : "month") as string;
     const periodInterval = body.period_interval != null ? Math.min(12, Math.max(1, parseInt(String(body.period_interval), 10))) : 1;
     const amount = typeof body.amount === "number" ? body.amount : parseFloat(String(body.amount ?? 0));
-    const currency = typeof body.currency === "string" && body.currency.length === 3 ? body.currency : "BRL";
+    const currency =
+      typeof body.currency === "string" && body.currency.length === 3
+        ? body.currency
+        : "BRL";
 
     if (Number.isNaN(categoryId) || Number.isNaN(month) || Number.isNaN(year)) {
-      return NextResponse.json({ message: "category_id, month and year are required." }, { status: 422 });
+      return NextResponse.json(
+        { message: "category_id, month and year are required." },
+        { status: 422 },
+      );
     }
     if (month < 1 || month > 12 || year < 2020 || year > 2100) {
-      return NextResponse.json({ message: "Invalid month or year." }, { status: 422 });
+      return NextResponse.json(
+        { message: "Invalid month or year." },
+        { status: 422 },
+      );
     }
     if (amount < 0 || Number.isNaN(amount)) {
-      return NextResponse.json({ message: "Amount must be a non-negative number." }, { status: 422 });
+      return NextResponse.json(
+        { message: "Amount must be a non-negative number." },
+        { status: 422 },
+      );
     }
     if (!["day", "week", "month", "year"].includes(periodType)) {
-      return NextResponse.json({ message: "Invalid period_type." }, { status: 422 });
+      return NextResponse.json(
+        { message: "Invalid period_type." },
+        { status: 422 },
+      );
     }
 
-    const category = await prisma.category.findFirst({
-      where: { id: categoryId, workspaceId: wid },
-    });
+    const category = await fetchOne<{ id: number }>(
+      "SELECT id FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1",
+      [categoryId, wid],
+    );
     if (!category) {
-      return NextResponse.json({ message: "Category not found." }, { status: 422 });
+      return NextResponse.json(
+        { message: "Category not found." },
+        { status: 422 },
+      );
     }
 
-    const budget = await prisma.budget.create({
-      data: {
-        workspaceId: wid,
-        categoryId,
-        month,
-        year,
-        periodType,
-        periodInterval,
-        amount: new Decimal(amount),
-        currency,
-      },
-      include: { category: true },
-    });
-    const b = budget as unknown as Record<string, unknown>;
-    b.amount = Number(budget.amount);
-    return NextResponse.json({ data: b }, { status: 201 });
+    const id = await insertOne(
+      `INSERT INTO budgets
+         (workspace_id, category_id, month, year, period_type, period_interval, start_date, amount, currency, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, NOW(3), NOW(3))`,
+      [wid, categoryId, month, year, periodType, periodInterval, amount, currency],
+    );
+
+    const [budget] = await fetchMany(
+      `SELECT
+         b.id,
+         b.workspace_id AS workspaceId,
+         b.category_id AS categoryId,
+         b.month,
+         b.year,
+         b.period_type AS periodType,
+         b.period_interval AS periodInterval,
+         b.start_date AS startDate,
+         b.amount,
+         b.currency,
+         c.id AS categoryIdNullable,
+         c.name AS categoryName,
+         c.icon AS categoryIcon,
+         c.color AS categoryColor
+       FROM budgets b
+       LEFT JOIN Category c ON c.id = b.category_id
+       WHERE b.id = ?
+       LIMIT 1`,
+      [id],
+    );
+
+    return NextResponse.json({ data: budget }, { status: 201 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
     if (status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
