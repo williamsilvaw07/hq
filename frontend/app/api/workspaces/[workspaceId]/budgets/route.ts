@@ -197,6 +197,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
       );
     }
 
+    // Ensure we don't create duplicate budgets for same workspace/category/month/year
+    const existing = await fetchOne<{ id: number }>(
+      `SELECT id
+       FROM budgets
+       WHERE workspace_id = ?
+         AND category_id = ?
+         AND month = ?
+         AND year = ?
+       LIMIT 1`,
+      [wid, categoryId, month, year],
+    );
+    if (existing) {
+      return NextResponse.json(
+        { message: "A budget for this category and month already exists." },
+        { status: 422 },
+      );
+    }
+
     const id = await insertOne(
       `INSERT INTO budgets
          (workspace_id, category_id, month, year, period_type, period_interval, start_date, amount, currency, created_at, updated_at)
@@ -233,6 +251,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     if (status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
     if (status === 404) return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
     console.error("POST /api/workspaces/[id]/budgets error:", e);
-    return NextResponse.json({ message: "Request failed." }, { status: 500 });
+    return NextResponse.json(
+      { message: (e as Error).message || "Request failed." },
+      { status: 500 },
+    );
   }
 }
