@@ -149,6 +149,7 @@ export default function BudgetsPage() {
     }
   }
 
+  // Layout inspired by mobile-first budgeting dashboards to keep the experience focused and glanceable.
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 space-y-4">
