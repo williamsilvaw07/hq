@@ -150,6 +150,35 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     const { workspaceId } = await params;
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
     const body = await req.json();
+
+    // #region agent log
+    fetch("http://127.0.0.1:7615/ingest/da303532-0e08-486a-895e-4daefa467a25", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Debug-Session-Id": "697a2b",
+      },
+      body: JSON.stringify({
+        sessionId: "697a2b",
+        runId: "pre-insert",
+        hypothesisId: "A",
+        location: "app/api/workspaces/[workspaceId]/budgets/route.ts:POST:body",
+        message: "Budget POST body received",
+        data: {
+          workspaceIdParam: workspaceId,
+          wid,
+          category_id: body.category_id,
+          month: body.month,
+          year: body.year,
+          period_type: body.period_type,
+          period_interval: body.period_interval,
+          amount: body.amount,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion agent log
+
     const categoryId = body.category_id != null ? parseInt(String(body.category_id), 10) : NaN;
     const month = body.month != null ? parseInt(String(body.month), 10) : NaN;
     const year = body.year != null ? parseInt(String(body.year), 10) : NaN;
@@ -215,6 +244,34 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
       );
     }
 
+    // #region agent log
+    fetch("http://127.0.0.1:7615/ingest/da303532-0e08-486a-895e-4daefa467a25", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Debug-Session-Id": "697a2b",
+      },
+      body: JSON.stringify({
+        sessionId: "697a2b",
+        runId: "pre-insert",
+        hypothesisId: "B",
+        location: "app/api/workspaces/[workspaceId]/budgets/route.ts:POST:before-insert",
+        message: "About to insert budget",
+        data: {
+          wid,
+          categoryId,
+          month,
+          year,
+          periodType,
+          periodInterval,
+          amount,
+          currency,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion agent log
+
     const id = await insertOne(
       `INSERT INTO budgets
          (workspace_id, category_id, month, year, period_type, period_interval, start_date, amount, currency, created_at, updated_at)
@@ -251,6 +308,29 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     if (status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
     if (status === 404) return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
     console.error("POST /api/workspaces/[id]/budgets error:", e);
+
+    // #region agent log
+    fetch("http://127.0.0.1:7615/ingest/da303532-0e08-486a-895e-4daefa467a25", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Debug-Session-Id": "697a2b",
+      },
+      body: JSON.stringify({
+        sessionId: "697a2b",
+        runId: "error",
+        hypothesisId: "C",
+        location: "app/api/workspaces/[workspaceId]/budgets/route.ts:POST:catch",
+        message: "Budget POST threw error",
+        data: {
+          workspaceIdParam: (await params).workspaceId,
+          errorMessage: (e as Error).message,
+          name: (e as Error).name,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion agent log
     return NextResponse.json(
       { message: (e as Error).message || "Request failed." },
       { status: 500 },
