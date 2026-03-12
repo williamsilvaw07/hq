@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { fetchMany, insertOne } from "@/lib/sql";
 
 export async function GET(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   try {
     const { workspaceId } = await params;
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
-    const categories = await prisma.category.findMany({
-      where: { workspaceId: wid },
-      orderBy: { name: "asc" },
-    });
+    const categories = await fetchMany(
+      `SELECT id, workspace_id AS workspaceId, name, type, icon, color, created_at AS createdAt, updated_at AS updatedAt
+       FROM Category
+       WHERE workspace_id = ?
+       ORDER BY name ASC`,
+      [wid],
+    );
     return NextResponse.json({ data: categories });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
@@ -37,9 +40,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
       return NextResponse.json({ message: "The type must be income or expense." }, { status: 422 });
     }
 
-    const category = await prisma.category.create({
-      data: { workspaceId: wid, name, type, icon, color },
-    });
+    const id = await insertOne(
+      `INSERT INTO Category (workspace_id, name, type, icon, color, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, NOW(3), NOW(3))`,
+      [wid, name, type, icon, color],
+    );
+    const [category] = await fetchMany(
+      `SELECT id, workspace_id AS workspaceId, name, type, icon, color, created_at AS createdAt, updated_at AS updatedAt
+       FROM Category
+       WHERE id = ?
+       LIMIT 1`,
+      [id],
+    );
     return NextResponse.json({ data: category }, { status: 201 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
