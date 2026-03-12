@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Icon } from "@iconify/react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { formatBRL, CURRENCY_SYMBOL } from "@/lib/format";
-import { Plus } from "lucide-react";
 
 type Budget = {
   id: number;
@@ -150,8 +150,8 @@ export default function BudgetsPage() {
   }
 
   return (
-    <div className="space-y-8 pb-8">
-      <header className="sticky top-0 z-30 -mx-6 px-6 pt-4 pb-5 bg-background/80 backdrop-blur-md space-y-4">
+    <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">My Budgets</h1>
           <Link
@@ -159,7 +159,7 @@ export default function BudgetsPage() {
             className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all active:scale-95 shadow-lg shadow-white/5"
             aria-label="Add budget"
           >
-            <Plus className="w-5 h-5" />
+            <Icon icon="material-symbols:add-rounded" className="text-2xl" />
           </Link>
         </div>
         <div className="bg-card p-5 rounded-3xl border border-border/50">
@@ -198,7 +198,7 @@ export default function BudgetsPage() {
         </div>
       </header>
 
-      <main className="space-y-8">
+      <main className="px-6 py-6 space-y-8">
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
@@ -243,22 +243,31 @@ export default function BudgetsPage() {
                       ? "Every 3 Months"
                       : "Monthly";
 
+                const iconId =
+                  (typeof b.category?.icon === "string" &&
+                    b.category.icon.trim().length > 0 &&
+                    b.category.icon) ||
+                  null;
+
                 return (
                   <div
                     key={b.id}
-                    className="bg-card p-5 rounded-[2rem] border border-border/50 space-y-4"
+                    className="bg-card p-5 rounded-[2rem] border border-border/50 space-y-4 group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div
-                          className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border ${colorClass}`}
+                          className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${colorClass}`}
                         >
-                          <span>
-                            {b.category?.icon ||
-                              (b.category?.name
+                          {iconId ? (
+                            <Icon icon={iconId} className="text-2xl" />
+                          ) : (
+                            <span className="text-xl">
+                              {b.category?.name
                                 ? b.category.name.charAt(0).toUpperCase()
-                                : "💰")}
-                          </span>
+                                : "💰"}
+                            </span>
+                          )}
                         </div>
                         <div>
                           <h4 className="text-sm font-bold">
@@ -269,28 +278,28 @@ export default function BudgetsPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
+                      <div className="flex items-center gap-1.5">
                         <Link
                           href={`/budgets/${b.id}/edit`}
-                          className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-xl bg-secondary/40"
+                          className="w-9 h-9 flex items-center justify-center rounded-xl bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="Edit budget"
                         >
-                          Edit
+                          <Icon
+                            icon="solar:pen-bold-duotone"
+                            className="text-lg"
+                          />
                         </Link>
                         <button
                           type="button"
                           onClick={() => handleDeleteBudget(b.id)}
-                          className="text-[9px] font-black uppercase tracking-widest text-chart-2 hover:opacity-80 px-3 py-1 rounded-xl bg-chart-2/10"
+                          className="w-9 h-9 flex items-center justify-center rounded-xl bg-secondary/50 text-muted-foreground hover:text-destructive transition-colors"
+                          aria-label="Delete budget"
                         >
-                          Delete
+                          <Icon
+                            icon="solar:trash-bin-trash-bold-duotone"
+                            className="text-lg"
+                          />
                         </button>
-                        {b.category?.id ? (
-                          <Link
-                            href={`/transactions/new?category_id=${b.category.id}&type=expense`}
-                            className="text-[9px] font-black uppercase tracking-widest text-primary hover:opacity-80 px-3 py-1 rounded-xl bg-primary/10"
-                          >
-                            Add Entry
-                          </Link>
-                        ) : null}
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -315,7 +324,7 @@ export default function BudgetsPage() {
                       <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
                         <div
                           style={{ width: `${pct}%` }}
-                          className="h-full bg-chart-4 rounded-full"
+                          className="h-full bg-white rounded-full"
                         />
                       </div>
                     </div>
