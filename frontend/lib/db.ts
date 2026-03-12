@@ -2,11 +2,7 @@ import mysql from "mysql2/promise";
 
 let pool: mysql.Pool | null = null;
 
-function getConnectionConfig(): string | mysql.PoolOptions {
-  const url = process.env.DATABASE_URL;
-  if (url) {
-    return url;
-  }
+function getConnectionConfig(): mysql.PoolOptions {
   const host = process.env.DB_HOST;
   const user = process.env.DB_USER;
   const database = process.env.DB_NAME;
@@ -18,16 +14,17 @@ function getConnectionConfig(): string | mysql.PoolOptions {
       password: process.env.DB_PASSWORD || "",
       database,
     };
+  } else {
+    throw new Error(
+      "Set DB_HOST, DB_USER, and DB_NAME (optionally DB_PORT, DB_PASSWORD)"
+    );
   }
-  throw new Error(
-    "Set either DATABASE_URL or all of DB_HOST, DB_USER, and DB_NAME (optionally DB_PORT, DB_PASSWORD)"
-  );
 }
 
 export function getPool() {
   if (!pool) {
     const config = getConnectionConfig();
-    pool = typeof config === "string" ? mysql.createPool(config) : mysql.createPool(config);
+    pool = mysql.createPool(config);
   }
   return pool;
 }
