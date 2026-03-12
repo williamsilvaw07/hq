@@ -75,8 +75,13 @@ export default function NewTransactionPage() {
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     setError("");
-    if (!workspaceId || !categoryId || !amount) {
-      setError("Category and amount are required.");
+    const needCategory = type === "expense";
+    if (!workspaceId || !amount) {
+      setError(needCategory ? "Budget and amount are required." : "Amount is required.");
+      return;
+    }
+    if (needCategory && !categoryId) {
+      setError("Please select a budget.");
       return;
     }
     setLoading(true);
@@ -84,7 +89,7 @@ export default function NewTransactionPage() {
       await api(`/api/workspaces/${workspaceId}/transactions`, {
         method: "POST",
         body: JSON.stringify({
-          category_id: Number(categoryId),
+          ...(categoryId ? { category_id: Number(categoryId) } : {}),
           type,
           amount: parseFloat(amount),
           currency: "BRL",
@@ -204,7 +209,7 @@ export default function NewTransactionPage() {
             <p className="text-sm text-chart-2 bg-chart-2/10 rounded-xl p-3">{error}</p>
           )}
 
-          {type === "expense" ? (
+          {type === "expense" && (
             <label className="block">
               <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
                 <div className="w-10 h-10 rounded-xl bg-chart-1/20 flex items-center justify-center shrink-0">
@@ -241,36 +246,9 @@ export default function NewTransactionPage() {
                 <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
               </div>
             </label>
-          ) : (
-            <label className="block">
-              <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
-                <div className="w-10 h-10 rounded-xl bg-chart-1/20 flex items-center justify-center shrink-0">
-                  <LayoutGrid className="w-5 h-5 text-chart-1" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-0.5">
-                    CATEGORY
-                  </p>
-                  <select
-                    value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
-                    required
-                    className="w-full bg-transparent text-sm font-medium text-foreground outline-none cursor-pointer appearance-none"
-                  >
-                    <option value="">Select Category</option>
-                    {relevantCategories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
-              </div>
-            </label>
           )}
 
-          {type === "expense" ? null : showNewCategory ? (
+          {type === "expense" && (showNewCategory ? (
             <div className="p-4 bg-card rounded-2xl space-y-2">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 New category
@@ -313,7 +291,7 @@ export default function NewTransactionPage() {
             >
               + Add custom category
             </button>
-          )}
+          ))}
 
           <label className="block cursor-pointer">
             <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">

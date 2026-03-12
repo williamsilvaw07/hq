@@ -100,7 +100,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     const { workspaceId } = await params;
     const { user, workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
     const body = await req.json();
-    const categoryId = body.category_id != null ? parseInt(String(body.category_id), 10) : NaN;
+    const rawCategoryId = body.category_id != null ? parseInt(String(body.category_id), 10) : NaN;
     const type = typeof body.type === "string" ? body.type : "";
     const amount = typeof body.amount === "number" ? body.amount : parseFloat(String(body.amount ?? 0));
     const currency = (typeof body.currency === "string" && body.currency.length === 3) ? body.currency : "BRL";
@@ -108,11 +108,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     const description = typeof body.description === "string" ? body.description : null;
     const status = (body.status === "draft" || body.status === "confirmed" ? body.status : "confirmed") as string;
 
-    if (Number.isNaN(categoryId)) {
-      return NextResponse.json({ message: "category_id is required." }, { status: 422 });
-    }
+    const isIncome = type === "income";
+    const categoryId = !Number.isNaN(rawCategoryId) ? rawCategoryId : null;
+
     if (type !== "income" && type !== "expense") {
       return NextResponse.json({ message: "type must be income or expense." }, { status: 422 });
+    }
+    if (!isIncome && categoryId == null) {
+      return NextResponse.json({ message: "category_id is required for expenses." }, { status: 422 });
     }
     if (Number.isNaN(amount)) {
       return NextResponse.json({ message: "amount is required." }, { status: 422 });
@@ -121,11 +124,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
       return NextResponse.json({ message: "date is required and must be YYYY-MM-DD." }, { status: 422 });
     }
 
-    const category = await prisma.category.findFirst({
-      where: { id: categoryId, workspaceId: wid },
-    });
-    if (!category) {
-      return NextResponse.json({ message: "Category not found." }, { status: 422 });
+    if (categoryId != null) {
+      const category = await prisma.category.findFirst({
+        where: { id: categoryId, workspaceId: wid },
+      });
+      if (!category) {
+        return NextResponse.json({ message: "Category not found." }, { status: 422 });
+      }
     }
 
     const transaction = await prisma.transaction.create({
