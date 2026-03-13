@@ -90,7 +90,7 @@ export default function WorkspacesPage() {
         <button
           type="button"
           onClick={() => router.back()}
-          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-secondary/50 text-muted-foreground active:scale-95 transition-all"
+          className="w-10 h-10 flex items-center justify-center rounded-lg bg-secondary/50 text-muted-foreground active:scale-95 transition-all"
           aria-label="Back"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -104,7 +104,7 @@ export default function WorkspacesPage() {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary active:scale-95 transition-all"
+          className="w-10 h-10 flex items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary active:scale-95 transition-all"
           aria-label="New workspace"
         >
           <Plus className="w-5 h-5" />
@@ -124,10 +124,10 @@ export default function WorkspacesPage() {
               You do not have an active workspace yet.
             </p>
           ) : (
-            <div className="relative p-5 bg-card rounded-[2rem] border-2 border-primary/50 shadow-lg shadow-primary/5">
+            <div className="relative p-5 bg-card rounded-xl border-2 border-primary/50 shadow-lg shadow-primary/5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30">
+                  <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
                     <User className="w-6 h-6 text-primary" />
                   </div>
                   <div>
@@ -172,10 +172,10 @@ export default function WorkspacesPage() {
                     key={w.id}
                     type="button"
                     onClick={() => handleSelect(w)}
-                    className="w-full p-5 bg-card/40 rounded-[2rem] flex items-center justify-between hover:bg-card transition-all active:scale-[0.98] text-left"
+                    className="w-full p-5 bg-card/40 rounded-xl flex items-center justify-between hover:bg-card transition-all active:scale-[0.98] text-left"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-chart-1/10 flex items-center justify-center border border-chart-1/20">
+                      <div className="w-12 h-12 rounded-lg bg-chart-1/10 flex items-center justify-center border border-chart-1/20">
                         <Icon className="w-6 h-6 text-chart-1" />
                       </div>
                       <div className="text-left">
@@ -193,7 +193,7 @@ export default function WorkspacesPage() {
         </section>
       </main>
 
-      <div className="fixed bottom-24 left-6 right-6 p-4 bg-secondary/20 rounded-2xl border border-dashed border-border/60 text-center">
+      <div className="fixed bottom-24 left-6 right-6 p-4 bg-secondary/20 rounded-lg border border-dashed border-border/60 text-center">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
           Long press a workspace to edit settings
         </p>
@@ -201,7 +201,7 @@ export default function WorkspacesPage() {
 
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6 bg-black/70">
-          <div className="w-full max-w-sm bg-card rounded-2xl p-6 shadow-2xl">
+          <div className="w-full max-w-sm bg-card rounded-lg p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
@@ -230,7 +230,7 @@ export default function WorkspacesPage() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="e.g. Family, Personal"
-                  className="w-full rounded-2xl border border-border/60 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  className="w-full rounded-lg border border-border/60 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
                   autoFocus
                 />
               </div>
@@ -246,14 +246,14 @@ export default function WorkspacesPage() {
                     setShowCreate(false);
                     setCreateError("");
                   }}
-                  className="flex-1 py-3 rounded-2xl border border-border text-xs font-bold text-foreground uppercase tracking-widest active:scale-[0.98]"
+                  className="flex-1 py-3 rounded-lg border border-border text-xs font-bold text-foreground uppercase tracking-widest active:scale-[0.98]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating || !newName.trim()}
-                  className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest disabled:opacity-50 active:scale-[0.98]"
+                  className="flex-1 py-3 rounded-lg bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest disabled:opacity-50 active:scale-[0.98]"
                 >
                   {creating ? "Creating…" : "Create"}
                 </button>

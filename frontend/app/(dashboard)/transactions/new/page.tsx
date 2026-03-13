@@ -198,7 +198,7 @@ export default function NewTransactionPage() {
 
           {type === "expense" && (
             <label className="block">
-              <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl">
+              <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-lg">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-1/20 flex items-center justify-center shrink-0">
                   <LayoutGrid className="w-5 h-5 text-chart-1" />
                 </div>
@@ -236,7 +236,7 @@ export default function NewTransactionPage() {
           )}
 
           {type === "expense" && (showNewCategory ? (
-            <div className="p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl space-y-2">
+            <div className="p-3 sm:p-4 bg-card rounded-xl sm:rounded-lg space-y-2">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 New category
               </p>
@@ -281,7 +281,7 @@ export default function NewTransactionPage() {
           ))}
 
           <label className="block">
-            <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl">
+            <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-lg">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/20 flex items-center justify-center shrink-0">
                 <Calendar className="w-5 h-5 text-chart-4" />
               </div>
@@ -300,7 +300,7 @@ export default function NewTransactionPage() {
           </label>
 
           <label className="block">
-            <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl">
+            <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-lg">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-muted flex items-center justify-center shrink-0">
                 <FileText className="w-5 h-5 text-muted-foreground" />
               </div>
@@ -323,7 +323,7 @@ export default function NewTransactionPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-white text-black font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-black/20 disabled:opacity-50 active:scale-[0.98] transition-all"
+            className="w-full py-3 sm:py-4 rounded-xl sm:rounded-lg bg-white text-black font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-black/20 disabled:opacity-50 active:scale-[0.98] transition-all"
           >
             {loading ? "Saving…" : "CONFIRM ENTRY"}
             <ArrowUpRight className="w-5 h-5" />

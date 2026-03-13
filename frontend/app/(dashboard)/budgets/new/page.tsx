@@ -133,7 +133,7 @@ export default function NewBudgetPage() {
         <div className="flex items-center gap-4 sm:gap-6">
           <button
             type="button"
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-card border border-border/40 flex items-center justify-center text-3xl sm:text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all shrink-0"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl bg-card border border-border/40 flex items-center justify-center text-3xl sm:text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all shrink-0"
           >
             {displayIcon}
           </button>
@@ -161,7 +161,7 @@ export default function NewBudgetPage() {
                 key={emoji}
                 type="button"
                 onClick={() => setIcon(emoji)}
-                className={`w-9 h-9 rounded-2xl border flex items-center justify-center text-lg transition-all active:scale-95 ${
+                className={`w-9 h-9 rounded-lg border flex items-center justify-center text-lg transition-all active:scale-95 ${
                   icon === emoji
                     ? "bg-primary/10 border-primary text-primary"
                     : "bg-card border-border text-foreground"
@@ -181,7 +181,7 @@ export default function NewBudgetPage() {
               value={icon ?? ""}
               onChange={(e) => setIcon(e.target.value || null)}
               placeholder="🙂"
-              className="flex-1 bg-card rounded-2xl border border-border px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground/60"
+              className="flex-1 bg-card rounded-lg border border-border px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground/60"
             />
           </div>
         </div>
@@ -204,7 +204,7 @@ export default function NewBudgetPage() {
           </div>
         </div>
 
-        <div className="space-y-1 bg-card/30 rounded-xl sm:rounded-[2rem] border border-border/30 overflow-hidden">
+        <div className="space-y-1 bg-card/30 rounded-xl sm:rounded-xl border border-border/30 overflow-hidden">
           <div className="w-full px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-9 h-9 rounded-xl bg-secondary/50 flex items-center justify-center">
@@ -236,7 +236,7 @@ export default function NewBudgetPage() {
                 onChange={(e) =>
                   setPeriodType(e.target.value === "week" ? "week" : "month")
                 }
-                className="bg-card rounded-2xl border border-border px-3 py-1.5 text-xs"
+                className="bg-card rounded-lg border border-border px-3 py-1.5 text-xs"
               >
                 <option value="week">Week</option>
                 <option value="month">Month</option>
@@ -244,7 +244,7 @@ export default function NewBudgetPage() {
               <select
                 value={periodInterval}
                 onChange={(e) => setPeriodInterval(Number(e.target.value))}
-                className="bg-card rounded-2xl border border-border px-3 py-1.5 text-xs"
+                className="bg-card rounded-lg border border-border px-3 py-1.5 text-xs"
               >
                 {periodType === "week" ? (
                   <option value={1}>Every week</option>
@@ -271,7 +271,7 @@ export default function NewBudgetPage() {
           type="button"
           onClick={handleSave}
           disabled={saving || !amount}
-          className="w-full py-3 sm:py-5 rounded-2xl sm:rounded-3xl bg-white text-black font-black text-sm uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
+          className="w-full py-3 sm:py-5 rounded-lg sm:rounded-xl bg-white text-black font-black text-sm uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
         >
           {saving ? "Saving…" : "Confirm Budget"}
         </button>

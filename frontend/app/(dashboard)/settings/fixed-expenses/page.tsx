@@ -123,7 +123,7 @@ export default function FixedExpensesPage() {
 
   return (
     <div className="space-y-5 pt-4 pb-8">
-      <div className="flex flex-col items-center justify-center py-4 bg-card rounded-2xl text-center px-4">
+      <div className="flex flex-col items-center justify-center py-4 bg-card rounded-lg text-center px-4">
         <p className="section-title mb-2">Monthly Total</p>
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter">
           {formatMoney(monthlyTotal)}
@@ -190,7 +190,7 @@ function BillCard({
   const nextLabel = next ? formatBillDisplayDate(next) : "No upcoming date";
 
   return (
-    <div className="bg-card p-4 rounded-2xl space-y-4">
+    <div className="bg-card p-4 rounded-lg space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">

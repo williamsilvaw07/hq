@@ -47,15 +47,15 @@ export default function PendingPage() {
       </header>
       <main className="space-y-4">
         {list.length === 0 ? (
-          <div className="bg-card rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-center">
+          <div className="bg-card rounded-lg sm:rounded-xl p-5 sm:p-8 text-center">
             <p className="text-muted-foreground text-sm">No pending transactions.</p>
             <p className="text-[11px] text-muted-foreground mt-2">Send a message via WhatsApp to record an expense or income.</p>
           </div>
         ) : (
           list.map((t) => (
-            <div key={t.id} className="bg-card p-3 sm:p-5 rounded-2xl sm:rounded-3xl flex items-center justify-between gap-3 active:scale-[0.98] transition-all">
+            <div key={t.id} className="bg-card p-3 sm:p-5 rounded-lg sm:rounded-xl flex items-center justify-between gap-3 active:scale-[0.98] transition-all">
               <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-chart-2/10 border border-chart-2/20 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-lg bg-chart-2/10 border border-chart-2/20 flex items-center justify-center shrink-0">
                   <ShoppingBag className="w-5 h-5 text-chart-2" />
                 </div>
                 <div>

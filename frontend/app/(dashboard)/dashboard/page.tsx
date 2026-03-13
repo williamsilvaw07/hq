@@ -175,7 +175,7 @@ export default function DashboardPage() {
   if (loadError) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="bg-card p-6 rounded-3xl border border-border/40 text-center space-y-4">
+        <div className="bg-card p-6 rounded-xl border border-border/40 text-center space-y-4">
           <p className="text-sm text-muted-foreground">{loadError}</p>
           <button onClick={fetchData} className="w-full py-2 bg-primary text-primary-foreground rounded-xl text-sm font-bold">Retry</button>
         </div>
@@ -207,7 +207,7 @@ export default function DashboardPage() {
       </header>
 
       <main className="px-6 space-y-8 mt-2">
-        <section className="bg-card p-6 rounded-[2.5rem] border border-border/40 relative overflow-hidden group shadow-2xl shadow-black/10">
+        <section className="bg-card p-6 rounded-xl border border-border/40 relative overflow-hidden group shadow-2xl shadow-black/10">
           <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mb-4 opacity-50">Projected Monthly Spending</p>
           <div className="flex items-baseline gap-2 mb-6 text-foreground">
             <span className="text-2xl font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
         </section>
 
         <section className="grid grid-cols-2 gap-3.5">
-          <div className="bg-card p-4 rounded-[2rem] border border-border/40 flex flex-col justify-between min-h-[150px]">
+          <div className="bg-card p-4 rounded-xl border border-border/40 flex flex-col justify-between min-h-[150px]">
             <div>
               <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-50">Variable</p>
               <p className="text-2xl font-black tracking-tighter">
@@ -244,7 +244,7 @@ export default function DashboardPage() {
               <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-60">{variablePercent.toFixed(0)}% of {formatCompact(variableLimit)}</p>
             </div>
           </div>
-          <div className="bg-card p-4 rounded-[2rem] border border-border/40 flex flex-col justify-between min-h-[150px]">
+          <div className="bg-card p-4 rounded-xl border border-border/40 flex flex-col justify-between min-h-[150px]">
             <div>
               <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
               <p className="text-2xl font-black tracking-tighter text-chart-1">
@@ -273,11 +273,11 @@ export default function DashboardPage() {
                   setEditingBudget(budget);
                   setBudgetModalOpen(true);
                 }}
-                className="bg-card p-5 rounded-[2.2rem] border border-border/50 flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer hover:border-border/80"
+                className="bg-card p-5 rounded-xl border border-border/50 flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer hover:border-border/80"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-secondary/50 flex items-center justify-center text-2xl shadow-inner">
+                    <div className="w-12 h-12 rounded-lg bg-secondary/50 flex items-center justify-center text-2xl shadow-inner">
                       {budget.icon || budget.category?.icon || "💰"}
                     </div>
                     <div>
@@ -306,7 +306,7 @@ export default function DashboardPage() {
             <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">Recent Transactions</h2>
             <Link href="/transactions" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">See All</Link>
           </div>
-          <div className="bg-card rounded-[2rem] border border-border/40 overflow-hidden divide-y divide-border/5">
+          <div className="bg-card rounded-xl border border-border/40 overflow-hidden divide-y divide-border/5">
             {recentTransactions.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8 opacity-50">No transactions yet.</p>
             ) : (

@@ -165,7 +165,7 @@ export default function TeamPage() {
                 <select
                   value={inviteWorkspaceId ?? ""}
                   onChange={(e) => setInviteWorkspaceId(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                  className="w-full bg-card rounded-lg border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
                 >
                   {workspaces.map((w) => (
                     <option key={w.id} value={w.id}>
@@ -184,7 +184,7 @@ export default function TeamPage() {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="colleague@example.com"
-                    className="w-full bg-card rounded-2xl border border-border pl-11 pr-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                    className="w-full bg-card rounded-lg border border-border pl-11 pr-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
                     required
                   />
                 </div>
@@ -194,7 +194,7 @@ export default function TeamPage() {
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as "admin" | "member" | "viewer")}
-                  className="w-full bg-card rounded-2xl border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+                  className="w-full bg-card rounded-lg border border-border px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
                 >
                   <option value="viewer">Viewer – read-only</option>
                   <option value="member">Member – can add/edit transactions</option>
@@ -230,7 +230,7 @@ export default function TeamPage() {
             {members.map((m) => (
               <div
                 key={m.id}
-                className="flex items-center justify-between p-4 bg-card rounded-2xl"
+                className="flex items-center justify-between p-4 bg-card rounded-lg"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
@@ -278,7 +278,7 @@ export default function TeamPage() {
               {invitations.map((inv) => (
                 <div
                   key={inv.id}
-                  className="flex items-center justify-between p-4 bg-secondary/50 rounded-2xl"
+                  className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg"
                 >
                   <div>
                     <p className="text-sm font-bold text-foreground">{inv.email}</p>

@@ -42,7 +42,7 @@ export function Modal({ isOpen, title, subtitle, showCloseButton = true, childre
       <div
         ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full ${maxWidthClass} max-h-[96vh] sm:max-h-[90vh] bg-background border-t sm:border border-border/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col transform origin-bottom animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden`}
+        className={`w-full ${maxWidthClass} max-h-[96vh] sm:max-h-[90vh] bg-background border-t sm:border border-border/10 rounded-t-[2.5rem] sm:rounded-xl shadow-2xl flex flex-col transform origin-bottom animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden`}
       >
         <div className="w-12 h-1.5 rounded-full bg-border/20 mx-auto mt-3 mb-1 shrink-0" />
         
@@ -87,9 +87,9 @@ export function ModalSkeleton() {
     <div className="space-y-4 animate-pulse">
       <div className="h-5 w-32 rounded-full bg-secondary" />
       <div className="space-y-3">
-        <div className="h-10 rounded-2xl bg-secondary" />
-        <div className="h-10 rounded-2xl bg-secondary" />
-        <div className="h-10 rounded-2xl bg-secondary" />
+        <div className="h-10 rounded-lg bg-secondary" />
+        <div className="h-10 rounded-lg bg-secondary" />
+        <div className="h-10 rounded-lg bg-secondary" />
       </div>
       <div className="flex gap-3 pt-4">
         <div className="flex-1 h-11 rounded-xl bg-secondary" />

@@ -19,7 +19,7 @@
   --card-foreground: #ffffff;
   --popover: #1a1a1a;
   --popover-foreground: #ffffff;
-  --border: #1a1a1a;
+  --border: transparent;
   --input: #1a1a1a;
   --ring: rgba(255, 255, 255, 0.15);
   --chart-1: #4ade80;
@@ -27,7 +27,7 @@
   --chart-3: #60a5fa;
   --chart-4: #c084fc;
   --chart-5: #fbbf24;
-  --radius: 0.75rem;
+  --radius: 0.5rem;
   /* Typography */
   --page-title: 1.2rem;
   --section-title: 0.7rem;

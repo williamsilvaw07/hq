@@ -53,7 +53,7 @@ function WorkspaceSettingsSection() {
       <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
         Workspace
       </h3>
-      <div className="bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden">
+      <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
         <div className="flex items-center justify-between p-3 sm:p-5 border-b border-border/50">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/10 flex items-center justify-center shrink-0">
@@ -152,7 +152,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-5 sm:space-y-8 pt-2 sm:pt-4">
       {/* Profile card */}
-      <section className="flex flex-col items-center py-4 sm:py-6 bg-secondary rounded-2xl sm:rounded-[2.5rem] overflow-hidden">
+      <section className="flex flex-col items-center py-4 sm:py-6 bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
         <div className="relative group">
           <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary border-2 border-primary/20 flex items-center justify-center text-xl sm:text-2xl font-bold text-foreground">
             {user?.name?.charAt(0)?.toUpperCase() || "U"}
@@ -182,7 +182,7 @@ export default function SettingsPage() {
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
           Financial Setup
         </h3>
-        <div className="bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden">
+        <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
           <Link
             href="/budgets"
             className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
@@ -255,7 +255,7 @@ export default function SettingsPage() {
             fixedBills.map((bill) => (
               <div
                 key={bill.id}
-                className="flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-xl sm:rounded-2xl"
+                className="flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-xl sm:rounded-lg"
               >
                 <div className="flex items-center gap-2.5 sm:gap-3">
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-background flex items-center justify-center shrink-0">
@@ -293,7 +293,7 @@ export default function SettingsPage() {
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
           App Settings
         </h3>
-        <div className="bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden">
+        <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
           <Link
             href="/settings/dashboard"
             className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
@@ -349,7 +349,7 @@ export default function SettingsPage() {
         <button
           type="button"
           onClick={() => logout()}
-          className="w-full py-3 sm:py-4 bg-chart-2/10 border border-chart-2/20 text-chart-2 font-bold text-sm rounded-2xl sm:rounded-3xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 sm:py-4 bg-chart-2/10 border border-chart-2/20 text-chart-2 font-bold text-sm rounded-lg sm:rounded-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
           <LogOut className="w-5 h-5" />
           Sign Out

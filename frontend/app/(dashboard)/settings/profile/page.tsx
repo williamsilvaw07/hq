@@ -168,7 +168,7 @@ export default function SettingsProfilePage() {
         <form id="profile-form" onSubmit={handleSave} className="space-y-6">
           <div className="space-y-2">
             <label className="label ml-1 block">Full Name</label>
-            <div className="bg-card rounded-2xl p-4 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+            <div className="bg-card rounded-lg p-4 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <input
                 type="text"
                 value={name}
@@ -179,7 +179,7 @@ export default function SettingsProfilePage() {
           </div>
           <div className="space-y-2">
             <label className="label ml-1 block">Email Address</label>
-            <div className="bg-card rounded-2xl p-4 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+            <div className="bg-card rounded-lg p-4 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <input
                 type="email"
                 value={email}
@@ -190,7 +190,7 @@ export default function SettingsProfilePage() {
           </div>
           <div className="space-y-2">
             <label className="label ml-1 block">Phone Number (WhatsApp)</label>
-            <div className="bg-card rounded-2xl p-4 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+            <div className="bg-card rounded-lg p-4 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <div className="flex items-center gap-2">
                 <span className="text-chart-1 text-lg" aria-hidden>●</span>
                 <input
@@ -208,7 +208,7 @@ export default function SettingsProfilePage() {
         </form>
         <div className="pt-8 space-y-4">
           <h3 className="section-title px-1">Privacy & Security</h3>
-          <div className="bg-card rounded-2xl sm:rounded-3xl overflow-hidden">
+          <div className="bg-card rounded-lg sm:rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => setShowPasswordModal(true)}

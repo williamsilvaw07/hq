@@ -51,7 +51,7 @@ export default function DashboardSettingsPage() {
             <button
               type="button"
               onClick={() => handleChange("monthly_focus")}
-              className={`w-full text-left p-5 rounded-[2rem] border transition-all active:scale-[0.98] ${
+              className={`w-full text-left p-5 rounded-xl border transition-all active:scale-[0.98] ${
                 mode === "monthly_focus"
                   ? "bg-card border-primary/60 shadow-lg shadow-primary/10"
                   : "bg-card/40 border-border/60 hover:bg-card"
@@ -79,7 +79,7 @@ export default function DashboardSettingsPage() {
             <button
               type="button"
               onClick={() => handleChange("full_timeline")}
-              className={`w-full text-left p-5 rounded-[2rem] border transition-all active:scale-[0.98] ${
+              className={`w-full text-left p-5 rounded-xl border transition-all active:scale-[0.98] ${
                 mode === "full_timeline"
                   ? "bg-card border-primary/60 shadow-lg shadow-primary/10"
                   : "bg-card/40 border-border/60 hover:bg-card"

@@ -181,7 +181,7 @@ export default function EditBudgetPage({
             <div className="flex items-center gap-6">
               <button
                 type="button"
-                className="w-20 h-20 rounded-3xl bg-card border border-border/40 flex items-center justify-center text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all"
+                className="w-20 h-20 rounded-xl bg-card border border-border/40 flex items-center justify-center text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all"
               >
                 {displayIcon}
               </button>
@@ -205,7 +205,7 @@ export default function EditBudgetPage({
                     key={emoji}
                     type="button"
                     onClick={() => setIcon(emoji)}
-                    className={`w-9 h-9 rounded-2xl border flex items-center justify-center text-lg transition-all active:scale-95 ${
+                    className={`w-9 h-9 rounded-lg border flex items-center justify-center text-lg transition-all active:scale-95 ${
                       icon === emoji
                         ? "bg-primary/10 border-primary text-primary"
                         : "bg-card border-border text-foreground"
@@ -225,7 +225,7 @@ export default function EditBudgetPage({
                   value={icon ?? ""}
                   onChange={(e) => setIcon(e.target.value || null)}
                   placeholder="🙂"
-                  className="flex-1 bg-card rounded-2xl border border-border px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground/60"
+                  className="flex-1 bg-card rounded-lg border border-border px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground/60"
                 />
               </div>
             </div>
@@ -248,7 +248,7 @@ export default function EditBudgetPage({
               </div>
             </div>
 
-            <div className="space-y-1 bg-card/30 rounded-[2rem] border border-border/30 overflow-hidden">
+            <div className="space-y-1 bg-card/30 rounded-xl border border-border/30 overflow-hidden">
               <div className="w-full px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-9 h-9 rounded-xl bg-secondary/50 flex items-center justify-center">
@@ -282,7 +282,7 @@ export default function EditBudgetPage({
                         e.target.value === "week" ? "week" : "month",
                       )
                     }
-                    className="bg-card rounded-2xl border border-border px-3 py-1.5 text-xs"
+                    className="bg-card rounded-lg border border-border px-3 py-1.5 text-xs"
                   >
                     <option value="week">Week</option>
                     <option value="month">Month</option>
@@ -292,7 +292,7 @@ export default function EditBudgetPage({
                     onChange={(e) =>
                       setPeriodInterval(Number(e.target.value))
                     }
-                    className="bg-card rounded-2xl border border-border px-3 py-1.5 text-xs"
+                    className="bg-card rounded-lg border border-border px-3 py-1.5 text-xs"
                   >
                     {periodType === "week" ? (
                       <option value={1}>Every week</option>
@@ -321,7 +321,7 @@ export default function EditBudgetPage({
           type="button"
           onClick={handleSave}
           disabled={saving || loading || !amount}
-          className="w-full py-5 rounded-3xl bg-white text-black font-black text-sm uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
+          className="w-full py-5 rounded-xl bg-white text-black font-black text-sm uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
         >
           {saving ? "Saving…" : "Save Changes"}
         </button>
@@ -329,7 +329,7 @@ export default function EditBudgetPage({
           type="button"
           onClick={handleDelete}
           disabled={saving || loading}
-          className="w-full py-4 rounded-3xl border border-border text-chart-2 font-bold text-xs uppercase tracking-widest active:scale-[0.98] transition-all disabled:opacity-40"
+          className="w-full py-4 rounded-xl border border-border text-chart-2 font-bold text-xs uppercase tracking-widest active:scale-[0.98] transition-all disabled:opacity-40"
         >
           Delete Budget
         </button>

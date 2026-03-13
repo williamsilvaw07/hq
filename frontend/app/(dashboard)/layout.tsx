@@ -123,7 +123,7 @@ export default function DashboardLayout({
       </main>
 
       <div className="fixed bottom-0 left-0 w-full z-40 px-4 pb-6 sm:pb-8 pt-4 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none">
-        <div className="w-full sm:max-w-md sm:mx-auto pointer-events-auto bg-zinc-900/95 border border-zinc-800/50 rounded-[2.5rem] px-2 py-3 flex items-center justify-between shadow-2xl">
+        <div className="w-full sm:max-w-md sm:mx-auto pointer-events-auto bg-zinc-900/95 border border-zinc-800/50 rounded-xl px-2 py-3 flex items-center justify-between shadow-2xl">
           <Link
             href="/dashboard"
             className={`flex-1 flex flex-col items-center gap-1 py-1 text-[8px] font-black uppercase tracking-widest transition-colors ${

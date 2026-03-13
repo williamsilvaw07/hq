@@ -64,7 +64,7 @@ export function TransactionModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-4 rounded-2xl border border-border/50 text-xs font-black uppercase tracking-widest text-muted-foreground active:scale-95 transition-all"
+              className="flex-1 py-4 rounded-lg border border-border/50 text-xs font-black uppercase tracking-widest text-muted-foreground active:scale-95 transition-all"
             >
               Cancel
             </button>
@@ -79,7 +79,7 @@ export function TransactionModal({
                 date
               })}
               disabled={saving || !amount || !categoryId}
-              className="flex-1 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
+              className="flex-1 py-4 rounded-lg bg-white text-black text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
             >
               {saving ? "Processing..." : "Confirm Entry"}
             </button>
@@ -133,7 +133,7 @@ export function TransactionModal({
 
         {/* Form Fields */}
         <div className="space-y-3">
-          <div className="bg-card/50 rounded-2xl p-4 border border-border/10 flex items-center gap-4">
+          <div className="bg-card/50 rounded-lg p-4 border border-border/10 flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground shrink-0 shadow-inner">
               <Icon icon="solar:pen-new-square-linear" className="text-xl" />
             </div>
@@ -150,7 +150,7 @@ export function TransactionModal({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="bg-card/50 rounded-2xl p-3 border border-border/10 flex items-center gap-3 overflow-hidden">
+            <div className="bg-card/50 rounded-lg p-3 border border-border/10 flex items-center gap-3 overflow-hidden">
               <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
                 <Icon icon="solar:tag-linear" className="text-lg" />
               </div>
@@ -167,7 +167,7 @@ export function TransactionModal({
               </div>
             </div>
 
-            <div className="bg-card/50 rounded-2xl p-3 border border-border/10 flex items-center gap-3 overflow-hidden">
+            <div className="bg-card/50 rounded-lg p-3 border border-border/10 flex items-center gap-3 overflow-hidden">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
                 <Icon icon="solar:calendar-linear" className="text-lg" />
               </div>
@@ -182,7 +182,7 @@ export function TransactionModal({
               </div>
             </div>
 
-            <div className="bg-card/50 rounded-2xl p-3 border border-border/10 flex items-center gap-3 overflow-hidden">
+            <div className="bg-card/50 rounded-lg p-3 border border-border/10 flex items-center gap-3 overflow-hidden">
               <div className="w-8 h-8 rounded-lg bg-zinc-500/10 flex items-center justify-center text-zinc-500 shrink-0">
                 <Icon icon="solar:notes-linear" className="text-lg" />
               </div>

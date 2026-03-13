@@ -54,7 +54,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-4 rounded-2xl border border-border/50 text-xs font-black uppercase tracking-widest text-muted-foreground active:scale-95 transition-all"
+            className="flex-1 py-4 rounded-lg border border-border/50 text-xs font-black uppercase tracking-widest text-muted-foreground active:scale-95 transition-all"
           >
             Cancel
           </button>
@@ -65,7 +65,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: {
               if (ok) onClose();
             }}
             disabled={saving || !draft.name || !draft.amount}
-            className="flex-1 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
+            className="flex-1 py-4 rounded-lg bg-white text-black text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
           >
             {saving ? "Saving..." : "Confirm Bill"}
           </button>
@@ -76,7 +76,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: {
         {/* Basic Info */}
         <div className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center text-3xl shadow-inner border border-border/10">
+            <div className="w-16 h-16 rounded-lg bg-secondary/50 flex items-center justify-center text-3xl shadow-inner border border-border/10">
               {draft.icon || "🏠"}
             </div>
             <div className="flex-1 space-y-1">
@@ -92,7 +92,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: {
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-card/50 rounded-2xl p-3 border border-border/10">
+            <div className="bg-card/50 rounded-lg p-3 border border-border/10">
               <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-50">Monthly Amount</p>
               <div className="flex items-baseline gap-1">
                 <span className="text-sm font-light text-muted-foreground/30">R$</span>
@@ -106,7 +106,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: {
                 />
               </div>
             </div>
-            <div className="bg-card/50 rounded-2xl p-3 border border-border/10">
+            <div className="bg-card/50 rounded-lg p-3 border border-border/10">
               <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-50">Icon</p>
               <select
                 value={draft.icon || ""}
@@ -120,7 +120,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: {
         </div>
 
         {/* Scheduling */}
-        <div className="bg-card/50 rounded-[2rem] border border-border/10 overflow-hidden divide-y divide-border/5">
+        <div className="bg-card/50 rounded-xl border border-border/10 overflow-hidden divide-y divide-border/5">
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center text-sm">⏱</div>
