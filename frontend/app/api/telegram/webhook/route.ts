@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { processTelegramMessage, processTelegramVoice } from "@/lib/telegram/process-message";
+import { processTelegramMessage, processTelegramVoice, processTelegramPhoto } from "@/lib/telegram/process-message";
 
 export async function POST(req: Request) {
   // Optional secret token check
@@ -40,6 +40,14 @@ function processUpdateAsync(update: any) {
       if (message.voice) {
         const fileId: string = message.voice.file_id;
         await processTelegramVoice(messageId, chatId, fileId);
+        return;
+      }
+
+      // Photo message — use highest resolution version
+      if (message.photo) {
+        const photos: { file_id: string }[] = message.photo;
+        const fileId = photos[photos.length - 1].file_id;
+        await processTelegramPhoto(messageId, chatId, fileId);
         return;
       }
 

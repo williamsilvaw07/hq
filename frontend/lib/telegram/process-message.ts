@@ -2,7 +2,7 @@ import { fetchOne, fetchMany, insertOne } from "@/lib/sql";
 import { parseExpenseMessage } from "./parse";
 import { sendTelegramMessage } from "./send";
 import { validateLinkCode, linkTelegramAccount } from "./link";
-import { transcribeAudio, categorizeExpense } from "./groq";
+import { transcribeAudio, categorizeExpense, extractExpenseFromImage } from "./groq";
 
 type UserRow = {
   id: number;
@@ -112,6 +112,66 @@ export async function processTelegramVoice(
   }
 
   await processExpenseText(telegramMessageId, chatId, transcribed);
+}
+
+/**
+ * Handles photo messages — uses vision AI to extract expense then processes it.
+ */
+export async function processTelegramPhoto(
+  telegramMessageId: string,
+  chatId: number,
+  fileId: string,
+): Promise<void> {
+  console.log(`[telegram] Processing photo ${telegramMessageId} from chat ${chatId}`);
+
+  // 1. Deduplication
+  try {
+    await insertOne(
+      "INSERT INTO telegram_messages (telegram_message_id) VALUES (?)",
+      [telegramMessageId],
+    );
+  } catch {
+    console.log(`[telegram] Duplicate photo message ${telegramMessageId} — skipping`);
+    return;
+  }
+
+  // 2. Download image from Telegram
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return;
+
+  let imageBuffer: Buffer;
+  try {
+    const fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`);
+    const fileData = await fileRes.json() as { ok: boolean; result: { file_path: string } };
+    if (!fileData.ok) throw new Error("Failed to get file path");
+
+    const filePath = fileData.result.file_path;
+    const imgRes = await fetch(`https://api.telegram.org/file/bot${token}/${filePath}`);
+    const arrayBuffer = await imgRes.arrayBuffer();
+    imageBuffer = Buffer.from(arrayBuffer);
+  } catch (err) {
+    console.error("[telegram] Failed to download photo:", err);
+    await sendTelegramMessage(chatId, "❌ Could not download your image. Please try again.");
+    return;
+  }
+
+  // 3. Extract expense with Groq Vision
+  let extracted: string | null;
+  try {
+    extracted = await extractExpenseFromImage(imageBuffer);
+    console.log(`[telegram] Vision extracted: "${extracted}"`);
+  } catch (err) {
+    console.error("[telegram] Vision extraction failed:", err);
+    await sendTelegramMessage(chatId, "❌ Could not read the image. Try typing the expense instead.");
+    return;
+  }
+
+  if (!extracted) {
+    await sendTelegramMessage(chatId, "❓ Couldn't find an expense in that image.\n\nMake sure it shows a receipt or price clearly.");
+    return;
+  }
+
+  await processExpenseText(telegramMessageId, chatId, extracted);
 }
 
 // ---------------------------------------------------------------------------
