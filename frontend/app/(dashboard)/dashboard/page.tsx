@@ -123,15 +123,40 @@ export default function DashboardPage() {
     setSaving(true);
     try {
       const isEdit = !!editingBudget;
-      const url = isEdit 
-        ? `/api/workspaces/${workspaceId}/budgets/${editingBudget.id}`
-        : `/api/workspaces/${workspaceId}/budgets`;
-      
-      await api(url, {
-        method: isEdit ? "PATCH" : "POST",
-        body: JSON.stringify({...data, currency: "BRL"}),
-      });
-      
+
+      if (isEdit) {
+        if (editingBudget.category?.id) {
+          await api(`/api/workspaces/${workspaceId}/categories/${editingBudget.category.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ name: data.name, icon: data.icon }),
+          });
+        }
+        await api(`/api/workspaces/${workspaceId}/budgets/${editingBudget.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ amount: data.amount, period_type: data.period_type }),
+        });
+      } else {
+        const catRes = await api<{ id: number }>(`/api/workspaces/${workspaceId}/categories`, {
+          method: "POST",
+          body: JSON.stringify({ name: data.name, icon: data.icon, type: "expense" }),
+        });
+        const categoryId = (catRes.data as any)?.id;
+        if (!categoryId) throw new Error("Failed to create category");
+
+        const now = new Date();
+        await api(`/api/workspaces/${workspaceId}/budgets`, {
+          method: "POST",
+          body: JSON.stringify({
+            category_id: categoryId,
+            month: now.getMonth() + 1,
+            year: now.getFullYear(),
+            amount: data.amount,
+            period_type: data.period_type,
+            currency: "BRL",
+          }),
+        });
+      }
+
       fetchData();
       setBudgetModalOpen(false);
       setEditingBudget(null);
