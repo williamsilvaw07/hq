@@ -34,3 +34,16 @@ export function formatMoney(value: number, options?: MoneyFormatOptions): string
   return `${CURRENCY_SYMBOL}${formatNumberUK(value, options)}`;
 }
 
+/** Brazilian locale format (3.240,50) - period for thousands, comma for decimals */
+export function formatBRLocale(value: number, options?: MoneyFormatOptions): string {
+  const isWhole = Number.isFinite(value) && Math.abs(value % 1) < 1e-9;
+  const minimumFractionDigits =
+    options?.minimumFractionDigits ?? (isWhole ? 0 : 2);
+  const maximumFractionDigits =
+    options?.maximumFractionDigits ?? (isWhole ? 0 : 2);
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits,
+    maximumFractionDigits,
+  });
+}
+
