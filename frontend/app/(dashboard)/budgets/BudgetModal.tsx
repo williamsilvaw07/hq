@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { CURRENCY_SYMBOL } from "@/lib/format";
-import { Icon } from "@iconify/react";
 
-type Category = { id: number; name: string; icon?: string | null };
+const BUDGET_EMOJI_OPTIONS = [
+  "🍔", "🍕", "🚗", "🍿", "🏠", "💡", "💳", "🛍️", "📱", "🎮",
+  "✈️", "🏥", "📚", "🛒", "💧", "🔧", "📦", "🎵", "🐾", "💰",
+];
 
 type BudgetModalProps = {
   isOpen: boolean;
@@ -13,7 +15,7 @@ type BudgetModalProps = {
   onSave: (data: any) => Promise<void>;
   onDelete?: (id: number) => Promise<void>;
   initialData?: any;
-  categories: Category[];
+  categories?: any[];
   saving: boolean;
 };
 
@@ -23,28 +25,26 @@ export function BudgetModal({
   onSave,
   onDelete,
   initialData,
-  categories,
   saving,
 }: BudgetModalProps) {
-  const [categoryId, setCategoryId] = useState(initialData?.category_id ?? "");
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [icon, setIcon] = useState(initialData?.icon ?? "💰");
   const [amount, setAmount] = useState(initialData?.amount?.toString() ?? "");
   const [periodType, setPeriodType] = useState(initialData?.period_type ?? "month");
 
   useEffect(() => {
     if (initialData) {
-      setCategoryId(initialData.category_id);
-      setAmount(initialData.amount?.toString());
+      setName(initialData.name ?? "");
+      setIcon(initialData.icon ?? "💰");
+      setAmount(initialData.amount?.toString() ?? "");
       setPeriodType(initialData.period_type ?? "month");
     } else {
-      setCategoryId("");
+      setName("");
+      setIcon("💰");
       setAmount("");
       setPeriodType("month");
     }
   }, [initialData, isOpen]);
-
-  const selectedCategory = categories.find((c) => c.id === Number(categoryId));
-
-  const emojiOptions = ["🍔", "🍕", "🚗", "🍿", "🏠", "💡", "💳", "🛍️", "📱", "🎮", "✈️"];
 
   return (
     <Modal
@@ -57,8 +57,8 @@ export function BudgetModal({
         <div className="flex flex-col gap-3">
           <button
             type="button"
-            onClick={() => onSave({ category_id: Number(categoryId), amount: parseFloat(amount), period_type: periodType })}
-            disabled={saving || !amount || !categoryId}
+            onClick={() => onSave({ name, icon, amount: parseFloat(amount), period_type: periodType })}
+            disabled={saving || !amount || !name}
             className="w-full py-4 rounded-2xl bg-white text-black text-sm font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
           >
             {saving ? "Confirming..." : initialData ? "Confirm Changes" : "Confirm Budget"}
@@ -76,41 +76,36 @@ export function BudgetModal({
       }
     >
       <div className="space-y-10 py-2">
-        {/* Category & Icon Picker */}
+        {/* Name & Icon */}
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center text-3xl shadow-inner border border-border/10">
-              {selectedCategory?.icon || "💰"}
+              {icon || "💰"}
             </div>
             <div className="flex-1 space-y-1">
-              <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">Budget Category</label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full bg-transparent border-none outline-none text-xl font-bold text-foreground appearance-none p-0 cursor-pointer"
-              >
-                <option value="">Select Category</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+              <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">Budget Title</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Groceries, Travel..."
+                className="w-full bg-transparent border-none outline-none text-xl font-bold text-foreground placeholder:text-muted-foreground/30 ring-0 p-0"
+                autoFocus={!initialData}
+              />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">Quick Icons</p>
-            <div className="flex flex-wrap gap-2">
-              {emojiOptions.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  className="w-9 h-9 rounded-xl bg-card border border-border/40 flex items-center justify-center text-lg active:scale-90 transition-all hover:bg-secondary/50"
-                  onClick={() => {/* If editing category icon were possible here */}}
-                >
-                  {emoji}
-                </button>
+          <div className="bg-card/50 rounded-2xl p-3 border border-border/10">
+            <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-50">Icon</p>
+            <select
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              className="w-full bg-transparent border-none outline-none text-sm font-bold text-foreground appearance-none ring-0 p-0"
+            >
+              {BUDGET_EMOJI_OPTIONS.map((e) => (
+                <option key={e} value={e}>{e}</option>
               ))}
-            </div>
+            </select>
           </div>
         </div>
 
@@ -125,7 +120,6 @@ export function BudgetModal({
               onChange={(e) => setAmount(e.target.value)}
               className="text-6xl font-black bg-transparent border-none outline-none text-center w-full max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               placeholder="0"
-              autoFocus={!initialData}
             />
           </div>
         </div>
