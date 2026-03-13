@@ -137,9 +137,9 @@ export default function DashboardPage() {
 
   const periodExpense = dashboard?.period_expense ?? 0;
   const totalBudgetFromBudgets = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
-  const totalSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
   const monthlyFixedTotal = fixedBillsTotal(fixedBills);
   const totalBudget = totalBudgetFromBudgets + monthlyFixedTotal;
+  const totalSpent = periodExpense + monthlyFixedTotal;
   const percentSpent = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
 
   const firstBill = fixedBills[0];
@@ -207,7 +207,7 @@ export default function DashboardPage() {
               {CURRENCY_SYMBOL}
             </span>
             <h1 className="text-5xl font-heading font-semibold tracking-tighter">
-              {formatBRLocale(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatBRLocale(totalSpent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h1>
           </div>
           <div className="flex flex-col items-center gap-2.5 w-full max-w-[240px]">
