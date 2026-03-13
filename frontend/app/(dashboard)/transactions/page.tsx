@@ -64,11 +64,15 @@ export default function TransactionsPage() {
   useEffect(() => {
     if (!workspaceId || !modalOpen) return;
     Promise.all([
-      api<any[]>(`/api/workspaces/${workspaceId}/budgets`),
+      api<any[]>(`/api/workspaces/${workspaceId}/budgets?with_summaries=true`),
       api<any>(`/api/workspaces/${workspaceId}/accounts`),
     ]).then(([budgetRes, accRes]) => {
       const budgets = Array.isArray(budgetRes.data) ? budgetRes.data : [];
-      setCategories(budgets.map((b: any) => ({ id: b.id, name: b.name || b.category?.name || "Budget" })));
+      setCategories(budgets.map((b: any) => ({
+        id: b.category?.id ?? b.categoryId,
+        name: b.name || b.category?.name || "Budget",
+        type: "expense",
+      })));
       setAccounts(accRes.data?.accounts || []);
     }).catch(() => {});
   }, [workspaceId, modalOpen]);

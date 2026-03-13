@@ -356,7 +356,7 @@ export default function DashboardPage() {
         isOpen={transactionModalOpen}
         onClose={() => setTransactionModalOpen(false)}
         onSave={handleSaveTransaction}
-        categories={budgets.map((b) => ({ id: b.id, name: (b as any).name || b.category?.name || "Budget" }))}
+        categories={budgets.map((b) => ({ id: b.category?.id ?? (b as any).categoryId, name: b.name || b.category?.name || "Budget", type: "expense" }))}
         accounts={accounts}
         saving={saving}
       />

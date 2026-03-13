@@ -40,14 +40,18 @@ export default function EditTransactionClient() {
     Promise.all([
       api<Transaction>(`/api/workspaces/${workspaceId}/transactions/${id}`),
       api<{ accounts: Account[] }>(`/api/workspaces/${workspaceId}/accounts`),
-      api<any[]>(`/api/workspaces/${workspaceId}/budgets`),
+      api<any[]>(`/api/workspaces/${workspaceId}/budgets?with_summaries=true`),
     ])
       .then(([txRes, accRes, budgetRes]) => {
         if (!txRes.data) throw new Error("Transaction not found");
         setTransaction(txRes.data);
         setAccounts(accRes.data?.accounts ?? []);
         const budgets = Array.isArray(budgetRes.data) ? budgetRes.data : [];
-        setCategories(budgets.map((b: any) => ({ id: b.id, name: b.name || b.category?.name || "Budget", type: "expense" })));
+        setCategories(budgets.map((b: any) => ({
+          id: b.category?.id ?? b.categoryId,
+          name: b.name || b.category?.name || "Budget",
+          type: "expense",
+        })));
       })
       .catch((err) => setLoadError(err instanceof Error ? err.message : "Could not load transaction."));
   }, [workspaceId, id]);
