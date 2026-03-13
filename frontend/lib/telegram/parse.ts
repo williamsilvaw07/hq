@@ -21,7 +21,6 @@ export function parseExpenseMessage(text: string): ParsedExpense | null {
     .replace(/\s+(on|em|no|na|para)\s+/i, " ")
     .trim();
 
-  // Match "20 uber" or "uber 20" — amount can be "20", "20.50", "20,50"
   const amountPattern = /(\d+(?:[.,]\d{1,2})?)/;
 
   // Amount first: "20 uber"
@@ -44,7 +43,6 @@ export function parseExpenseMessage(text: string): ParsedExpense | null {
 }
 
 function parseAmount(raw: string): number {
-  // Replace comma decimal separator (PT-BR) with dot
   const normalised = raw.replace(",", ".");
   const n = parseFloat(normalised);
   return isFinite(n) && n > 0 ? n : 0;
@@ -71,7 +69,6 @@ const KEYWORD_MAP: KeywordMap = [
 
 /**
  * Returns a suggested category name based on the description.
- * Returns null if no keyword matches.
  */
 export function suggestCategory(description: string): string | null {
   const lower = description.toLowerCase();

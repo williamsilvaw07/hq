@@ -16,9 +16,102 @@ import {
   Users,
   Flag,
   LineChart,
+  Send,
+  Copy,
+  CheckCheck,
 } from "lucide-react";
 import { type FixedBill } from "@/lib/fixed-expenses";
 import { formatMoney } from "@/lib/format";
+
+function TelegramLinkSection() {
+  const [code, setCode] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function handleGenerate() {
+    setLoading(true);
+    try {
+      const r = await api<{ code: string }>("/api/telegram/link", { method: "POST" });
+      if (r.data?.code) setCode(r.data.code);
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCopy() {
+    if (!code) return;
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <section className="space-y-3 sm:space-y-4">
+      <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
+        Integrations
+      </h3>
+      <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
+        <div className="p-3 sm:p-5">
+          <div className="flex items-center gap-3 sm:gap-4 mb-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <Send className="w-5 h-5 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-sm font-bold">Connect Telegram</p>
+              <p className="text-[10px] text-muted-foreground font-medium">
+                Log expenses by sending messages to your bot
+              </p>
+            </div>
+          </div>
+
+          {!code ? (
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={loading}
+              className="w-full py-2.5 bg-blue-500/10 text-blue-400 text-xs font-bold rounded-lg active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {loading ? "Generating..." : "Generate Linking Code"}
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-[10px] text-muted-foreground">
+                Send this code to your Telegram bot. Expires in 15 minutes.
+              </p>
+              <div className="flex items-center justify-between bg-background rounded-lg px-4 py-3">
+                <span className="text-xl font-mono font-bold tracking-widest text-foreground">
+                  {code}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="text-muted-foreground active:scale-90 transition-all"
+                  aria-label="Copy code"
+                >
+                  {copied ? (
+                    <CheckCheck className="w-5 h-5 text-green-500" />
+                  ) : (
+                    <Copy className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={handleGenerate}
+                disabled={loading}
+                className="w-full py-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest"
+              >
+                {loading ? "Generating..." : "Generate New Code"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function WorkspaceSettingsSection() {
   const { workspaceId } = useAuth();
@@ -253,6 +346,9 @@ export default function SettingsPage() {
 
       {/* Workspace */}
       <WorkspaceSettingsSection />
+
+      {/* Telegram */}
+      <TelegramLinkSection />
 
       {/* App Settings */}
       <section className="space-y-3 sm:space-y-4">
