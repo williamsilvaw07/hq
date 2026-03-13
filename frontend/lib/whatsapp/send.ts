@@ -1,4 +1,4 @@
-const GRAPH_API_VERSION = "v21.0";
+const GRAPH_API_VERSION = "v22.0";
 
 /**
  * Sends a plain-text WhatsApp message via Meta Cloud API.
