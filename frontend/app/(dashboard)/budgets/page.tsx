@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Icon } from "@iconify/react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { formatBRL, CURRENCY_SYMBOL } from "@/lib/format";
+import { Plus } from "lucide-react";
+import { BudgetModal } from "./BudgetModal";
 
 type Budget = {
   id: number;
@@ -21,12 +22,13 @@ type Budget = {
   spent_percentage: number;
   category?: { id: number; name: string; icon?: string | null; color?: string | null };
 };
-type Category = { id: number; name: string; type: string };
+
+type Category = { id: number; name: string; type: string; icon?: string | null };
 
 const categoryColors = [
   "bg-orange-500/10 border-orange-500/40",
-  "bg-chart-3/10 border-chart-3/40",
-  "bg-chart-4/10 border-chart-4/40",
+  "bg-blue-500/10 border-blue-500/40",
+  "bg-purple-500/10 border-purple-500/40",
 ];
 
 function loadBudgets(workspaceId: number): Promise<Budget[]> {
@@ -38,18 +40,11 @@ export default function BudgetsPage() {
   const { workspaceId } = useAuth();
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [newCategoryId, setNewCategoryId] = useState("");
-  const [newAmount, setNewAmount] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [showNewCategory, setShowNewCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [savingCategory, setSavingCategory] = useState(false);
-  const [categoryError, setCategoryError] = useState("");
-  const [newPeriodType, setNewPeriodType] = useState<"day" | "week" | "month" | "year">("month");
-  const [newPeriodInterval, setNewPeriodInterval] = useState(1);
 
   useEffect(() => {
     if (!workspaceId) {
@@ -65,72 +60,40 @@ export default function BudgetsPage() {
   }, [workspaceId]);
 
   useEffect(() => {
-    if (!workspaceId || !showAddForm) return;
+    if (!workspaceId || !modalOpen) return;
     api<Category[]>(`/api/workspaces/${workspaceId}/categories`)
       .then((r) => setCategories(Array.isArray(r.data) ? r.data : []))
       .catch(() => setCategories([]));
-  }, [workspaceId, showAddForm]);
+  }, [workspaceId, modalOpen]);
 
-  async function handleAddBudget(e: React.FormEvent) {
-    e.preventDefault();
-    if (!workspaceId || !newCategoryId || !newAmount) return;
+  async function handleSaveBudget(data: any) {
+    if (!workspaceId) return;
     setError("");
     setSaving(true);
     try {
-      await api(`/api/workspaces/${workspaceId}/budgets`, {
-        method: "POST",
+      const isEdit = !!editingBudget;
+      const url = isEdit 
+        ? `/api/workspaces/${workspaceId}/budgets/${editingBudget.id}`
+        : `/api/workspaces/${workspaceId}/budgets`;
+      
+      await api(url, {
+        method: isEdit ? "PATCH" : "POST",
         body: JSON.stringify({
-          category_id: Number(newCategoryId),
-          period_type: newPeriodType,
-          period_interval: newPeriodInterval,
-          amount: parseFloat(newAmount.replace(",", ".")) || 0,
-          currency: "BRL",
+          ...data,
+          currency: "BRL"
         }),
       });
+      
       const list = await loadBudgets(workspaceId);
       setBudgets(list);
-      setShowAddForm(false);
-      setNewCategoryId("");
-      setNewAmount("");
-      setNewPeriodType("month");
-      setNewPeriodInterval(1);
+      setModalOpen(false);
+      setEditingBudget(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add budget");
+      setError(err instanceof Error ? err.message : "Failed to save budget");
     } finally {
       setSaving(false);
     }
   }
-
-  async function handleAddCategory(e: React.FormEvent) {
-    e.preventDefault();
-    if (!workspaceId || !newCategoryName.trim()) return;
-    setCategoryError("");
-    setSavingCategory(true);
-    try {
-      const res = await api<Category>(`/api/workspaces/${workspaceId}/categories`, {
-        method: "POST",
-        body: JSON.stringify({ name: newCategoryName.trim(), type: "expense" }),
-      });
-      if (res.data) {
-        setCategories((prev) => [...prev, res.data as Category]);
-        setNewCategoryId(String(res.data.id));
-        setNewCategoryName("");
-        setShowNewCategory(false);
-      }
-    } catch (err) {
-      setCategoryError(err instanceof Error ? err.message : "Failed to add category");
-    } finally {
-      setSavingCategory(false);
-    }
-  }
-
-  const existingCategoryIds = new Set(budgets.map((b) => b.category?.id).filter(Boolean) as number[]);
-  const availableCategories = categories.filter((c) => !existingCategoryIds.has(c.id));
-
-  const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
-  const totalRemaining = budgets.reduce((sum, b) => sum + Number(b.remaining || 0), 0);
-  const totalSpent = Math.max(0, totalBudget - totalRemaining);
-  const totalPct = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
 
   async function handleDeleteBudget(id: number) {
     if (!workspaceId) return;
@@ -144,32 +107,42 @@ export default function BudgetsPage() {
       });
       const list = await loadBudgets(workspaceId);
       setBudgets(list);
+      setModalOpen(false);
+      setEditingBudget(null);
     } catch (err) {
-      // Optionally surface error later; for now fail silently to avoid breaking UI.
+      // ignore
     }
   }
 
-  // Layout inspired by mobile-first budgeting dashboards to keep the experience focused and glanceable.
+  const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
+  const totalRemaining = budgets.reduce((sum, b) => sum + Number(b.remaining || 0), 0);
+  const totalSpent = Math.max(0, totalBudget - totalRemaining);
+  const totalPct = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
+
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans selection:bg-primary/20 tracking-tight">
-      <header className="z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground">My Budgets</h1>
-          <Link
-            href="/budgets/new"
-            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all active:scale-95 shadow-lg shadow-white/5"
-            aria-label="Add budget"
-          >
-            <Icon icon="material-symbols:add-rounded" className="text-2xl" />
-          </Link>
-        </div>
-        <div className="bg-card p-3 sm:p-5 rounded-2xl sm:rounded-3xl border border-border/50">
-          <div className="flex justify-between items-end mb-2 sm:mb-3">
+    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans tracking-tight">
+      <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
+        <h1 className="page-title">Budgets</h1>
+        <button
+          onClick={() => {
+            setEditingBudget(null);
+            setModalOpen(true);
+          }}
+          className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95 border border-border/50"
+          aria-label="Add Budget"
+        >
+          <Plus className="w-5 h-5 text-muted-foreground" />
+        </button>
+      </header>
+
+      <div className="px-4 sm:px-0">
+        <div className="bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/50 shadow-xl shadow-black/10">
+          <div className="flex justify-between items-end mb-3 sm:mb-4">
             <div>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1">
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-60">
                 Total Monthly Budget
               </p>
-              <p className="text-xl sm:text-2xl font-black">
+              <p className="text-2xl sm:text-3xl font-black">
                 {CURRENCY_SYMBOL}{" "}
                 {formatBRL(totalBudget, {
                   minimumFractionDigits: 2,
@@ -178,10 +151,10 @@ export default function BudgetsPage() {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1">
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-60">
                 Remaining
               </p>
-              <p className="text-lg sm:text-xl font-bold text-chart-1">
+              <p className="text-xl sm:text-2xl font-bold text-chart-1">
                 {CURRENCY_SYMBOL}{" "}
                 {formatBRL(totalRemaining, {
                   minimumFractionDigits: 2,
@@ -193,139 +166,80 @@ export default function BudgetsPage() {
           <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
             <div
               style={{ width: `${totalPct}%` }}
-              className="h-full bg-white rounded-full"
+              className="h-full bg-white rounded-full transition-all duration-500"
             />
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="px-4 sm:px-6 py-4 sm:py-6 space-y-5 sm:space-y-8">
-        <section className="space-y-3 sm:space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-              Active Budgets
-            </h3>
-          </div>
-          <div className="space-y-3">
+      <main className="px-4 sm:px-0 py-6 sm:py-8 space-y-6 sm:space-y-10">
+        <section className="space-y-4">
+          <h3 className="text-[10px] font-bold text-muted-foreground ml-1 uppercase tracking-[0.2em] opacity-60">
+            Active Budgets
+          </h3>
+          <div className="grid grid-cols-1 gap-3.5">
             {loading && workspaceId ? (
-              <p className="text-muted-foreground text-sm py-4 px-1">
-                Loading…
-              </p>
+              <p className="text-muted-foreground text-sm py-4 px-1">Loading…</p>
             ) : budgets.length === 0 ? (
-              <div className="bg-card p-5 sm:p-8 rounded-xl sm:rounded-[2rem] border border-border/50 text-center">
-                <p className="text-muted-foreground text-sm">
-                  No budgets set yet.
-                </p>
-                <Link
-                  href="/budgets/new"
-                  className="inline-flex items-center justify-center mt-3 sm:mt-4 py-2 px-4 sm:py-2.5 sm:px-5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-all"
+              <div className="bg-card/50 p-8 rounded-3xl border border-border/30 text-center space-y-4">
+                <p className="text-muted-foreground text-sm">No budgets set yet.</p>
+                <button
+                  onClick={() => {
+                    setEditingBudget(null);
+                    setModalOpen(true);
+                  }}
+                  className="py-2.5 px-6 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest active:scale-95 transition-all"
                 >
-                  Add your first budget
-                </Link>
+                  Create Budget
+                </button>
               </div>
             ) : (
-              budgets.map((b, i) => {
-                const amount = Number(b.amount);
-                const spent = Number(b.spent);
-                const remaining = Number(b.remaining);
-                const pct = Number.isFinite(b.spent_percentage)
-                  ? b.spent_percentage
-                  : amount > 0
-                    ? Math.min(100, (spent / amount) * 100)
-                    : 0;
-                const colorClass =
-                  categoryColors[i % categoryColors.length] ??
-                  "bg-chart-4/10 border-chart-4/40";
-                const periodLabel =
-                  b.period_type === "week"
-                    ? "Weekly"
-                    : b.period_type === "month" &&
-                        (b.period_interval ?? 1) === 3
-                      ? "Every 3 Months"
-                      : "Monthly";
-
-                const iconId =
-                  (typeof b.category?.icon === "string" &&
-                    b.category.icon.trim().length > 0 &&
-                    b.category.icon) ||
-                  null;
-
+              budgets.map((budget, i) => {
+                const amount = Number(budget.amount);
+                const spent = Number(budget.spent);
+                const remaining = Number(budget.remaining);
+                const pct = Number.isFinite(budget.spent_percentage)
+                  ? budget.spent_percentage
+                  : amount > 0 ? Math.min(100, (spent / amount) * 100) : 0;
+                
+                const colorClass = categoryColors[i % categoryColors.length] ?? "bg-zinc-500/10 border-zinc-500/20";
+                
                 return (
                   <div
-                    key={b.id}
-                    className="bg-card p-3 sm:p-5 rounded-xl sm:rounded-[2rem] border border-border/50 space-y-3 sm:space-y-4 group"
+                    key={budget.id}
+                    onClick={() => {
+                      setEditingBudget(budget);
+                      setModalOpen(true);
+                    }}
+                    className="bg-card p-4 sm:p-6 rounded-[2rem] border border-border/40 space-y-4 active:scale-[0.98] transition-all cursor-pointer group hover:border-border/80"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 sm:gap-4">
-                        <div
-                          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center border shrink-0 ${colorClass}`}
-                        >
-                          {iconId ? (
-                            <Icon icon={iconId} className="text-2xl" />
-                          ) : (
-                            <span className="text-xl">
-                              {b.category?.name
-                                ? b.category.name.charAt(0).toUpperCase()
-                                : "💰"}
-                            </span>
-                          )}
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${colorClass} text-2xl`}>
+                          {budget.category?.icon || "💰"}
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold">
-                            {b.category?.name ?? "Category"}
-                          </h4>
-                          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-                            {periodLabel} • Resets {b.next_reset_date}
+                          <h4 className="text-sm font-bold text-foreground">{budget.category?.name || "Budget"}</h4>
+                          <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
+                            {budget.period_type ?? "Monthly"} • {budget.next_reset_date || "Active"}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <Link
-                          href={`/budgets/${b.id}/edit`}
-                          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg sm:rounded-xl bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="Edit budget"
-                        >
-                          <Icon
-                            icon="solar:pen-bold-duotone"
-                            className="text-lg"
-                          />
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteBudget(b.id)}
-                          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg sm:rounded-xl bg-secondary/50 text-muted-foreground hover:text-destructive transition-colors"
-                          aria-label="Delete budget"
-                        >
-                          <Icon
-                            icon="solar:trash-bin-trash-bold-duotone"
-                            className="text-lg"
-                          />
-                        </button>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">
+                          {CURRENCY_SYMBOL} {formatBRL(remaining, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter ml-1">left</span>
+                        </p>
+                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
+                          of {CURRENCY_SYMBOL} {formatBRL(amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        </p>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-tight">
-                        <span className="text-muted-foreground">
-                          Spent{" "}
-                          {CURRENCY_SYMBOL}{" "}
-                          {formatBRL(spent, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </span>
-                        <span className="text-foreground">
-                          {CURRENCY_SYMBOL}{" "}
-                          {formatBRL(remaining, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}{" "}
-                          left
-                        </span>
-                      </div>
                       <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
                         <div
                           style={{ width: `${pct}%` }}
-                          className="h-full bg-white rounded-full"
+                          className="h-full bg-white rounded-full transition-all duration-500"
                         />
                       </div>
                     </div>
@@ -336,6 +250,18 @@ export default function BudgetsPage() {
           </div>
         </section>
       </main>
+
+      {modalOpen && (
+        <BudgetModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSaveBudget}
+          onDelete={handleDeleteBudget}
+          initialData={editingBudget}
+          categories={categories}
+          saving={saving}
+        />
+      )}
     </div>
   );
 }

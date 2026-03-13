@@ -44,25 +44,26 @@ export function Modal({ isOpen, title, subtitle, showCloseButton = true, childre
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/60 backdrop-blur-[2px] animate-fade-in"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
         ref={dialogRef}
-        className={`w-full ${maxWidthClass} max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0 mx-4 sm:mx-0 bg-card rounded-t-[32px] sm:rounded-[32px] shadow-xl flex flex-col transform origin-bottom sm:origin-center animate-scale-in`}
+        className={`w-full ${maxWidthClass} max-h-[92vh] sm:max-h-[90vh] overflow-hidden bg-card rounded-t-[32px] sm:rounded-[32px] shadow-2xl flex flex-col transform origin-bottom sm:origin-center animate-scale-in transition-transform duration-300 ease-out`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 rounded-full bg-border/50 mx-auto mt-3 mb-1 shrink-0" />
+        <div className="w-12 h-1.5 rounded-full bg-border/40 mx-auto mt-3 mb-1 shrink-0 cursor-grab active:cursor-grabbing" />
+        
         <div className="flex flex-col items-center justify-center p-4 sm:p-6 pb-2 shrink-0 relative">
           {subtitle && (
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 text-center">
+            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1.5 text-center opacity-70">
               {subtitle}
             </span>
           )}
           {title ? (
-            <h2 className="text-xl font-bold text-foreground text-center">{title}</h2>
+            <h2 className="text-xl font-bold text-foreground text-center tracking-tight">{title}</h2>
           ) : (
             <span />
           )}
@@ -70,21 +71,27 @@ export function Modal({ isOpen, title, subtitle, showCloseButton = true, childre
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 -m-2 rounded-xl text-muted-foreground hover:text-foreground active:bg-secondary touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-xl text-muted-foreground hover:text-foreground active:bg-secondary transition-colors"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
           )}
         </div>
-        <div className="flex-1 min-h-0 min-w-0 p-4 sm:p-6 pt-2 space-y-4">
-          {children}
+
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 pt-2 pb-safe-offset-4 w-full">
+          <div className="w-full max-w-full mx-auto space-y-4">
+            {children}
+          </div>
         </div>
+
         {footer ? (
-          <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 border-t border-border/40 bg-card/80 flex flex-col gap-3">
+          <div className="px-4 sm:px-6 pb-6 sm:pb-8 pt-4 border-t border-border/10 bg-card/80 backdrop-blur-md flex flex-col gap-3 shrink-0 mb-safe mt-auto">
             {footer}
           </div>
-        ) : null}
+        ) : (
+          <div className="h-6 sm:hidden shrink-0" />
+        )}
       </div>
     </div>
   );

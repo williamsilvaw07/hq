@@ -49,7 +49,7 @@ function RecurringEditor({ bill, setDraft }: RecurringEditorProps) {
           </select>
         </label>
 
-        <label className="block">
+        <label className="block w-full overflow-hidden">
           <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider block mb-1.5">
             Starts on
           </span>
@@ -69,7 +69,7 @@ function RecurringEditor({ bill, setDraft }: RecurringEditorProps) {
                 };
               });
             }}
-            className="w-full min-w-0 max-w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-medium text-foreground min-h-[44px] touch-manipulation"
+            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-medium text-foreground min-h-[44px] touch-manipulation focus:outline-none focus:ring-1 focus:ring-primary/20 box-border"
           />
         </label>
 
@@ -96,7 +96,7 @@ function RecurringEditor({ bill, setDraft }: RecurringEditorProps) {
           </label>
         )}
 
-        <label className="block">
+        <label className="block w-full overflow-hidden">
           <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider block mb-1.5">
             Ends on
           </span>
@@ -106,7 +106,7 @@ function RecurringEditor({ bill, setDraft }: RecurringEditorProps) {
             onChange={(e) =>
               setDraft((prev) => ({ ...prev, endDate: e.target.value || null }))
             }
-            className="w-full min-w-0 max-w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-medium text-foreground min-h-[44px] touch-manipulation"
+            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-medium text-foreground min-h-[44px] touch-manipulation focus:outline-none focus:ring-1 focus:ring-primary/20 box-border"
           />
         </label>
       </div>

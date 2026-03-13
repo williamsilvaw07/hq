@@ -433,46 +433,6 @@ export default function DashboardPage() {
         </section>
       </main>
 
-      {/* Bottom navigation */}
-      <div className="fixed bottom-0 left-0 w-full z-50 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
-        <div className="bg-card/80 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-1.5 flex items-center justify-between shadow-2xl shadow-black/50">
-          <Link
-            href="/dashboard"
-            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-primary"
-          >
-            <Icon icon="solar:home-2-bold-duotone" className="text-xl" />
-            <span className="text-[8px] font-bold uppercase tracking-widest">Home</span>
-          </Link>
-          <Link
-            href="/history"
-            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Icon icon="solar:history-bold-duotone" className="text-xl" />
-            <span className="text-[8px] font-bold uppercase tracking-widest">History</span>
-          </Link>
-          <Link
-            href="/transactions/new"
-            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Icon icon="hugeicons:add-01" className="text-xl" />
-            <span className="text-[8px] font-bold uppercase tracking-widest">Add</span>
-          </Link>
-          <Link
-            href="/budgets"
-            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Icon icon="solar:wallet-bold-duotone" className="text-xl" />
-            <span className="text-[8px] font-bold uppercase tracking-widest">Budgets</span>
-          </Link>
-          <Link
-            href="/settings"
-            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Icon icon="solar:settings-bold-duotone" className="text-xl" />
-            <span className="text-[8px] font-bold uppercase tracking-widest">Setup</span>
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }
