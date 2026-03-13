@@ -31,8 +31,15 @@ export default function DashboardLayout({
         setWorkspaces(list);
         if (list.length > 0 && !workspaceId) setWorkspaceId(list[0].id);
       })
-      .catch(() => {});
-  }, [setWorkspaceId, workspaceId]);
+      .catch((err: unknown) => {
+        const status = (err as { status?: number })?.status;
+        if (status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("workspaceId");
+          router.push("/login");
+        }
+      });
+  }, [setWorkspaceId, workspaceId, router]);
 
   useEffect(() => {
     if (loading) return;

@@ -5,6 +5,8 @@ export type FixedBill = {
   name: string;
   category: string;
   amount: number;
+  /** Emoji/icon shown on the bill card (e.g. 🏠, 💡) */
+  icon?: string | null;
   /** Next charge date, free-form string (e.g. DD/MM/YYYY) */
   due: string;
   /** Whether the bill is considered due soon for UI highlighting */
@@ -25,6 +27,7 @@ export const MOCK_FIXED_BILLS: FixedBill[] = [
     name: "Apartment Rent",
     category: "Housing",
     amount: 2200,
+    icon: "🏠",
     due: "01/10/2023",
     dueSoon: true,
     frequency: "monthly",
@@ -37,6 +40,7 @@ export const MOCK_FIXED_BILLS: FixedBill[] = [
     name: "Netflix 4K",
     category: "Entertainment",
     amount: 19.99,
+    icon: "📺",
     due: "12/10/2023",
     dueSoon: false,
     frequency: "monthly",
@@ -49,6 +53,7 @@ export const MOCK_FIXED_BILLS: FixedBill[] = [
     name: "Cloud Storage",
     category: "Tech",
     amount: 9.99,
+    icon: "☁️",
     due: "20/10/2023",
     dueSoon: false,
     frequency: "monthly",
@@ -99,6 +104,7 @@ export function loadFixedBills(workspaceId: number | null): FixedBill[] {
         name: String(b.name ?? ""),
         category: String(b.category ?? ""),
         amount: Number(b.amount ?? 0),
+        icon: typeof b.icon === "string" && b.icon.trim() ? b.icon.trim() : null,
         due: safeDue,
         dueSoon: Boolean(b.dueSoon),
         frequency,

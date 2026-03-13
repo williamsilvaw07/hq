@@ -322,7 +322,11 @@ export default function DashboardPage() {
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                <Icon icon="solar:home-2-bold-duotone" className="text-muted-foreground text-base" />
+                {firstBill?.icon ? (
+                  <span className="text-lg">{firstBill.icon}</span>
+                ) : (
+                  <Icon icon="solar:home-2-bold-duotone" className="text-muted-foreground text-base" />
+                )}
               </div>
               <div>
                 <p className="text-xs font-semibold">

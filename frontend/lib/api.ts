@@ -50,9 +50,11 @@ export async function api<T>(
     const firstError =
       json.errors &&
       Object.values(json.errors).flat().find(Boolean);
-    throw new Error(
+    const err = new Error(
       firstError || json.message || res.statusText || "Request failed"
-    );
+    ) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
   }
   return json;
 }

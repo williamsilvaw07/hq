@@ -19,6 +19,11 @@ import {
 
 type DraftSetter = React.Dispatch<React.SetStateAction<FixedBill | null>>;
 
+const FIXED_BILL_EMOJI_OPTIONS = [
+  "🏠", "💡", "📺", "📱", "☁️", "🚗", "🏥", "📚",
+  "🛒", "💳", "🎮", "✈️", "🍕", "💧", "🔧", "📦",
+];
+
 type RecurringEditorProps = {
   bill: FixedBill;
   originalId: number;
@@ -188,6 +193,7 @@ export default function FixedExpensesPage() {
       name: "New bill",
       category: "General",
       amount: 0,
+      icon: "🏠",
       // Store next date in ISO so it works well with <input type="date" />
       due: `${year}-${month}-${day}`,
       dueSoon: false,
@@ -258,9 +264,37 @@ export default function FixedExpensesPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-secondary flex items-center justify-center shrink-0">
-                        <Home className="w-6 h-6 text-muted-foreground" />
+                        {display.icon ? (
+                          <span className="text-xl sm:text-2xl">{display.icon}</span>
+                        ) : (
+                          <Home className="w-6 h-6 text-muted-foreground" />
+                        )}
                       </div>
                       <div>
+                        {isEditing && (
+                          <div className="flex flex-wrap gap-1.5 mb-2">
+                            {FIXED_BILL_EMOJI_OPTIONS.map((emoji) => (
+                              <button
+                                key={emoji}
+                                type="button"
+                                onClick={() =>
+                                  setDraft((prev) =>
+                                    prev && prev.id === bill.id
+                                      ? { ...prev, icon: display.icon === emoji ? null : emoji }
+                                      : prev,
+                                  )
+                                }
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg transition-all ${
+                                  display.icon === emoji
+                                    ? "bg-primary/20 ring-2 ring-primary"
+                                    : "bg-secondary/50 hover:bg-secondary"
+                                }`}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         {isEditing ? (
                           <input
                             type="text"

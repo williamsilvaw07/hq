@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 import {
   Camera,
   Wallet,
@@ -31,9 +32,8 @@ function WorkspaceSettingsSection() {
         return;
       }
       try {
-        const res = await fetch("/api/workspaces");
-        const data = (await res.json()) as { data?: { id: number; name: string }[] };
-        const list = Array.isArray(data.data) ? data.data : [];
+        const r = await api<{ id: number; name: string }[]>("/api/workspaces");
+        const list = Array.isArray(r.data) ? r.data : [];
         const current = list.find((w) => w.id === workspaceId);
         if (!cancelled) {
           setWorkspaceName(current?.name ?? null);
@@ -256,7 +256,11 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center gap-2.5 sm:gap-3">
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-background flex items-center justify-center shrink-0">
-                    <Home className="w-5 h-5 text-muted-foreground" />
+                    {bill.icon ? (
+                      <span className="text-lg">{bill.icon}</span>
+                    ) : (
+                      <Home className="w-5 h-5 text-muted-foreground" />
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-bold">{bill.name}</p>
