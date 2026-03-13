@@ -208,23 +208,27 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: FixedBi
         onSubmit={handleSubmit}
         className="flex flex-col flex-1 min-h-0 min-w-0 space-y-4"
       >
-          <div className="grid grid-cols-5 gap-2">
-            {FIXED_BILL_EMOJI_OPTIONS.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                onClick={() =>
-                  setDraft((prev) => ({ ...prev, icon: prev.icon === emoji ? null : emoji }))
-                }
-                className={`aspect-square min-w-0 rounded-xl flex items-center justify-center text-xl transition-all touch-manipulation active:scale-95 ${
-                  draft.icon === emoji
-                    ? "bg-primary/20 ring-2 ring-primary"
-                    : "bg-secondary/50 active:bg-secondary"
-                }`}
-              >
-                {emoji}
-              </button>
-            ))}
+          <div className="space-y-1.5">
+            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider block">
+              Icon
+            </span>
+            <select
+              value={draft.icon ?? ""}
+              onChange={(e) =>
+                setDraft((prev) => ({
+                  ...prev,
+                  icon: e.target.value || null,
+                }))
+              }
+              className="w-full min-w-0 max-w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-medium text-foreground min-h-[44px] touch-manipulation"
+            >
+              <option value="">None</option>
+              {FIXED_BILL_EMOJI_OPTIONS.map((emoji) => (
+                <option key={emoji} value={emoji}>
+                  {emoji}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
