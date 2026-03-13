@@ -85,7 +85,21 @@ button:focus-visible,
   @apply bg-card rounded-2xl;
 }
 .page-title {
-  @apply text-xl font-bold text-foreground;
+  @apply text-lg sm:text-xl font-bold text-foreground;
+}
+
+/* Mobile-first spacing utilities */
+.mobile-px {
+  @apply px-4 sm:px-6;
+}
+.mobile-section-gap {
+  @apply space-y-4 sm:space-y-6;
+}
+.mobile-card-padding {
+  @apply p-3 sm:p-5;
+}
+.mobile-card-padding-lg {
+  @apply p-4 sm:p-6;
 }
 
 .no-scrollbar::-webkit-scrollbar {

@@ -219,10 +219,10 @@ export default function FixedExpensesPage() {
   }
 
   return (
-    <div className="space-y-8 pt-6">
-      <div className="flex flex-col items-center justify-center py-6 bg-card rounded-[2.5rem] text-center px-8">
+    <div className="space-y-5 sm:space-y-8 pt-4 sm:pt-6">
+      <div className="flex flex-col items-center justify-center py-4 sm:py-6 bg-card rounded-2xl sm:rounded-[2.5rem] text-center px-4 sm:px-8">
         <p className="section-title mb-2">Monthly Total</p>
-        <h2 className="text-3xl font-bold tracking-tighter">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter">
           {formatMoney(monthlyTotal)}
         </h2>
         <p className="text-[9px] text-chart-1 font-bold uppercase tracking-widest mt-2 px-3 py-1 bg-chart-1/5 rounded-full border border-chart-1/10">
@@ -253,11 +253,11 @@ export default function FixedExpensesPage() {
               return (
                 <div
                   key={bill.id}
-                  className="bg-card p-6 rounded-[2rem] space-y-5"
+                  className="bg-card p-4 sm:p-6 rounded-xl sm:rounded-[2rem] space-y-4 sm:space-y-5"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-secondary flex items-center justify-center shrink-0">
                         <Home className="w-6 h-6 text-muted-foreground" />
                       </div>
                       <div>

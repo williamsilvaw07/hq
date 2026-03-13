@@ -54,7 +54,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold tracking-tight text-foreground mb-6">Sign in</h1>
+      <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">Sign in</h1>
       {dbHealthy === false && (
         <p className="mb-4 text-xs rounded-2xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-red-300">
           Database error: {dbMessage}
@@ -65,7 +65,7 @@ export default function LoginPage() {
           Database connection OK.
         </p>
       )}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
         {error && (
           <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
             {error}
@@ -79,7 +79,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-2xl border border-border/50 bg-card px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
           />
         </div>
         <div>
@@ -95,13 +95,13 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-2xl border border-border/50 bg-card px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-2xl bg-primary text-primary-foreground py-3.5 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all"
+          className="w-full rounded-xl sm:rounded-2xl bg-primary text-primary-foreground py-2.5 sm:py-3 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>

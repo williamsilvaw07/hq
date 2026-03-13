@@ -94,7 +94,7 @@ export default function SettingsProfilePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-10 font-sans tracking-tight">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -115,7 +115,7 @@ export default function SettingsProfilePage() {
           {saving ? "Saving…" : saved ? "Saved" : "Save"}
         </button>
       </header>
-      <main className="px-6 space-y-8 pt-6">
+      <main className="px-4 sm:px-6 space-y-5 sm:space-y-8 pt-4 sm:pt-6">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <input
@@ -130,7 +130,7 @@ export default function SettingsProfilePage() {
               type="button"
               onClick={handleAvatarClick}
               disabled={avatarUploading}
-              className="relative w-28 h-28 rounded-full bg-secondary flex items-center justify-center text-3xl font-bold text-foreground shadow-2xl overflow-hidden active:scale-95 transition-all"
+              className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-secondary flex items-center justify-center text-2xl sm:text-3xl font-bold text-foreground shadow-2xl overflow-hidden active:scale-95 transition-all"
               aria-label="Change photo"
             >
               {user?.avatar_url ? (
@@ -207,11 +207,11 @@ export default function SettingsProfilePage() {
         </form>
         <div className="pt-8 space-y-4">
           <h3 className="section-title px-1">Privacy & Security</h3>
-          <div className="bg-card rounded-3xl overflow-hidden">
+          <div className="bg-card rounded-2xl sm:rounded-3xl overflow-hidden">
             <button
               type="button"
               onClick={() => setShowPasswordModal(true)}
-              className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+              className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
             >
               <span className="text-sm font-bold">Change Password</span>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -229,7 +229,7 @@ export default function SettingsProfilePage() {
 
       {showPasswordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className="bg-card rounded-2xl w-full max-w-sm p-6 shadow-xl">
+          <div className="bg-card rounded-xl sm:rounded-2xl w-full max-w-sm p-4 sm:p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-foreground">Change Password</h3>
               <button

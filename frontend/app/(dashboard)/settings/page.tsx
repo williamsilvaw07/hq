@@ -49,14 +49,14 @@ function WorkspaceSettingsSection() {
   }, [workspaceId]);
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-3 sm:space-y-4">
       <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
         Workspace
       </h3>
-      <div className="bg-secondary rounded-3xl overflow-hidden">
-        <div className="flex items-center justify-between p-5 border-b border-border/50">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-chart-4/10 flex items-center justify-center">
+      <div className="bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden">
+        <div className="flex items-center justify-between p-3 sm:p-5 border-b border-border/50">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/10 flex items-center justify-center shrink-0">
               <Users className="w-5 h-5 text-chart-4" />
             </div>
             <div className="text-left">
@@ -74,10 +74,10 @@ function WorkspaceSettingsSection() {
         </div>
         <Link
           href="/settings/workspaces"
-          className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+          className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-chart-4/10 flex items-center justify-center">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/10 flex items-center justify-center shrink-0">
               <Users className="w-5 h-5 text-chart-4" />
             </div>
             <div className="text-left">
@@ -91,10 +91,10 @@ function WorkspaceSettingsSection() {
         </Link>
         <Link
           href="/settings/workspaces"
-          className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+          className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-chart-1/10 flex items-center justify-center">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-1/10 flex items-center justify-center shrink-0">
               <Users className="w-5 h-5 text-chart-1" />
             </div>
             <div className="text-left">
@@ -108,10 +108,10 @@ function WorkspaceSettingsSection() {
         </Link>
         <Link
           href="/settings/team"
-          className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-chart-3/10 flex items-center justify-center">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-3/10 flex items-center justify-center shrink-0">
               <Users className="w-5 h-5 text-chart-3" />
             </div>
             <div className="text-left">
@@ -147,45 +147,45 @@ export default function SettingsPage() {
   }, [refreshFixedBills]);
 
   return (
-    <div className="space-y-8 pt-4">
+    <div className="space-y-5 sm:space-y-8 pt-2 sm:pt-4">
       {/* Profile card */}
-      <section className="flex flex-col items-center py-6 bg-secondary rounded-[2.5rem] overflow-hidden">
+      <section className="flex flex-col items-center py-4 sm:py-6 bg-secondary rounded-2xl sm:rounded-[2.5rem] overflow-hidden">
         <div className="relative group">
-          <div className="w-24 h-24 rounded-full bg-secondary border-2 border-primary/20 flex items-center justify-center text-2xl font-bold text-foreground">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary border-2 border-primary/20 flex items-center justify-center text-xl sm:text-2xl font-bold text-foreground">
             {user?.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
           <button
             type="button"
-            className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-4 border-card active:scale-90 transition-all shadow-lg"
+            className="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-2 sm:border-4 border-card active:scale-90 transition-all shadow-lg"
             aria-label="Change photo"
           >
             <Camera className="w-4 h-4" />
           </button>
         </div>
-        <h2 className="text-xl font-bold mt-4">{user?.name ?? "User"}</h2>
-        <p className="text-xs text-muted-foreground font-medium mt-1 uppercase tracking-widest">
+        <h2 className="text-lg sm:text-xl font-bold mt-3 sm:mt-4">{user?.name ?? "User"}</h2>
+        <p className="text-xs text-muted-foreground font-medium mt-0.5 sm:mt-1 uppercase tracking-widest">
           {user?.email ?? ""}
         </p>
         <Link
           href="/settings/profile"
-          className="mt-6 px-6 py-2.5 bg-secondary rounded-xl text-xs font-bold active:scale-95 transition-all"
+          className="mt-4 sm:mt-6 px-4 sm:px-6 py-2 bg-secondary rounded-xl text-xs font-bold active:scale-95 transition-all"
         >
           Edit Profile
         </Link>
       </section>
 
       {/* Financial Setup */}
-      <section className="space-y-4">
+      <section className="space-y-3 sm:space-y-4">
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
           Financial Setup
         </h3>
-        <div className="bg-secondary rounded-3xl overflow-hidden">
+        <div className="bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden">
           <Link
             href="/budgets"
-            className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
                 <Wallet className="w-5 h-5 text-orange-500" />
               </div>
               <div className="text-left">
@@ -197,10 +197,10 @@ export default function SettingsPage() {
           </Link>
           <Link
             href="/budgets"
-            className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-chart-1/10 flex items-center justify-center">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-1/10 flex items-center justify-center shrink-0">
                 <Flag className="w-5 h-5 text-chart-1" />
               </div>
               <div className="text-left">
@@ -214,10 +214,10 @@ export default function SettingsPage() {
           </Link>
           <Link
             href="/settings/fixed-expenses"
-            className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
                 <Calendar className="w-5 h-5 text-blue-500" />
               </div>
               <div className="text-left">
@@ -231,7 +231,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Active Bills */}
-      <section className="space-y-4">
+      <section className="space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
             Active Bills
@@ -252,10 +252,10 @@ export default function SettingsPage() {
             fixedBills.map((bill) => (
               <div
                 key={bill.id}
-                className="flex items-center justify-between p-4 bg-secondary rounded-2xl"
+                className="flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-xl sm:rounded-2xl"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-background flex items-center justify-center shrink-0">
                     <Home className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div>
@@ -282,17 +282,17 @@ export default function SettingsPage() {
       <WorkspaceSettingsSection />
 
       {/* App Settings */}
-      <section className="space-y-4">
+      <section className="space-y-3 sm:space-y-4">
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
           App Settings
         </h3>
-        <div className="bg-secondary rounded-3xl overflow-hidden">
+        <div className="bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden">
           <Link
             href="/settings/dashboard"
-            className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-chart-1/10 flex items-center justify-center">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-1/10 flex items-center justify-center shrink-0">
                 <LineChart className="w-5 h-5 text-chart-1" />
               </div>
               <div className="text-left">
@@ -306,10 +306,10 @@ export default function SettingsPage() {
           </Link>
           <button
             type="button"
-            className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-secondary flex items-center justify-center shrink-0">
                 <Lock className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="text-left">
@@ -321,10 +321,10 @@ export default function SettingsPage() {
           </button>
           <button
             type="button"
-            className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-secondary flex items-center justify-center shrink-0">
                 <Bell className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="text-left">
@@ -338,11 +338,11 @@ export default function SettingsPage() {
       </section>
 
       {/* Sign Out */}
-      <section className="pt-4">
+      <section className="pt-2 sm:pt-4">
         <button
           type="button"
           onClick={() => logout()}
-          className="w-full py-5 bg-chart-2/10 border border-chart-2/20 text-chart-2 font-bold text-sm rounded-3xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 sm:py-4 bg-chart-2/10 border border-chart-2/20 text-chart-2 font-bold text-sm rounded-2xl sm:rounded-3xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
           <LogOut className="w-5 h-5" />
           Sign Out

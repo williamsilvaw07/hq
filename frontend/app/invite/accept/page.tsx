@@ -64,8 +64,8 @@ function AcceptInviteContent() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="card-base p-8 max-w-sm text-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+        <div className="card-base p-5 sm:p-8 max-w-sm w-full text-center">
           <h1 className="text-xl font-bold text-foreground mb-2">Invalid link</h1>
           <p className="text-sm text-muted-foreground mb-4">This invite link is missing or invalid.</p>
           <Link href="/login" className="text-primary font-bold text-sm hover:underline">Go to sign in</Link>
@@ -84,8 +84,8 @@ function AcceptInviteContent() {
 
   if (error && !info) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="card-base p-8 max-w-sm text-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+        <div className="card-base p-5 sm:p-8 max-w-sm w-full text-center">
           <h1 className="text-xl font-bold text-foreground mb-2">Invitation invalid</h1>
           <p className="text-sm text-muted-foreground mb-4">{error}</p>
           <Link href="/login" className="text-primary font-bold text-sm hover:underline">Go to sign in</Link>
@@ -95,9 +95,9 @@ function AcceptInviteContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="card-base p-8 max-w-sm w-full space-y-6">
-        <h1 className="text-xl font-bold text-foreground">Workspace invitation</h1>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+      <div className="card-base p-5 sm:p-8 max-w-sm w-full space-y-4 sm:space-y-6">
+        <h1 className="text-lg sm:text-xl font-bold text-foreground">Workspace invitation</h1>
         <p className="text-sm text-muted-foreground">
           You&apos;ve been invited to join <strong className="text-foreground">{info?.workspace_name ?? "a workspace"}</strong> as <strong className="text-foreground">{info?.role ?? "member"}</strong>.
         </p>
@@ -109,7 +109,7 @@ function AcceptInviteContent() {
               type="button"
               onClick={handleAccept}
               disabled={accepting}
-              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50"
+              className="w-full py-2.5 sm:py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50"
             >
               {accepting ? "Accepting…" : "Accept invitation"}
             </button>
@@ -119,13 +119,13 @@ function AcceptInviteContent() {
             <p className="text-sm text-muted-foreground">Sign in or register to accept this invitation.</p>
             <Link
               href={`/login?returnTo=${encodeURIComponent("/invite/accept?token=" + token)}`}
-              className="block w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm text-center"
+              className="block w-full py-2.5 sm:py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm text-center"
             >
               Sign in
             </Link>
             <Link
               href={`/register?returnTo=${encodeURIComponent("/invite/accept?token=" + token)}`}
-              className="block w-full py-3 rounded-xl border border-border text-foreground font-bold text-sm text-center"
+              className="block w-full py-2.5 sm:py-3 rounded-xl border border-border text-foreground font-bold text-sm text-center"
             >
               Register
             </Link>

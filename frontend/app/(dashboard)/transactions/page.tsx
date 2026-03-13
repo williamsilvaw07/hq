@@ -79,21 +79,21 @@ export default function TransactionsPage() {
   }, {});
 
   return (
-    <div className="space-y-6 pb-4">
-      <header className="sticky top-0 z-30 -mx-6 px-6 py-4 bg-background/80 backdrop-blur-md space-y-4">
+    <div className="space-y-4 sm:space-y-6 pb-4">
+      <header className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="page-title">Activity History</h1>
           <button
             type="button"
             onClick={() => setFilterOpen(true)}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-95 ${status || from || to ? "bg-primary/20 text-primary" : "bg-card text-foreground"}`}
+            className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl transition-all active:scale-95 ${status || from || to ? "bg-primary/20 text-primary" : "bg-card text-foreground"}`}
             aria-label="Filter"
           >
             <Filter className={`w-5 h-5 ${status || from || to ? "text-primary" : "text-muted-foreground"}`} />
           </button>
         </div>
         {filterOpen && (
-          <div className="bg-card rounded-2xl p-4 space-y-3 border border-border">
+          <div className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-2 sm:space-y-3 border border-border">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-foreground uppercase tracking-wider">Filter</span>
               <button type="button" onClick={() => setFilterOpen(false)} className="p-1 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Close">
@@ -124,22 +124,22 @@ export default function TransactionsPage() {
           </div>
         )}
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search transactions..."
-            className="w-full bg-card border border-border rounded-2xl py-3.5 pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-all"
+            className="w-full bg-card border border-border rounded-xl sm:rounded-2xl py-2.5 sm:py-3.5 pl-10 sm:pl-11 pr-3 sm:pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-all"
           />
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-6 px-6">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-4 sm:-mx-6 px-4 sm:px-6">
           {filterPills.map(({ id, label }) => (
             <button
               key={id}
               type="button"
               onClick={() => setTypeFilter(id)}
-              className={`whitespace-nowrap px-5 py-2 rounded-xl text-xs font-bold transition-all border ${
+              className={`whitespace-nowrap px-4 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs font-bold transition-all border ${
                 typeFilter === id
                   ? "bg-muted text-foreground border-border"
                   : "bg-card text-muted-foreground border-border"
@@ -151,9 +151,9 @@ export default function TransactionsPage() {
         </div>
       </header>
 
-      <div className="space-y-8">
+      <div className="space-y-5 sm:space-y-8">
         {list.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
+          <div className="flex flex-col items-center justify-center py-10 sm:py-16 text-center gap-2 sm:gap-3">
             <p className="text-sm font-medium text-foreground">No activity yet for this workspace and filters.</p>
             <p className="text-xs text-muted-foreground max-w-[260px]">
               Add a transaction or adjust the filters above to see your income and expenses here.
@@ -161,13 +161,13 @@ export default function TransactionsPage() {
             <div className="flex gap-2 mt-2">
               <Link
                 href="/transactions/new"
-                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold active:scale-95"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl bg-primary text-primary-foreground text-xs font-bold active:scale-95"
               >
                 Add transaction
               </Link>
               <Link
                 href="/pending"
-                className="px-4 py-2 rounded-xl bg-card text-xs font-bold text-foreground border border-border active:scale-95"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl bg-card text-xs font-bold text-foreground border border-border active:scale-95"
               >
                 View drafts
               </Link>
@@ -176,17 +176,17 @@ export default function TransactionsPage() {
         )}
 
         {Object.entries(byDate).sort(([a], [b]) => b.localeCompare(a)).map(([date, list]) => (
-          <div key={date} className="space-y-4">
+          <div key={date} className="space-y-3 sm:space-y-4">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">{date}</p>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {list.map((t) => (
                 <Link
                   key={t.id}
                   href={`/transactions/${t.id}`}
-                  className="flex items-center justify-between bg-card p-5 rounded-3xl group active:scale-[0.98] transition-all"
+                  className="flex items-center justify-between bg-card p-3 sm:p-5 rounded-2xl sm:rounded-3xl group active:scale-[0.98] transition-all"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${t.type === "income" ? "bg-chart-1/10 border-chart-1/10" : "bg-card"}`}>
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center border shrink-0 ${t.type === "income" ? "bg-chart-1/10 border-chart-1/10" : "bg-card"}`}>
                       {t.type === "income" ? <ArrowUpRight className="w-5 h-5 text-chart-1" /> : <ShoppingBag className="w-5 h-5 text-muted-foreground" />}
                     </div>
                     <div>
@@ -209,10 +209,10 @@ export default function TransactionsPage() {
       </div>
 
       {result.last_page > 1 && (
-        <div className="flex gap-2 justify-center pt-4">
-          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-xl border border-border px-4 py-2 text-xs font-bold disabled:opacity-50">Previous</button>
+        <div className="flex gap-2 justify-center pt-3 sm:pt-4">
+          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-lg sm:rounded-xl border border-border px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-bold disabled:opacity-50">Previous</button>
           <span className="py-2 text-xs text-muted-foreground">Page {result.current_page} of {result.last_page}</span>
-          <button type="button" disabled={page >= result.last_page} onClick={() => setPage((p) => p + 1)} className="rounded-xl border border-border px-4 py-2 text-xs font-bold disabled:opacity-50">Next</button>
+          <button type="button" disabled={page >= result.last_page} onClick={() => setPage((p) => p + 1)} className="rounded-lg sm:rounded-xl border border-border px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-bold disabled:opacity-50">Next</button>
         </div>
       )}
     </div>

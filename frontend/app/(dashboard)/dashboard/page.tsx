@@ -100,14 +100,14 @@ export default function DashboardPage() {
   const percentSpent = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans selection:bg-primary/20 tracking-tight">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button className="active:scale-95 transition-all outline-none">
             <img
               alt="William Silva"
               src="https://lh3.googleusercontent.com/a/ACg8ocKWNslgSbBlq9VRuPmMGTIiOWz2MhQWURhBTCiZaqiaMKEbJGg=s96-c"
-              className="w-10 h-10 rounded-full object-cover grayscale border border-white/10"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover grayscale border border-white/10"
             />
           </button>
           <div>
@@ -120,20 +120,20 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground transition-all active:scale-95">
+          <button className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground transition-all active:scale-95">
             <span className="text-xs text-muted-foreground">⚙️</span>
           </button>
         </div>
       </header>
-      <main className="px-6 space-y-8">
-        <section className="flex flex-col items-center justify-center pt-6 pb-2">
+      <main className="px-4 sm:px-6 space-y-5 sm:space-y-8">
+        <section className="flex flex-col items-center justify-center pt-4 sm:pt-6 pb-2">
           <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mb-2 opacity-60">
             Total Spent this Month
           </p>
-          <div className="flex items-baseline gap-1 mb-4">
-            <span className="text-xl font-light text-muted-foreground/50 tracking-tighter">$</span>
+          <div className="flex items-baseline gap-1 mb-3 sm:mb-4">
+            <span className="text-lg sm:text-xl font-light text-muted-foreground/50 tracking-tighter">$</span>
             <h1
-              className="text-5xl font-heading font-black tracking-tighter text-white"
+              className="text-4xl sm:text-5xl font-heading font-black tracking-tighter text-white"
               style={{ color: "#ffffff" }}
             >
               {periodExpense.toLocaleString("en-US", {
@@ -142,7 +142,7 @@ export default function DashboardPage() {
               })}
             </h1>
           </div>
-          <div className="flex flex-col items-center gap-3 w-full max-w-[280px]">
+          <div className="flex flex-col items-center gap-2 sm:gap-3 w-full max-w-[280px]">
             <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
               <div
                 style={{ width: `${percentSpent}%` }}
@@ -162,7 +162,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="space-y-4">
+        <section className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-sm font-bold text-foreground tracking-tight">Active Budgets</h2>
             <Link
@@ -172,7 +172,7 @@ export default function DashboardPage() {
               Manage
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {budgets.map((b) => {
               const remaining = Number(b.remaining || 0);
               const amount = Number(b.amount || 0);
@@ -187,15 +187,15 @@ export default function DashboardPage() {
               return (
                 <div
                   key={b.id}
-                  className="bg-card p-5 rounded-[2.5rem] space-y-4 group active:scale-[0.98] transition-all"
+                  className="bg-card p-3 sm:p-5 rounded-2xl sm:rounded-[2.5rem] space-y-3 sm:space-y-4 group active:scale-[0.98] transition-all"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 text-2xl">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 text-xl sm:text-2xl shrink-0">
                         {b.category?.icon || "🍕"}
                       </div>
                       <div>
-                        <h4 className="text-base font-bold">
+                        <h4 className="text-sm sm:text-base font-bold">
                           {b.category?.name ?? "Budget"}
                         </h4>
                         <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
@@ -221,7 +221,7 @@ export default function DashboardPage() {
                       </p>
                       <Link
                         href={`/budgets/${b.id}/edit`}
-                        className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-secondary/60 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                        className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg sm:rounded-xl bg-secondary/60 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                       >
                         Edit
                       </Link>
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                             // ignore for now
                           }
                         }}
-                        className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-chart-2/10 text-[9px] font-black uppercase tracking-widest text-chart-2 hover:opacity-80"
+                        className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg sm:rounded-xl bg-chart-2/10 text-[9px] font-black uppercase tracking-widest text-chart-2 hover:opacity-80"
                       >
                         Delete
                       </button>
@@ -262,8 +262,8 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="pb-10">
-          <div className="flex items-center justify-between mb-4 px-1">
+        <section className="pb-6 sm:pb-10">
+          <div className="flex items-center justify-between mb-3 sm:mb-4 px-1">
             <h2 className="text-sm font-bold text-foreground tracking-tight">Fixed Bills</h2>
             <Link
               href="/settings/fixed-expenses"
@@ -272,9 +272,9 @@ export default function DashboardPage() {
               See all
             </Link>
           </div>
-          <div className="bg-card/50 p-4 rounded-[1.8rem] flex items-center justify-between group active:scale-[0.98] transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+          <div className="bg-card/50 p-3 sm:p-4 rounded-xl sm:rounded-[1.8rem] flex items-center justify-between group active:scale-[0.98] transition-all">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-secondary flex items-center justify-center shrink-0">
                 <span className="text-muted-foreground text-xl">🏠</span>
               </div>
               <div>

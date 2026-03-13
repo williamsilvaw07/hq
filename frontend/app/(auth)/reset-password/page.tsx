@@ -47,7 +47,7 @@ function ResetPasswordForm() {
   if (!validToken) {
     return (
       <>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">
           Reset password
         </h1>
         <p className="text-sm text-muted-foreground mb-4">
@@ -56,7 +56,7 @@ function ResetPasswordForm() {
         </p>
         <Link
           href="/forgot-password"
-          className="block w-full text-center rounded-2xl bg-primary text-primary-foreground py-3.5 font-bold text-sm"
+          className="block w-full text-center rounded-xl sm:rounded-2xl bg-primary text-primary-foreground py-2.5 sm:py-3 font-bold text-sm"
         >
           Request reset link
         </Link>
@@ -72,7 +72,7 @@ function ResetPasswordForm() {
   if (success) {
     return (
       <>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">
           Password reset
         </h1>
         <p className="text-sm text-muted-foreground mb-4">
@@ -80,7 +80,7 @@ function ResetPasswordForm() {
         </p>
         <Link
           href="/login"
-          className="block w-full text-center rounded-2xl bg-primary text-primary-foreground py-3.5 font-bold text-sm"
+          className="block w-full text-center rounded-xl sm:rounded-2xl bg-primary text-primary-foreground py-2.5 sm:py-3 font-bold text-sm"
         >
           Sign in
         </Link>
@@ -90,10 +90,10 @@ function ResetPasswordForm() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold tracking-tight text-foreground mb-6">
+      <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">
         Set new password
       </h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
         {error && (
           <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
             {error}
@@ -109,7 +109,7 @@ function ResetPasswordForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-2xl border border-border/50 bg-card px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
           />
         </div>
         <div>
@@ -122,7 +122,7 @@ function ResetPasswordForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-2xl border border-border/50 bg-card px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
           />
         </div>
         <div>
@@ -135,13 +135,13 @@ function ResetPasswordForm() {
             value={passwordConfirmation}
             onChange={(e) => setPasswordConfirmation(e.target.value)}
             required
-            className="w-full rounded-2xl border border-border/50 bg-card px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-2xl bg-primary text-primary-foreground py-3.5 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all"
+          className="w-full rounded-xl sm:rounded-2xl bg-primary text-primary-foreground py-2.5 sm:py-3 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all"
         >
           {loading ? "Resetting…" : "Reset password"}
         </button>

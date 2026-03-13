@@ -79,9 +79,9 @@ export default function DashboardLayout({
   const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-28 font-sans selection:bg-primary/20 tracking-tight">
+    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-28 font-sans selection:bg-primary/20 tracking-tight">
       {showSettingsHeader ? (
-        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -92,19 +92,19 @@ export default function DashboardLayout({
                   router.push(settingsBackHref);
                 }
               }}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
+              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
               aria-label="Back"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-bold">Settings</h1>
+            <h1 className="text-base sm:text-lg font-bold">Settings</h1>
           </div>
         </header>
       ) : null}
       {/* Per-page headers and navigation are handled by each screen now */}
 
       {workspaceOpen && workspaces.length > 1 && (
-        <div className="absolute top-16 left-3 right-3 z-50 bg-card rounded-2xl shadow-xl overflow-hidden w-[calc(100%-1.5rem)] sm:max-w-md sm:mx-auto">
+        <div className="absolute top-14 sm:top-16 left-4 right-4 z-50 bg-card rounded-xl sm:rounded-2xl shadow-xl overflow-hidden w-[calc(100%-2rem)] sm:max-w-md sm:mx-auto">
           {workspaces.map((w) => (
             <button
               key={w.id}
@@ -121,54 +121,54 @@ export default function DashboardLayout({
         </div>
       )}
 
-      <main className="px-3 pt-3 pb-24 w-full sm:max-w-md sm:mx-auto sm:px-4">
+      <main className="px-4 pt-3 pb-24 w-full sm:max-w-md sm:mx-auto sm:px-6">
         {children}
       </main>
-      <div className="fixed bottom-0 left-0 w-full z-40 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
-        <div className="w-full sm:max-w-md sm:mx-auto bg-card/80 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-2 flex items-center justify-between shadow-2xl shadow-black/50">
+      <div className="fixed bottom-0 left-0 w-full z-40 px-4 sm:px-6 pb-6 sm:pb-8 pt-3 sm:pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+        <div className="w-full sm:max-w-md sm:mx-auto bg-card/80 backdrop-blur-2xl border border-white/5 rounded-2xl sm:rounded-[2.5rem] p-1.5 sm:p-2 flex items-center justify-between shadow-2xl shadow-black/50">
           <Link
             href="/dashboard"
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 sm:py-3 text-[9px] font-black uppercase tracking-widest ${
               isDashboard ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <Icon icon="solar:home-2-bold-duotone" className="text-2xl" />
+            <Icon icon="solar:home-2-bold-duotone" className="text-xl sm:text-2xl" />
             <span>Home</span>
           </Link>
           <Link
             href="/transactions"
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 sm:py-3 text-[9px] font-black uppercase tracking-widest ${
               isTransactions ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <Icon icon="solar:history-bold-duotone" className="text-2xl" />
+            <Icon icon="solar:history-bold-duotone" className="text-xl sm:text-2xl" />
             <span>History</span>
           </Link>
-          <div className="flex-1 flex justify-center relative -top-8">
+          <div className="flex-1 flex justify-center relative -top-6 sm:-top-8">
             <Link
               href="/transactions/new"
-              className="w-16 h-16 rounded-full bg-white text-black shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-4 border-background"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white text-black shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-4 border-background"
               aria-label="Add transaction"
             >
-              <Icon icon="hugeicons:add-01" className="text-2xl" />
+              <Icon icon="hugeicons:add-01" className="text-xl sm:text-2xl" />
             </Link>
           </div>
           <Link
             href="/budgets"
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 sm:py-3 text-[9px] font-black uppercase tracking-widest ${
               isBudgets ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <Icon icon="solar:wallet-bold-duotone" className="text-2xl" />
+            <Icon icon="solar:wallet-bold-duotone" className="text-xl sm:text-2xl" />
             <span>Budgets</span>
           </Link>
           <Link
             href="/settings"
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 text-[9px] font-black uppercase tracking-widest ${
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 sm:py-3 text-[9px] font-black uppercase tracking-widest ${
               isSetupRoot || isSettings ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
             }`}
           >
-            <Icon icon="solar:settings-bold-duotone" className="text-2xl" />
+            <Icon icon="solar:settings-bold-duotone" className="text-xl sm:text-2xl" />
             <span>Setup</span>
           </Link>
         </div>

@@ -108,7 +108,7 @@ export default function NewBudgetPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans tracking-tight selection:bg-primary/10 flex flex-col">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-6 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
         <button
           type="button"
           onClick={() => router.back()}
@@ -129,11 +129,11 @@ export default function NewBudgetPage() {
         </button>
       </header>
 
-      <main className="flex-1 px-8 pt-2 space-y-12">
-        <div className="flex items-center gap-6">
+      <main className="flex-1 px-4 sm:px-8 pt-2 space-y-8 sm:space-y-12">
+        <div className="flex items-center gap-4 sm:gap-6">
           <button
             type="button"
-            className="w-20 h-20 rounded-3xl bg-card border border-border/40 flex items-center justify-center text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-card border border-border/40 flex items-center justify-center text-3xl sm:text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all shrink-0"
           >
             {displayIcon}
           </button>
@@ -143,7 +143,7 @@ export default function NewBudgetPage() {
             </label>
             <input
               type="text"
-              className="w-full bg-transparent border-none outline-none text-2xl font-bold text-foreground placeholder:text-muted/10 p-0"
+              className="w-full bg-transparent border-none outline-none text-xl sm:text-2xl font-bold text-foreground placeholder:text-muted/10 p-0"
               placeholder="Food & Dining"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -196,7 +196,7 @@ export default function NewBudgetPage() {
             </span>
             <input
               type="number"
-              className="w-full max-w-[240px] text-7xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tighter"
+              className="w-full max-w-[240px] text-5xl sm:text-7xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tighter"
               placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -204,8 +204,8 @@ export default function NewBudgetPage() {
           </div>
         </div>
 
-        <div className="space-y-1 bg-card/30 rounded-[2rem] border border-border/30 overflow-hidden">
-          <div className="w-full px-6 py-5 flex items-center justify-between">
+        <div className="space-y-1 bg-card/30 rounded-xl sm:rounded-[2rem] border border-border/30 overflow-hidden">
+          <div className="w-full px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-9 h-9 rounded-xl bg-secondary/50 flex items-center justify-center">
                 <span className="text-muted-foreground text-lg">⏱</span>
@@ -222,8 +222,8 @@ export default function NewBudgetPage() {
               </span>
             </div>
           </div>
-          <div className="h-px bg-border/20 mx-6" />
-          <div className="w-full px-6 pb-5 flex items-center justify-between">
+          <div className="h-px bg-border/20 mx-4 sm:mx-6" />
+          <div className="w-full px-4 sm:px-6 pb-3 sm:pb-5 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-9 h-9 rounded-xl bg-secondary/50 flex items-center justify-center">
                 <span className="text-muted-foreground text-lg">📅</span>
@@ -266,12 +266,12 @@ export default function NewBudgetPage() {
         )}
       </main>
 
-      <footer className="p-8">
+      <footer className="p-4 sm:p-8">
         <button
           type="button"
           onClick={handleSave}
           disabled={saving || !amount}
-          className="w-full py-5 rounded-3xl bg-white text-black font-black text-sm uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
+          className="w-full py-3 sm:py-5 rounded-2xl sm:rounded-3xl bg-white text-black font-black text-sm uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
         >
           {saving ? "Saving…" : "Confirm Budget"}
         </button>

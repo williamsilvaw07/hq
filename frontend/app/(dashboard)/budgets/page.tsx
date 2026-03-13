@@ -151,25 +151,25 @@ export default function BudgetsPage() {
 
   // Layout inspired by mobile-first budgeting dashboards to keep the experience focused and glanceable.
   return (
-    <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 space-y-4">
+    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans selection:bg-primary/20 tracking-tight">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-foreground">My Budgets</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-foreground">My Budgets</h1>
           <Link
             href="/budgets/new"
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all active:scale-95 shadow-lg shadow-white/5"
+            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all active:scale-95 shadow-lg shadow-white/5"
             aria-label="Add budget"
           >
             <Icon icon="material-symbols:add-rounded" className="text-2xl" />
           </Link>
         </div>
-        <div className="bg-card p-5 rounded-3xl border border-border/50">
-          <div className="flex justify-between items-end mb-3">
+        <div className="bg-card p-3 sm:p-5 rounded-2xl sm:rounded-3xl border border-border/50">
+          <div className="flex justify-between items-end mb-2 sm:mb-3">
             <div>
               <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1">
                 Total Monthly Budget
               </p>
-              <p className="text-2xl font-black">
+              <p className="text-xl sm:text-2xl font-black">
                 {CURRENCY_SYMBOL}{" "}
                 {formatBRL(totalBudget, {
                   minimumFractionDigits: 2,
@@ -181,7 +181,7 @@ export default function BudgetsPage() {
               <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1">
                 Remaining
               </p>
-              <p className="text-xl font-bold text-chart-1">
+              <p className="text-lg sm:text-xl font-bold text-chart-1">
                 {CURRENCY_SYMBOL}{" "}
                 {formatBRL(totalRemaining, {
                   minimumFractionDigits: 2,
@@ -199,8 +199,8 @@ export default function BudgetsPage() {
         </div>
       </header>
 
-      <main className="px-6 py-6 space-y-8">
-        <section className="space-y-4">
+      <main className="px-4 sm:px-6 py-4 sm:py-6 space-y-5 sm:space-y-8">
+        <section className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between px-1">
             <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Active Budgets
@@ -212,13 +212,13 @@ export default function BudgetsPage() {
                 Loading…
               </p>
             ) : budgets.length === 0 ? (
-              <div className="bg-card p-8 rounded-[2rem] border border-border/50 text-center">
+              <div className="bg-card p-5 sm:p-8 rounded-xl sm:rounded-[2rem] border border-border/50 text-center">
                 <p className="text-muted-foreground text-sm">
                   No budgets set yet.
                 </p>
                 <Link
                   href="/budgets/new"
-                  className="inline-flex items-center justify-center mt-4 py-2.5 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-all"
+                  className="inline-flex items-center justify-center mt-3 sm:mt-4 py-2 px-4 sm:py-2.5 sm:px-5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-all"
                 >
                   Add your first budget
                 </Link>
@@ -253,12 +253,12 @@ export default function BudgetsPage() {
                 return (
                   <div
                     key={b.id}
-                    className="bg-card p-5 rounded-[2rem] border border-border/50 space-y-4 group"
+                    className="bg-card p-3 sm:p-5 rounded-xl sm:rounded-[2rem] border border-border/50 space-y-3 sm:space-y-4 group"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 sm:gap-4">
                         <div
-                          className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${colorClass}`}
+                          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center border shrink-0 ${colorClass}`}
                         >
                           {iconId ? (
                             <Icon icon={iconId} className="text-2xl" />
@@ -282,7 +282,7 @@ export default function BudgetsPage() {
                       <div className="flex items-center gap-1.5">
                         <Link
                           href={`/budgets/${b.id}/edit`}
-                          className="w-9 h-9 flex items-center justify-center rounded-xl bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
+                          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg sm:rounded-xl bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
                           aria-label="Edit budget"
                         >
                           <Icon
@@ -293,7 +293,7 @@ export default function BudgetsPage() {
                         <button
                           type="button"
                           onClick={() => handleDeleteBudget(b.id)}
-                          className="w-9 h-9 flex items-center justify-center rounded-xl bg-secondary/50 text-muted-foreground hover:text-destructive transition-colors"
+                          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg sm:rounded-xl bg-secondary/50 text-muted-foreground hover:text-destructive transition-colors"
                           aria-label="Delete budget"
                         >
                           <Icon

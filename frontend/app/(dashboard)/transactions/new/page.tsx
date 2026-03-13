@@ -134,10 +134,10 @@ export default function NewTransactionPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-12 font-sans tracking-tight">
-      <header className="px-6 pt-6 pb-4 flex items-center justify-between">
+      <header className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex items-center justify-between">
         <Link
           href="/dashboard"
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-card text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-card text-muted-foreground hover:text-foreground transition-colors active:scale-95"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
@@ -146,25 +146,25 @@ export default function NewTransactionPage() {
           <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
             TRANSACTION
           </p>
-          <h1 className="text-lg font-bold text-foreground">New Entry</h1>
+          <h1 className="text-base sm:text-lg font-bold text-foreground">New Entry</h1>
         </div>
         <button
           type="button"
           onClick={() => handleSubmit()}
           disabled={loading}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-card text-muted-foreground hover:text-foreground transition-colors active:scale-95 disabled:opacity-50"
+          className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-card text-muted-foreground hover:text-foreground transition-colors active:scale-95 disabled:opacity-50"
           aria-label="Confirm"
         >
           <Check className="w-5 h-5" />
         </button>
       </header>
 
-      <main className="px-6 space-y-6">
+      <main className="px-4 sm:px-6 space-y-4 sm:space-y-6">
         <div className="flex p-1.5 bg-card rounded-full">
           <button
             type="button"
             onClick={() => setType("expense")}
-            className={`flex-1 py-3 text-xs font-bold rounded-full transition-all uppercase tracking-wider ${
+            className={`flex-1 py-2.5 sm:py-3 text-xs font-bold rounded-full transition-all uppercase tracking-wider ${
               type === "expense"
                 ? "bg-chart-2 text-white shadow-inner"
                 : "text-muted-foreground hover:text-foreground"
@@ -175,7 +175,7 @@ export default function NewTransactionPage() {
           <button
             type="button"
             onClick={() => setType("income")}
-            className={`flex-1 py-3 text-xs font-bold rounded-full transition-all uppercase tracking-wider ${
+            className={`flex-1 py-2.5 sm:py-3 text-xs font-bold rounded-full transition-all uppercase tracking-wider ${
               type === "income"
                 ? "bg-chart-1 text-white shadow-inner"
                 : "text-muted-foreground hover:text-foreground"
@@ -199,20 +199,20 @@ export default function NewTransactionPage() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0"
-              className="flex-1 min-w-0 text-5xl font-heading font-bold bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tight"
+              className="flex-1 min-w-0 text-4xl sm:text-5xl font-heading font-bold bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tight"
             />
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
           {error && (
             <p className="text-sm text-chart-2 bg-chart-2/10 rounded-xl p-3">{error}</p>
           )}
 
           {type === "expense" && (
             <label className="block">
-              <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
-                <div className="w-10 h-10 rounded-xl bg-chart-1/20 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-1/20 flex items-center justify-center shrink-0">
                   <LayoutGrid className="w-5 h-5 text-chart-1" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -249,7 +249,7 @@ export default function NewTransactionPage() {
           )}
 
           {type === "expense" && (showNewCategory ? (
-            <div className="p-4 bg-card rounded-2xl space-y-2">
+            <div className="p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl space-y-2">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 New category
               </p>
@@ -294,8 +294,8 @@ export default function NewTransactionPage() {
           ))}
 
           <label className="block cursor-pointer">
-            <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
-              <div className="w-10 h-10 rounded-xl bg-chart-4/20 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/20 flex items-center justify-center shrink-0">
                 <Calendar className="w-5 h-5 text-chart-4" />
               </div>
               <div className="flex-1 min-w-0">
@@ -317,8 +317,8 @@ export default function NewTransactionPage() {
           </label>
 
           <label className="block">
-            <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
-              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-muted flex items-center justify-center shrink-0">
                 <FileText className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">
@@ -340,7 +340,7 @@ export default function NewTransactionPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-2xl bg-white text-black font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-black/20 disabled:opacity-50 active:scale-[0.98] transition-all"
+            className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-white text-black font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-black/20 disabled:opacity-50 active:scale-[0.98] transition-all"
           >
             {loading ? "Saving…" : "CONFIRM ENTRY"}
             <ArrowUpRight className="w-5 h-5" />
