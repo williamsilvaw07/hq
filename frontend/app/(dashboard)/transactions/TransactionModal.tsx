@@ -9,6 +9,7 @@ type TransactionModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => Promise<void>;
+  onDelete?: () => Promise<void>;
   categories: any[];
   accounts: any[];
   saving: boolean;
@@ -19,6 +20,7 @@ export function TransactionModal({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   categories,
   accounts,
   saving,
@@ -57,29 +59,40 @@ export function TransactionModal({
       subtitle={initialData ? "UPDATE ENTRY" : "NEW ENTRY"}
       showCloseButton={true}
       footer={
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-4 rounded-2xl border border-border/50 text-xs font-black uppercase tracking-widest text-muted-foreground active:scale-95 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={() => onSave({
-              type,
-              amount: parseFloat(amount),
-              description,
-              category_id: Number(categoryId),
-              account_id: Number(accountId),
-              date
-            })}
-            disabled={saving || !amount || !categoryId}
-            className="flex-1 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
-          >
-            {saving ? "Processing..." : "Confirm Entry"}
-          </button>
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-4 rounded-2xl border border-border/50 text-xs font-black uppercase tracking-widest text-muted-foreground active:scale-95 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => onSave({
+                type,
+                amount: parseFloat(amount),
+                description,
+                category_id: Number(categoryId),
+                account_id: Number(accountId),
+                date
+              })}
+              disabled={saving || !amount || !categoryId}
+              className="flex-1 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
+            >
+              {saving ? "Processing..." : "Confirm Entry"}
+            </button>
+          </div>
+          {initialData && onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="w-full py-2 text-[10px] font-black text-chart-2 uppercase tracking-widest hover:opacity-80 transition-opacity"
+            >
+              Delete Transaction
+            </button>
+          )}
         </div>
       }
     >

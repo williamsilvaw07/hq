@@ -101,6 +101,21 @@ export default function TransactionsPage() {
     }
   }
 
+  async function handleDeleteTransaction() {
+    if (!workspaceId || !editingTransaction) return;
+    setSaving(true);
+    try {
+      await api(`/api/workspaces/${workspaceId}/transactions/${editingTransaction.id}`, { method: "DELETE" });
+      fetchList();
+      setModalOpen(false);
+      setEditingTransaction(null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchInput), DEBOUNCE_MS);
     return () => clearTimeout(t);
@@ -276,6 +291,7 @@ export default function TransactionsPage() {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           onSave={handleSaveTransaction}
+          onDelete={editingTransaction ? handleDeleteTransaction : undefined}
           categories={categories}
           accounts={accounts}
           saving={saving}

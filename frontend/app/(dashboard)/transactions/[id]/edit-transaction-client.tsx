@@ -72,6 +72,19 @@ export default function EditTransactionClient() {
     }
   }
 
+  async function handleDelete() {
+    if (!workspaceId || !Number.isFinite(id)) return;
+    setSaving(true);
+    try {
+      await api(`/api/workspaces/${workspaceId}/transactions/${id}`, { method: "DELETE" });
+      router.push(transaction?.status === "draft" ? "/pending" : "/transactions");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function handleClose() {
     router.push(transaction?.status === "draft" ? "/pending" : "/transactions");
   }
@@ -100,6 +113,7 @@ export default function EditTransactionClient() {
       isOpen={true}
       onClose={handleClose}
       onSave={handleSave}
+      onDelete={handleDelete}
       categories={categories}
       accounts={accounts}
       saving={saving}
