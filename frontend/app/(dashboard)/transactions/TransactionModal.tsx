@@ -28,7 +28,7 @@ export function TransactionModal({
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [accountId, setAccountId] = useState("");
+  const [accountId, setAccountId] = useState(initialData?.account_id?.toString() || "");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function TransactionModal({
               account_id: Number(accountId),
               date
             })}
-            disabled={saving || !amount || !categoryId || !accountId}
+            disabled={saving || !amount || !categoryId}
             className="flex-1 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
           >
             {saving ? "Processing..." : "Confirm Entry"}
@@ -150,23 +150,6 @@ export function TransactionModal({
                 >
                   <option value="">Select</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="bg-card/50 rounded-2xl p-3 border border-border/10 flex items-center gap-3 overflow-hidden">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
-                <Icon icon="solar:wallet-2-linear" className="text-lg" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mb-0.5 opacity-50">Account</p>
-                <select
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-xs font-bold text-foreground appearance-none truncate cursor-pointer"
-                >
-                  <option value="">Main</option>
-                  {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
               </div>
             </div>
