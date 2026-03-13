@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { processTelegramMessage } from "@/lib/telegram/process-message";
+import { processTelegramMessage, processTelegramVoice } from "@/lib/telegram/process-message";
 
 export async function POST(req: Request) {
-  // Optional secret token check (set in Telegram setWebhook call)
+  // Optional secret token check
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (secret) {
     const header = req.headers.get("x-telegram-bot-api-secret-token");
@@ -33,19 +33,23 @@ function processUpdateAsync(update: any) {
       const message = update?.message;
       if (!message) return;
 
-      // Only handle text messages
-      if (!message.text) {
-        console.log("[telegram] Ignoring non-text message");
+      const messageId = String(message.message_id);
+      const chatId: number = message.chat.id;
+
+      // Voice message
+      if (message.voice) {
+        const fileId: string = message.voice.file_id;
+        await processTelegramVoice(messageId, chatId, fileId);
         return;
       }
 
-      const messageId = String(message.message_id);
-      const chatId: number = message.chat.id;
-      const text: string = message.text;
+      // Text message
+      if (message.text) {
+        await processTelegramMessage(messageId, chatId, message.text);
+        return;
+      }
 
-      if (!messageId || !chatId || !text.trim()) return;
-
-      await processTelegramMessage(messageId, chatId, text);
+      console.log("[telegram] Ignoring unsupported message type");
     } catch (err) {
       console.error("[telegram] Error processing update:", err);
     }
