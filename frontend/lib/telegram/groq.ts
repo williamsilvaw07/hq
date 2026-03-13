@@ -86,39 +86,43 @@ If you cannot find a clear expense amount, reply with: NONE`,
  * Uses Groq LLaMA to pick the best matching category from the user's budgets.
  * Returns the category name string, or null if none match well.
  */
+/**
+ * Uses Groq LLaMA to pick the best matching category from the user's budgets.
+ * On retry=true uses a more lenient prompt to force a best-guess pick.
+ * Returns null only if categories list is empty.
+ */
 export async function categorizeExpense(
   description: string,
   categories: { id: number; name: string }[],
+  retry = false,
 ): Promise<number | null> {
   if (categories.length === 0) return null;
 
   const groq = getGroq();
-
   const categoryList = categories.map((c) => `${c.id}: ${c.name}`).join("\n");
+
+  const systemPrompt = retry
+    ? "You are an expense categorizer. You MUST pick the closest matching category even if the match is not perfect. Reply with ONLY the numeric ID. No explanation."
+    : "You are an expense categorizer. Given an expense description and a list of budget categories, reply with ONLY the numeric ID of the most appropriate category. No explanation, just the number.";
+
+  const userPrompt = retry
+    ? `Expense: "${description}"\n\nCategories:\n${categoryList}\n\nPick the closest category ID. You must choose one. Reply with only the number.`
+    : `Expense: "${description}"\n\nCategories:\n${categoryList}\n\nReply with only the category ID number.`;
 
   const response = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
     messages: [
-      {
-        role: "system",
-        content:
-          "You are an expense categorizer. Given an expense description and a list of budget categories, reply with ONLY the numeric ID of the most appropriate category. No explanation, just the number.",
-      },
-      {
-        role: "user",
-        content: `Expense: "${description}"\n\nCategories:\n${categoryList}\n\nReply with only the category ID number.`,
-      },
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
     ],
-    temperature: 0,
+    temperature: retry ? 0.2 : 0,
     max_tokens: 10,
   });
 
   const raw = response.choices[0]?.message?.content?.trim() ?? "";
   const id = parseInt(raw, 10);
-
   if (isNaN(id)) return null;
 
-  // Validate it's actually one of the provided IDs
   const valid = categories.find((c) => c.id === id);
   return valid ? valid.id : null;
 }
