@@ -6,13 +6,15 @@ import { X } from "lucide-react";
 type ModalProps = {
   isOpen: boolean;
   title?: string;
+  subtitle?: string;
+  showCloseButton?: boolean;
   children: React.ReactNode;
   footer?: React.ReactNode;
   onClose: () => void;
   size?: "default" | "lg";
 };
 
-export function Modal({ isOpen, title, children, footer, onClose, size = "default" }: ModalProps) {
+export function Modal({ isOpen, title, subtitle, showCloseButton = true, children, footer, onClose, size = "default" }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -49,23 +51,31 @@ export function Modal({ isOpen, title, children, footer, onClose, size = "defaul
     >
       <div
         ref={dialogRef}
-        className={`w-full ${maxWidthClass} max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0 mx-4 sm:mx-0 bg-card rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col transform origin-bottom sm:origin-center animate-scale-in`}
+        className={`w-full ${maxWidthClass} max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0 mx-4 sm:mx-0 bg-card rounded-t-[32px] sm:rounded-[32px] shadow-xl flex flex-col transform origin-bottom sm:origin-center animate-scale-in`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 sm:p-6 pb-2 shrink-0">
+        <div className="w-10 h-1 rounded-full bg-border/50 mx-auto mt-3 mb-1 shrink-0" />
+        <div className="flex flex-col items-center justify-center p-4 sm:p-6 pb-2 shrink-0 relative">
+          {subtitle && (
+            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 text-center">
+              {subtitle}
+            </span>
+          )}
           {title ? (
-            <h2 className="text-lg font-bold text-foreground">{title}</h2>
+            <h2 className="text-xl font-bold text-foreground text-center">{title}</h2>
           ) : (
             <span />
           )}
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 -m-2 rounded-xl text-muted-foreground hover:text-foreground active:bg-secondary touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {showCloseButton && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 -m-2 rounded-xl text-muted-foreground hover:text-foreground active:bg-secondary touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
         <div className="flex-1 min-h-0 min-w-0 p-4 sm:p-6 pt-2 space-y-4">
           {children}

@@ -181,7 +181,9 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: FixedBi
     <Modal
       isOpen
       onClose={onClose}
-      title={isNew ? "Add fixed bill" : "Edit fixed bill"}
+      title={isNew ? "Add Fixed Bill" : "Edit Fixed Bill"}
+      subtitle="SUBSCRIPTIONS"
+      showCloseButton={false}
       size="default"
       footer={
         <div className="flex gap-3">
