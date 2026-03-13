@@ -19,14 +19,12 @@ export function formatBRL(value: number, options?: MoneyFormatOptions): string {
  */
 export function formatNumberUK(value: number, options?: MoneyFormatOptions): string {
   const isWhole = Number.isFinite(value) && Math.abs(value % 1) < 1e-9;
-  const minimumFractionDigits =
-    options?.minimumFractionDigits ?? (isWhole ? 0 : 2);
-  const maximumFractionDigits =
-    options?.maximumFractionDigits ?? (isWhole ? 0 : 2);
+  const min = options?.minimumFractionDigits ?? (isWhole ? 0 : 2);
+  const max = Math.max(min, options?.maximumFractionDigits ?? (isWhole ? 0 : 2));
 
   return value.toLocaleString("en-GB", {
-    minimumFractionDigits,
-    maximumFractionDigits,
+    minimumFractionDigits: min,
+    maximumFractionDigits: max,
   });
 }
 
@@ -46,13 +44,12 @@ export function formatCompact(value: number): string {
 /** Brazilian locale format (3.240,50) - period for thousands, comma for decimals */
 export function formatBRLocale(value: number, options?: MoneyFormatOptions): string {
   const isWhole = Number.isFinite(value) && Math.abs(value % 1) < 1e-9;
-  const minimumFractionDigits =
-    options?.minimumFractionDigits ?? (isWhole ? 0 : 2);
-  const maximumFractionDigits =
-    options?.maximumFractionDigits ?? (isWhole ? 0 : 2);
+  const min = options?.minimumFractionDigits ?? (isWhole ? 0 : 2);
+  const max = Math.max(min, options?.maximumFractionDigits ?? (isWhole ? 0 : 2));
+
   return value.toLocaleString("pt-BR", {
-    minimumFractionDigits,
-    maximumFractionDigits,
+    minimumFractionDigits: min,
+    maximumFractionDigits: max,
   });
 }
 
