@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [budgets, setBudgets] = useState<BudgetSummary[]>([]);
   const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -41,6 +42,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!workspaceId) return;
     setLoading(true);
+    setLoadError(null);
     Promise.all([
       api<DashboardData>(`/api/workspaces/${workspaceId}/dashboard?period=this_month`)
         .then((r) => r.data ?? { period_expense: 0 }),
@@ -51,6 +53,10 @@ export default function DashboardPage() {
       .then(([d, b]) => {
         setDashboard(d);
         setBudgets(b);
+        setLoadError(null);
+      })
+      .catch((err) => {
+        setLoadError(err instanceof Error ? err.message : "Unable to load dashboard. Please try again later.");
       })
       .finally(() => setLoading(false));
   }, [workspaceId]);
@@ -59,29 +65,27 @@ export default function DashboardPage() {
     setFixedBills(loadFixedBills(workspaceId ?? null));
   }, [workspaceId]);
 
-  // #region agent log
-  useEffect(() => {
-    const t = setTimeout(() => {
-      const section = document.querySelector('section');
-      if (!section) return;
-      const heading = Array.from(section.querySelectorAll('p')).find((p) => p.textContent?.includes('Total Spent this Month'));
-      if (!heading) return;
-      const container = heading.parentElement;
-      const h1 = container?.querySelector('h1');
-      const span = container?.querySelector('span');
-      const h1Class = h1?.className ?? '';
-      const h1Color = h1 ? window.getComputedStyle(h1).color : '';
-      const spanColor = span ? window.getComputedStyle(span).color : '';
-      const parentColor = container ? window.getComputedStyle(container).color : '';
-      fetch('http://127.0.0.1:7615/ingest/da303532-0e08-486a-895e-4daefa467a25', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '96b1df' }, body: JSON.stringify({ sessionId: '96b1df', location: 'dashboard/page.tsx:TotalSpent', message: 'Total Spent value styles', data: { h1Class, h1Color, spanColor, parentColor }, timestamp: Date.now(), hypothesisId: 'H1-class-and-computed' }) }).catch(() => {});
-    }, 500);
-    return () => clearTimeout(t);
-  }, []);
-  // #endregion
-
-  if (!workspaceId) {
-    return null;
-  }
+  const retryLoad = useCallback(() => {
+    if (!workspaceId) return;
+    setLoadError(null);
+    setLoading(true);
+    Promise.all([
+      api<DashboardData>(`/api/workspaces/${workspaceId}/dashboard?period=this_month`)
+        .then((r) => r.data ?? { period_expense: 0 }),
+      api<BudgetSummary[]>(`/api/workspaces/${workspaceId}/budgets?with_summaries=true`).then((r) =>
+        Array.isArray(r.data) ? r.data : [],
+      ),
+    ])
+      .then(([d, b]) => {
+        setDashboard(d);
+        setBudgets(b);
+        setLoadError(null);
+      })
+      .catch((err) => {
+        setLoadError(err instanceof Error ? err.message : "Unable to load dashboard. Please try again later.");
+      })
+      .finally(() => setLoading(false));
+  }, [workspaceId]);
 
   const refreshBudgets = useCallback(async () => {
     if (!workspaceId) return;
@@ -91,6 +95,10 @@ export default function DashboardPage() {
     setBudgets(Array.isArray(res.data) ? res.data : []);
   }, [workspaceId]);
 
+  if (!workspaceId) {
+    return null;
+  }
+
   const periodExpense = dashboard?.period_expense ?? 0;
   const totalBudgetFromBudgets = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
   const totalSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
@@ -98,6 +106,29 @@ export default function DashboardPage() {
   const monthlyFixedTotal = fixedBillsTotal(fixedBills);
   const totalBudget = totalBudgetFromBudgets + monthlyFixedTotal;
   const percentSpent = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans flex flex-col items-center justify-center px-4">
+        <div className="bg-card/50 rounded-2xl p-6 max-w-sm w-full text-center space-y-4">
+          <h2 className="text-lg font-bold text-foreground">Unable to load dashboard</h2>
+          <p className="text-sm text-muted-foreground">
+            {loadError}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            This may be a temporary server issue. If it persists, please contact support.
+          </p>
+          <button
+            type="button"
+            onClick={retryLoad}
+            className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm active:scale-[0.98] transition-all"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans selection:bg-primary/20 tracking-tight">
