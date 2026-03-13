@@ -4,84 +4,124 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import {
-  ArrowLeft,
-  Plus,
-  Check,
-  User,
-  BriefcaseBusiness,
-  Home,
-  LineChart,
-} from "lucide-react";
+import { ArrowLeft, Plus, Check, Pencil, Trash2, UserPlus, X } from "lucide-react";
 
 type Workspace = { id: number; name: string; slug: string };
+
+type Sheet =
+  | { type: "create" }
+  | { type: "edit"; workspace: Workspace }
+  | { type: "delete"; workspace: Workspace }
+  | { type: "invite"; workspace: Workspace };
 
 export default function WorkspacesPage() {
   const router = useRouter();
   const { workspaceId, setWorkspaceId } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
-   const [showCreate, setShowCreate] = useState(false);
-   const [newName, setNewName] = useState("");
-   const [creating, setCreating] = useState(false);
-   const [createError, setCreateError] = useState("");
+  const [sheet, setSheet] = useState<Sheet | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  // form state
+  const [name, setName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("member");
+
+  function openSheet(s: Sheet) {
+    setError("");
+    if (s.type === "edit") setName(s.workspace.name);
+    else if (s.type === "create") setName("");
+    else if (s.type === "invite") { setInviteEmail(""); setInviteRole("member"); }
+    setSheet(s);
+  }
+
+  function closeSheet() {
+    setSheet(null);
+    setError("");
+  }
 
   useEffect(() => {
-    let cancelled = false;
     setLoading(true);
     api<Workspace[]>("/api/workspaces")
-      .then((res) => {
-        if (cancelled) return;
-        const list = Array.isArray(res.data) ? res.data : [];
-        setWorkspaces(list);
-      })
-      .catch(() => {
-        if (!cancelled) setWorkspaces([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+      .then((res) => setWorkspaces(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setWorkspaces([]))
+      .finally(() => setLoading(false));
   }, []);
 
-  const activeWorkspace = workspaces.find((w) => w.id === workspaceId) ?? null;
-  const otherWorkspaces = workspaces.filter((w) => w.id !== workspaceId);
-
-  function handleSelect(w: Workspace) {
-    setWorkspaceId(w.id);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("workspaces-refresh"));
-    }
-    router.back();
+  function refresh() {
+    api<Workspace[]>("/api/workspaces")
+      .then((res) => setWorkspaces(Array.isArray(res.data) ? res.data : []))
+      .catch(() => {});
   }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
-    if (!newName.trim() || creating) return;
-    setCreateError("");
-    setCreating(true);
+    if (!name.trim() || saving) return;
+    setSaving(true); setError("");
     try {
       const res = await api<Workspace>("/api/workspaces", {
         method: "POST",
-        body: JSON.stringify({ name: newName.trim() }),
+        body: JSON.stringify({ name: name.trim() }),
       });
-      const workspace = res.data;
-      if (workspace) {
-        setWorkspaces((prev) => [...prev, workspace]);
-        setWorkspaceId(workspace.id);
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new Event("workspaces-refresh"));
-        }
-        setNewName("");
-        setShowCreate(false);
+      if (res.data) {
+        setWorkspaceId(res.data.id);
+        window.dispatchEvent(new Event("workspaces-refresh"));
+        refresh();
+        closeSheet();
       }
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : "Failed to create workspace.");
-    } finally {
-      setCreating(false);
-    }
+      setError(err instanceof Error ? err.message : "Failed to create.");
+    } finally { setSaving(false); }
+  }
+
+  async function handleEdit(e: FormEvent) {
+    e.preventDefault();
+    if (sheet?.type !== "edit" || !name.trim() || saving) return;
+    setSaving(true); setError("");
+    try {
+      await api(`/api/workspaces/${sheet.workspace.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      window.dispatchEvent(new Event("workspaces-refresh"));
+      refresh();
+      closeSheet();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update.");
+    } finally { setSaving(false); }
+  }
+
+  async function handleDelete() {
+    if (sheet?.type !== "delete" || saving) return;
+    setSaving(true); setError("");
+    try {
+      await api(`/api/workspaces/${sheet.workspace.id}`, { method: "DELETE" });
+      const remaining = workspaces.filter((w) => w.id !== sheet.workspace.id);
+      setWorkspaces(remaining);
+      if (workspaceId === sheet.workspace.id && remaining.length > 0) {
+        setWorkspaceId(remaining[0].id);
+      }
+      window.dispatchEvent(new Event("workspaces-refresh"));
+      closeSheet();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete.");
+    } finally { setSaving(false); }
+  }
+
+  async function handleInvite(e: FormEvent) {
+    e.preventDefault();
+    if (sheet?.type !== "invite" || !inviteEmail.trim() || saving) return;
+    setSaving(true); setError("");
+    try {
+      await api(`/api/workspaces/${sheet.workspace.id}/members/invite`, {
+        method: "POST",
+        body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole }),
+      });
+      closeSheet();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send invite.");
+    } finally { setSaving(false); }
   }
 
   return (
@@ -91,178 +131,191 @@ export default function WorkspacesPage() {
           type="button"
           onClick={() => router.back()}
           className="w-10 h-10 flex items-center justify-center rounded-lg bg-secondary/50 text-muted-foreground active:scale-95 transition-all"
-          aria-label="Back"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex flex-col items-center">
-          <h1 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-0.5">
-            Workspace
-          </h1>
-          <p className="text-sm font-bold text-foreground">Switch Account</p>
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-0.5">Workspace</p>
+          <p className="text-sm font-bold text-foreground">Manage Spaces</p>
         </div>
         <button
           type="button"
-          onClick={() => setShowCreate(true)}
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary active:scale-95 transition-all"
-          aria-label="New workspace"
+          onClick={() => openSheet({ type: "create" })}
+          className="w-10 h-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary active:scale-95 transition-all"
         >
           <Plus className="w-5 h-5" />
         </button>
       </header>
 
-      <main className="px-6 py-4 space-y-6">
-        <section className="space-y-3">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
-            Active Now
-          </h3>
-
-          {loading ? (
-            <p className="text-xs text-muted-foreground px-1">Loading workspaces…</p>
-          ) : !activeWorkspace ? (
-            <p className="text-xs text-muted-foreground px-1">
-              You do not have an active workspace yet.
-            </p>
-          ) : (
-            <div className="relative p-5 bg-card rounded-xl border-2 border-primary/50 shadow-lg shadow-primary/5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
-                    <User className="w-6 h-6 text-primary" />
+      <main className="px-6 py-4 space-y-3">
+        {loading ? (
+          <p className="text-xs text-muted-foreground px-1">Loading…</p>
+        ) : (
+          workspaces.map((w) => {
+            const isActive = w.id === workspaceId;
+            return (
+              <div
+                key={w.id}
+                className={`p-4 bg-card rounded-xl flex items-center justify-between ${isActive ? "ring-1 ring-primary/40" : ""}`}
+              >
+                <button
+                  type="button"
+                  onClick={() => { setWorkspaceId(w.id); window.dispatchEvent(new Event("workspaces-refresh")); router.back(); }}
+                  className="flex items-center gap-3 flex-1 text-left"
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-black ${isActive ? "bg-primary/20 text-primary" : "bg-secondary/50 text-muted-foreground"}`}>
+                    {w.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground">{activeWorkspace.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
-                      Default Workspace
+                    <p className="text-sm font-bold text-foreground">{w.name}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-60">
+                      {isActive ? "Active" : w.slug}
                     </p>
                   </div>
-                </div>
-                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                  <Check className="w-4 h-4 text-primary-foreground" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {isActive && (
+                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center mr-1">
+                      <Check className="w-3 h-3 text-primary-foreground" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => openSheet({ type: "invite", workspace: w })}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openSheet({ type: "edit", workspace: w })}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openSheet({ type: "delete", workspace: w })}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-chart-2 hover:bg-chart-2/10 transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
-        </section>
-
-        <section className="space-y-3">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
-            Your Spaces
-          </h3>
-          {loading ? (
-            <p className="text-xs text-muted-foreground px-1">Loading spaces…</p>
-          ) : otherWorkspaces.length === 0 ? (
-            <p className="text-xs text-muted-foreground px-1">
-              You have no other workspaces yet. Create one from Settings.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {otherWorkspaces.map((w, index) => {
-                const Icon =
-                  index === 0 ? BriefcaseBusiness : index === 1 ? Home : LineChart;
-                const description =
-                  index === 0
-                    ? "Shared"
-                    : index === 1
-                      ? "Shared"
-                      : "Private Space";
-
-                return (
-                  <button
-                    key={w.id}
-                    type="button"
-                    onClick={() => handleSelect(w)}
-                    className="w-full p-5 bg-card/40 rounded-xl flex items-center justify-between hover:bg-card transition-all active:scale-[0.98] text-left"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-chart-1/10 flex items-center justify-center border border-chart-1/20">
-                        <Icon className="w-6 h-6 text-chart-1" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-bold text-foreground">{w.name}</p>
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
-                          {description}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </section>
+            );
+          })
+        )}
       </main>
 
-      <div className="fixed bottom-24 left-6 right-6 p-4 bg-secondary/20 rounded-lg border border-dashed border-border/60 text-center">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-          Long press a workspace to edit settings
-        </p>
-      </div>
-
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-6 bg-black/70">
-          <div className="w-full max-w-sm bg-card rounded-lg p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
+      {/* Sheet overlay */}
+      {sheet && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-0">
+          <div className="w-full max-w-lg bg-card rounded-t-xl p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-                  Workspace
+                <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                  {sheet.type === "create" ? "New Space" : sheet.type === "edit" ? "Edit Space" : sheet.type === "delete" ? "Delete Space" : "Invite Member"}
                 </p>
-                <h2 className="text-sm font-bold text-foreground mt-1">Create New Space</h2>
+                <h2 className="text-sm font-bold text-foreground mt-0.5">
+                  {sheet.type === "create" ? "Create Workspace" : sheet.type === "edit" ? sheet.workspace.name : sheet.type === "delete" ? "Are you sure?" : `Invite to ${sheet.workspace.name}`}
+                </h2>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCreate(false);
-                  setCreateError("");
-                }}
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                Close
+              <button type="button" onClick={closeSheet} className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary/50 text-muted-foreground">
+                <X className="w-4 h-4" />
               </button>
             </div>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">
-                  Workspace name
-                </label>
+
+            {error && <p className="text-xs text-chart-2">{error}</p>}
+
+            {/* Create */}
+            {sheet.type === "create" && (
+              <form onSubmit={handleCreate} className="space-y-4">
                 <input
                   type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="e.g. Family, Personal"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Workspace name"
                   className="w-full rounded-lg border border-border/60 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
                   autoFocus
                 />
-              </div>
-              {createError && (
-                <p className="text-xs text-chart-2">
-                  {createError}
+                <div className="flex gap-2">
+                  <button type="button" onClick={closeSheet} className="flex-1 py-3 rounded-lg border border-border text-xs font-black uppercase tracking-widest text-muted-foreground">Cancel</button>
+                  <button type="submit" disabled={saving || !name.trim()} className="flex-1 py-3 rounded-lg bg-white text-black text-xs font-black uppercase tracking-widest disabled:opacity-40">
+                    {saving ? "Creating…" : "Create"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Edit */}
+            {sheet.type === "edit" && (
+              <form onSubmit={handleEdit} className="space-y-4">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Workspace name"
+                  className="w-full rounded-lg border border-border/60 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button type="button" onClick={closeSheet} className="flex-1 py-3 rounded-lg border border-border text-xs font-black uppercase tracking-widest text-muted-foreground">Cancel</button>
+                  <button type="submit" disabled={saving || !name.trim()} className="flex-1 py-3 rounded-lg bg-white text-black text-xs font-black uppercase tracking-widest disabled:opacity-40">
+                    {saving ? "Saving…" : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Delete */}
+            {sheet.type === "delete" && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  This will permanently delete <span className="font-bold text-foreground">{sheet.workspace.name}</span> and all its data. This cannot be undone.
                 </p>
-              )}
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreate(false);
-                    setCreateError("");
-                  }}
-                  className="flex-1 py-3 rounded-lg border border-border text-xs font-bold text-foreground uppercase tracking-widest active:scale-[0.98]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={creating || !newName.trim()}
-                  className="flex-1 py-3 rounded-lg bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest disabled:opacity-50 active:scale-[0.98]"
-                >
-                  {creating ? "Creating…" : "Create"}
-                </button>
+                <div className="flex gap-2">
+                  <button type="button" onClick={closeSheet} className="flex-1 py-3 rounded-lg border border-border text-xs font-black uppercase tracking-widest text-muted-foreground">Cancel</button>
+                  <button type="button" onClick={handleDelete} disabled={saving} className="flex-1 py-3 rounded-lg bg-chart-2 text-white text-xs font-black uppercase tracking-widest disabled:opacity-40">
+                    {saving ? "Deleting…" : "Delete"}
+                  </button>
+                </div>
               </div>
-            </form>
+            )}
+
+            {/* Invite */}
+            {sheet.type === "invite" && (
+              <form onSubmit={handleInvite} className="space-y-4">
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="member@email.com"
+                  className="w-full rounded-lg border border-border/60 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  autoFocus
+                />
+                <div className="bg-secondary/30 rounded-lg p-1 grid grid-cols-3 gap-1">
+                  {(["member", "admin", "viewer"] as const).map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setInviteRole(r)}
+                      className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${inviteRole === r ? "bg-background text-foreground" : "text-muted-foreground"}`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={closeSheet} className="flex-1 py-3 rounded-lg border border-border text-xs font-black uppercase tracking-widest text-muted-foreground">Cancel</button>
+                  <button type="submit" disabled={saving || !inviteEmail.trim()} className="flex-1 py-3 rounded-lg bg-white text-black text-xs font-black uppercase tracking-widest disabled:opacity-40">
+                    {saving ? "Sending…" : "Send Invite"}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
     </div>
   );
 }
-
