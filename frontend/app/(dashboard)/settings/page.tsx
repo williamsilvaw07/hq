@@ -74,7 +74,7 @@ function WorkspaceSettingsSection() {
         </div>
         <Link
           href="/settings/workspaces"
-          className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+          className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/10 flex items-center justify-center shrink-0">
@@ -84,40 +84,6 @@ function WorkspaceSettingsSection() {
               <p className="text-sm font-bold">Switch Workspace</p>
               <p className="text-[10px] text-muted-foreground font-medium">
                 Jump between your finance hubs
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </Link>
-        <Link
-          href="/settings/workspaces"
-          className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
-        >
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-1/10 flex items-center justify-center shrink-0">
-              <Users className="w-5 h-5 text-chart-1" />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-bold">New Workspace</p>
-              <p className="text-[10px] text-muted-foreground font-medium">
-                Create a shared or private space
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </Link>
-        <Link
-          href="/settings/team"
-          className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
-        >
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-3/10 flex items-center justify-center shrink-0">
-              <Users className="w-5 h-5 text-chart-3" />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-bold">Invite Team</p>
-              <p className="text-[10px] text-muted-foreground font-medium">
-                Collaborate on shared finances
               </p>
             </div>
           </div>
