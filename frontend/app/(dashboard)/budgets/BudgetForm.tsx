@@ -87,7 +87,7 @@ export function BudgetForm({
       <div className="flex items-center gap-4 sm:gap-6">
         <button
           type="button"
-          className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl bg-card border border-border/40 flex items-center justify-center text-3xl sm:text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all shrink-0"
+          className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl bg-card flex items-center justify-center text-3xl sm:text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all shrink-0"
         >
           {displayIcon}
         </button>
@@ -158,7 +158,7 @@ export function BudgetForm({
         </div>
       </div>
 
-      <div className="space-y-1 bg-card/30 rounded-xl sm:rounded-xl border border-border/30 overflow-hidden">
+      <div className="space-y-1 bg-card/30 rounded-xl sm:rounded-xl overflow-hidden">
         <div className="w-full px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-9 h-9 rounded-xl bg-secondary/50 flex items-center justify-center">

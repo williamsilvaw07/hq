@@ -110,7 +110,7 @@ export default function DashboardLayout({
         <header className="z-40 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground active:scale-95 transition-all"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-foreground active:scale-95 transition-all"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>

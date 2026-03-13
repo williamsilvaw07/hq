@@ -125,7 +125,7 @@ export default function BudgetsPage() {
             setEditingBudget(null);
             setModalOpen(true);
           }}
-          className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95 border border-border/50"
+          className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-card text-foreground transition-all active:scale-95"
           aria-label="Add Budget"
         >
           <Plus className="w-5 h-5 text-muted-foreground" />
@@ -133,7 +133,7 @@ export default function BudgetsPage() {
       </header>
 
       <div className="px-4 sm:px-0">
-        <div className="bg-card p-4 sm:p-6 rounded-lg sm:rounded-xl border border-border/50 shadow-xl shadow-black/10">
+        <div className="bg-card p-4 sm:p-6 rounded-lg sm:rounded-xl shadow-xl shadow-black/10">
           <div className="flex justify-between items-end mb-3 sm:mb-4">
             <div>
               <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-60">
@@ -178,7 +178,7 @@ export default function BudgetsPage() {
             {loading && workspaceId ? (
               <p className="text-muted-foreground text-sm py-4 px-1">Loading…</p>
             ) : budgets.length === 0 ? (
-              <div className="bg-card/50 p-8 rounded-xl border border-border/30 text-center space-y-4">
+              <div className="bg-card/50 p-8 rounded-xl text-center space-y-4">
                 <p className="text-muted-foreground text-sm">No budgets set yet.</p>
                 <button
                   onClick={() => {
@@ -208,7 +208,7 @@ export default function BudgetsPage() {
                       setEditingBudget(budget);
                       setModalOpen(true);
                     }}
-                    className="bg-card p-4 sm:p-6 rounded-xl border border-border/40 space-y-4 active:scale-[0.98] transition-all cursor-pointer group hover:border-border/80"
+                    className="bg-card p-4 sm:p-6 rounded-xl space-y-4 active:scale-[0.98] transition-all cursor-pointer group hover:border-border/80"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">

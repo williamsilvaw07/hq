@@ -174,7 +174,7 @@ export default function TransactionsPage() {
           </div>
         </div>
         {filterOpen && (
-          <div className="bg-card rounded-xl sm:rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3 border border-border/40 shadow-xl">
+          <div className="bg-card rounded-xl sm:rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3 shadow-xl">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-foreground uppercase tracking-wider">Filter Activity</span>
               <button type="button" onClick={() => setFilterOpen(false)} className="p-1 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Close">
@@ -191,7 +191,7 @@ export default function TransactionsPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search transactions..."
-            className="w-full bg-card border border-border/40 rounded-xl sm:rounded-lg py-2.5 sm:py-3.5 pl-10 sm:pl-11 pr-3 sm:pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/20 transition-all"
+            className="w-full bg-card rounded-xl sm:rounded-lg py-2.5 sm:py-3.5 pl-10 sm:pl-11 pr-3 sm:pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/20 transition-all"
           />
         </div>
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-4 sm:-mx-6 px-4 sm:px-6">
@@ -214,7 +214,7 @@ export default function TransactionsPage() {
 
       <div className="space-y-5 sm:space-y-8">
         {list.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-10 sm:py-16 text-center gap-2 sm:gap-3 bg-card/30 rounded-xl border border-border/20">
+          <div className="flex flex-col items-center justify-center py-10 sm:py-16 text-center gap-2 sm:gap-3 bg-card/30 rounded-xl">
             <p className="text-sm font-medium text-foreground">No activity found.</p>
             <p className="text-xs text-muted-foreground max-w-[260px]">
               Try adjusting your filters or add a new transaction manually.
@@ -247,7 +247,7 @@ export default function TransactionsPage() {
                       setEditingTransaction(t);
                       setModalOpen(true);
                     }}
-                    className="flex items-center justify-between bg-card p-3 sm:p-5 rounded-lg sm:rounded-xl border border-border/40 active:scale-[0.98] transition-all cursor-pointer group hover:border-border/80"
+                    className="flex items-center justify-between bg-card p-3 sm:p-5 rounded-lg sm:rounded-xl active:scale-[0.98] transition-all cursor-pointer group hover:border-border/80"
                   >
                     <div className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0">
                       <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-lg flex items-center justify-center border shrink-0 ${t.type === "income" ? "bg-chart-1/10 border-chart-1/20" : "bg-card/50"}`}>
@@ -280,9 +280,9 @@ export default function TransactionsPage() {
 
       {result.last_page > 1 && (
         <div className="flex gap-2 justify-center pt-8">
-          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-xl border border-border/50 px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Prev</button>
+          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Prev</button>
           <span className="py-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest self-center">Page {result.current_page} / {result.last_page}</span>
-          <button type="button" disabled={page >= result.last_page} onClick={() => setPage((p) => p + 1)} className="rounded-xl border border-border/50 px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Next</button>
+          <button type="button" disabled={page >= result.last_page} onClick={() => setPage((p) => p + 1)} className="rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Next</button>
         </div>
       )}
 

@@ -79,7 +79,7 @@ export function BudgetModal({
         {/* Name & Icon */}
         <div className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-lg bg-secondary/50 flex items-center justify-center text-3xl shadow-inner border border-border/10">
+            <div className="w-16 h-16 rounded-lg bg-secondary/50 flex items-center justify-center text-3xl shadow-inner">
               {icon || "💰"}
             </div>
             <div className="flex-1 space-y-1">
@@ -95,7 +95,7 @@ export function BudgetModal({
             </div>
           </div>
 
-          <div className="bg-card/50 rounded-lg p-3 border border-border/10">
+          <div className="bg-card/50 rounded-lg p-3">
             <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-50">Icon</p>
             <select
               value={icon}
@@ -125,7 +125,7 @@ export function BudgetModal({
         </div>
 
         {/* Reset Frequency */}
-        <div className="bg-card/40 rounded-xl border border-border/10 overflow-hidden divide-y divide-border/5">
+        <div className="bg-card/40 rounded-xl overflow-hidden divide-y divide-border/5">
           <div className="p-5 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center text-lg">⏱</div>

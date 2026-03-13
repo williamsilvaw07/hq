@@ -181,7 +181,7 @@ export default function EditBudgetPage({
             <div className="flex items-center gap-6">
               <button
                 type="button"
-                className="w-20 h-20 rounded-xl bg-card border border-border/40 flex items-center justify-center text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all"
+                className="w-20 h-20 rounded-xl bg-card flex items-center justify-center text-4xl shadow-xl shadow-black/20 active:scale-95 transition-all"
               >
                 {displayIcon}
               </button>
@@ -248,7 +248,7 @@ export default function EditBudgetPage({
               </div>
             </div>
 
-            <div className="space-y-1 bg-card/30 rounded-xl border border-border/30 overflow-hidden">
+            <div className="space-y-1 bg-card/30 rounded-xl overflow-hidden">
               <div className="w-full px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-9 h-9 rounded-xl bg-secondary/50 flex items-center justify-center">
