@@ -74,44 +74,13 @@ export default function BudgetsPage() {
     setSaving(true);
     try {
       const isEdit = !!editingBudget;
-
-      if (isEdit) {
-        // Update category name + icon
-        if (editingBudget.category?.id) {
-          await api(`/api/workspaces/${workspaceId}/categories/${editingBudget.category.id}`, {
-            method: "PATCH",
-            body: JSON.stringify({ name: data.name, icon: data.icon }),
-          });
-        }
-        // Update budget amount + period
-        await api(`/api/workspaces/${workspaceId}/budgets/${editingBudget.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ amount: data.amount, period_type: data.period_type }),
-        });
-      } else {
-        // Create category first
-        const catRes = await api<{ id: number }>(`/api/workspaces/${workspaceId}/categories`, {
-          method: "POST",
-          body: JSON.stringify({ name: data.name, icon: data.icon, type: "expense" }),
-        });
-        const categoryId = (catRes.data as any)?.id;
-        if (!categoryId) throw new Error("Failed to create category");
-
-        // Create budget linked to new category
-        const now = new Date();
-        await api(`/api/workspaces/${workspaceId}/budgets`, {
-          method: "POST",
-          body: JSON.stringify({
-            category_id: categoryId,
-            month: now.getMonth() + 1,
-            year: now.getFullYear(),
-            amount: data.amount,
-            period_type: data.period_type,
-            currency: "BRL",
-          }),
-        });
-      }
-
+      const url = isEdit
+        ? `/api/workspaces/${workspaceId}/budgets/${editingBudget.id}`
+        : `/api/workspaces/${workspaceId}/budgets`;
+      await api(url, {
+        method: isEdit ? "PATCH" : "POST",
+        body: JSON.stringify({ ...data, currency: "BRL" }),
+      });
       const list = await loadBudgets(workspaceId);
       setBudgets(list);
       setModalOpen(false);

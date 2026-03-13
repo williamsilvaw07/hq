@@ -33,6 +33,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
            b.id,
            b.workspace_id AS workspaceId,
            b.category_id AS categoryId,
+           b.name,
+           b.icon,
            b.month,
            b.year,
            b.period_type AS periodType,
@@ -78,6 +80,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
 
           return {
             id: budget.id,
+            name: (budget as any).name || budget.categoryName,
+            icon: (budget as any).icon || budget.categoryIcon,
             category: budget.categoryIdNullable
               ? {
                   id: budget.categoryIdNullable,
@@ -151,9 +155,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
     const body = await req.json();
 
-    const categoryId = body.category_id != null ? parseInt(String(body.category_id), 10) : NaN;
-    const month = body.month != null ? parseInt(String(body.month), 10) : NaN;
-    const year = body.year != null ? parseInt(String(body.year), 10) : NaN;
+    const name = typeof body.name === "string" ? body.name.trim() : null;
+    const icon = typeof body.icon === "string" ? body.icon : null;
+    let categoryId = body.category_id != null ? parseInt(String(body.category_id), 10) : NaN;
+    const now = new Date();
+    const month = body.month != null ? parseInt(String(body.month), 10) : now.getMonth() + 1;
+    const year = body.year != null ? parseInt(String(body.year), 10) : now.getFullYear();
     const periodType = (typeof body.period_type === "string" ? body.period_type : "month") as string;
     const periodInterval = body.period_interval != null ? Math.min(12, Math.max(1, parseInt(String(body.period_interval), 10))) : 1;
     const amount = typeof body.amount === "number" ? body.amount : parseFloat(String(body.amount ?? 0));
@@ -162,87 +169,47 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
         ? body.currency
         : "BRL";
 
-    if (Number.isNaN(categoryId) || Number.isNaN(month) || Number.isNaN(year)) {
-      return NextResponse.json(
-        { message: "category_id, month and year are required." },
-        { status: 422 },
-      );
-    }
     if (month < 1 || month > 12 || year < 2020 || year > 2100) {
-      return NextResponse.json(
-        { message: "Invalid month or year." },
-        { status: 422 },
-      );
+      return NextResponse.json({ message: "Invalid month or year." }, { status: 422 });
     }
     if (amount < 0 || Number.isNaN(amount)) {
-      return NextResponse.json(
-        { message: "Amount must be a non-negative number." },
-        { status: 422 },
-      );
+      return NextResponse.json({ message: "Amount must be a non-negative number." }, { status: 422 });
     }
     if (!["day", "week", "month", "year"].includes(periodType)) {
-      return NextResponse.json(
-        { message: "Invalid period_type." },
-        { status: 422 },
-      );
+      return NextResponse.json({ message: "Invalid period_type." }, { status: 422 });
     }
 
-    const category = await fetchOne<{ id: number }>(
-      "SELECT id FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1",
-      [categoryId, wid],
-    );
-    if (!category) {
-      return NextResponse.json(
-        { message: "Category not found." },
-        { status: 422 },
+    // If no category_id, auto-create one from name
+    if (Number.isNaN(categoryId)) {
+      if (!name) {
+        return NextResponse.json({ message: "Either category_id or name is required." }, { status: 422 });
+      }
+      categoryId = await insertOne(
+        `INSERT INTO Category (workspace_id, name, type, icon, color, created_at, updated_at) VALUES (?, ?, 'expense', ?, NULL, NOW(3), NOW(3))`,
+        [wid, name, icon],
       );
-    }
-
-    // Ensure we don't create duplicate budgets for same workspace/category/month/year
-    const existing = await fetchOne<{ id: number }>(
-      `SELECT id
-       FROM budgets
-       WHERE workspace_id = ?
-         AND category_id = ?
-         AND month = ?
-         AND year = ?
-       LIMIT 1`,
-      [wid, categoryId, month, year],
-    );
-    if (existing) {
-      return NextResponse.json(
-        { message: "A budget for this category and month already exists." },
-        { status: 422 },
+    } else {
+      const category = await fetchOne<{ id: number }>(
+        "SELECT id FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1",
+        [categoryId, wid],
       );
+      if (!category) {
+        return NextResponse.json({ message: "Category not found." }, { status: 422 });
+      }
     }
 
     const id = await insertOne(
-      `INSERT INTO budgets
-         (workspace_id, category_id, month, year, period_type, period_interval, start_date, amount, currency, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, NOW(3), NOW(3))`,
-      [wid, categoryId, month, year, periodType, periodInterval, amount, currency],
+      `INSERT INTO budgets (workspace_id, category_id, name, icon, month, year, period_type, period_interval, start_date, amount, currency, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NOW(3), NOW(3))`,
+      [wid, categoryId, name, icon, month, year, periodType, periodInterval, amount, currency],
     );
 
     const [budget] = await fetchMany(
-      `SELECT
-         b.id,
-         b.workspace_id AS workspaceId,
-         b.category_id AS categoryId,
-         b.month,
-         b.year,
-         b.period_type AS periodType,
-         b.period_interval AS periodInterval,
-         b.start_date AS startDate,
-         b.amount,
-         b.currency,
-         c.id AS categoryIdNullable,
-         c.name AS categoryName,
-         c.icon AS categoryIcon,
-         c.color AS categoryColor
-       FROM budgets b
-       LEFT JOIN Category c ON c.id = b.category_id
-       WHERE b.id = ?
-       LIMIT 1`,
+      `SELECT b.id, b.workspace_id AS workspaceId, b.category_id AS categoryId, b.name, b.icon,
+              b.month, b.year, b.period_type AS periodType, b.period_interval AS periodInterval,
+              b.start_date AS startDate, b.amount, b.currency,
+              c.id AS categoryIdNullable, c.name AS categoryName, c.icon AS categoryIcon, c.color AS categoryColor
+       FROM budgets b LEFT JOIN Category c ON c.id = b.category_id WHERE b.id = ? LIMIT 1`,
       [id],
     );
 
@@ -252,9 +219,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     if (status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
     if (status === 404) return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
     console.error("POST /api/workspaces/[id]/budgets error:", e);
-    return NextResponse.json(
-      { message: (e as Error).message || "Request failed." },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: (e as Error).message || "Request failed." }, { status: 500 });
   }
 }

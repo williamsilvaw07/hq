@@ -62,6 +62,14 @@ export async function PATCH(
     const fields: string[] = [];
     const paramsArr: any[] = [];
 
+    if (typeof body.name === "string") {
+      fields.push("name = ?");
+      paramsArr.push(body.name.trim() || null);
+    }
+    if (body.icon !== undefined) {
+      fields.push("icon = ?");
+      paramsArr.push(typeof body.icon === "string" ? body.icon : null);
+    }
     if (body.month != null) {
       const m = parseInt(String(body.month), 10);
       if (m < 1 || m > 12) return NextResponse.json({ message: "Invalid month." }, { status: 422 });
