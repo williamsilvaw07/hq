@@ -19,6 +19,8 @@ type DashboardData = {
 
 type BudgetSummary = {
   id: number;
+  name?: string | null;
+  icon?: string | null;
   amount: number;
   spent: number;
   remaining: number;
@@ -278,10 +280,10 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-secondary/50 flex items-center justify-center text-2xl shadow-inner">
-                      {budget.category?.icon || "💰"}
+                      {budget.icon || budget.category?.icon || "💰"}
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold">{budget.category?.name ?? "Budget"}</h4>
+                      <h4 className="text-sm font-bold">{budget.name || budget.category?.name || "Budget"}</h4>
                       <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
                         {budget.period_type ?? "Monthly"} • {budget.next_reset_date}
                       </p>
@@ -356,7 +358,7 @@ export default function DashboardPage() {
         isOpen={transactionModalOpen}
         onClose={() => setTransactionModalOpen(false)}
         onSave={handleSaveTransaction}
-        categories={categories}
+        categories={budgets.map((b) => ({ id: b.id, name: (b as any).name || b.category?.name || "Budget" }))}
         accounts={accounts}
         saving={saving}
       />

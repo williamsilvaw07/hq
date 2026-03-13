@@ -10,6 +10,8 @@ import { BudgetModal } from "./BudgetModal";
 
 type Budget = {
   id: number;
+  name?: string | null;
+  icon?: string | null;
   amount: number;
   currency: string;
   period_type?: string;
@@ -216,10 +218,10 @@ export default function BudgetsPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${colorClass} text-2xl`}>
-                          {budget.category?.icon || "💰"}
+                          {budget.icon || budget.category?.icon || "💰"}
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-foreground">{budget.category?.name || "Budget"}</h4>
+                          <h4 className="text-sm font-bold text-foreground">{budget.name || budget.category?.name || "Budget"}</h4>
                           <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
                             {budget.period_type ?? "Monthly"} • {budget.next_reset_date || "Active"}
                           </p>

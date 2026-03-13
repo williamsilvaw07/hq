@@ -142,7 +142,7 @@ export function TransactionModal({
                 <Icon icon="solar:tag-linear" className="text-lg" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mb-0.5 opacity-50">Category</p>
+                <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mb-0.5 opacity-50">Budget</p>
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
