@@ -108,7 +108,7 @@ export default function NewBudgetPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans tracking-tight selection:bg-primary/10 flex flex-col">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
+      <header className="z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
         <button
           type="button"
           onClick={() => router.back()}

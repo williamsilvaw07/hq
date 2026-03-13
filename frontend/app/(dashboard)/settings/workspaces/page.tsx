@@ -86,7 +86,7 @@ export default function WorkspacesPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans tracking-tight">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl px-6 py-5 flex items-center justify-between">
+      <header className="z-40 bg-background/80 backdrop-blur-xl px-6 py-5 flex items-center justify-between">
         <button
           type="button"
           onClick={() => router.back()}

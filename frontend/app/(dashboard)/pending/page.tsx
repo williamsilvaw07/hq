@@ -32,7 +32,7 @@ export default function PendingPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-4">
-      <header className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
+      <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">Pending Review</h1>
           <p className="text-[11px] text-chart-1 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">

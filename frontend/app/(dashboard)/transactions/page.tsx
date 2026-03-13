@@ -81,7 +81,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-4">
-      <header className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md space-y-3 sm:space-y-4">
+      <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="page-title">Activity History</h1>
           <button

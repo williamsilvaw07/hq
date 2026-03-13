@@ -143,7 +143,7 @@ export default function TeamPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-10 font-sans tracking-tight">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+      <header className="z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <button
           type="button"
           onClick={() => router.push("/settings")}

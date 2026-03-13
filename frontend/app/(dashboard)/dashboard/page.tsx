@@ -185,7 +185,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+      <header className="z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/settings/profile" className="active:scale-95 transition-all outline-none">
             <img

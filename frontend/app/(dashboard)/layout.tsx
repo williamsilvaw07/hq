@@ -88,7 +88,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-28 font-sans selection:bg-primary/20 tracking-tight">
       {showSettingsHeader ? (
-        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <header className="z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               type="button"

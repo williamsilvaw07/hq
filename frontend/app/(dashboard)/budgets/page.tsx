@@ -152,7 +152,7 @@ export default function BudgetsPage() {
   // Layout inspired by mobile-first budgeting dashboards to keep the experience focused and glanceable.
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans selection:bg-primary/20 tracking-tight">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
+      <header className="z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg sm:text-xl font-bold text-foreground">My Budgets</h1>
           <Link
