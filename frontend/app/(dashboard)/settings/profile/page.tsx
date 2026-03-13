@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ArrowLeft, Camera, ChevronRight, Trash2, X } from "lucide-react";
 import { buildMediaUrl } from "@/lib/api";
+import { Modal } from "@/components/ui/Modal";
 
 export default function SettingsProfilePage() {
   const router = useRouter();
@@ -228,20 +229,34 @@ export default function SettingsProfilePage() {
       </main>
 
       {showPasswordModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className="bg-card rounded-xl sm:rounded-2xl w-full max-w-sm p-4 sm:p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-foreground">Change Password</h3>
+        <Modal
+          isOpen={showPasswordModal}
+          onClose={() => {
+            setShowPasswordModal(false);
+            setPasswordError("");
+          }}
+          title="Change Password"
+          footer={
+            <div className="flex gap-2 pt-2">
               <button
                 type="button"
-                onClick={() => { setShowPasswordModal(false); setPasswordError(""); }}
-                className="p-2 rounded-lg text-muted-foreground hover:text-foreground"
-                aria-label="Close"
+                onClick={() => setShowPasswordModal(false)}
+                className="flex-1 py-3 rounded-xl border border-border text-foreground font-bold text-sm"
               >
-                <X className="w-5 h-5" />
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="change-password-form"
+                disabled={changingPassword}
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50"
+              >
+                {changingPassword ? "Saving…" : "Update password"}
               </button>
             </div>
-            <form onSubmit={handleChangePassword} className="space-y-4">
+          }
+        >
+          <form id="change-password-form" onSubmit={handleChangePassword} className="space-y-4">
               <div>
                 <label className="label block mb-2">Current password</label>
                 <input
@@ -280,25 +295,8 @@ export default function SettingsProfilePage() {
               {passwordError && (
                 <p className="text-sm text-chart-2">{passwordError}</p>
               )}
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordModal(false)}
-                  className="flex-1 py-3 rounded-xl border border-border text-foreground font-bold text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={changingPassword}
-                  className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50"
-                >
-                  {changingPassword ? "Saving…" : "Update password"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+          </form>
+        </Modal>
       )}
     </div>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
 import {
   type FixedBill,
   computeNextOccurrence,
@@ -10,6 +9,7 @@ import {
   formatRecurrenceRule,
   parseBillDate,
 } from "@/lib/fixed-expenses";
+import { Modal } from "@/components/ui/Modal";
 
 const FIXED_BILL_EMOJI_OPTIONS = [
   "🏠", "💡", "📺", "📱", "💻", "☁️", "🚗", "🏥", "📚", "🛒",
@@ -178,32 +178,36 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: FixedBi
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4 bg-black/60"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="fixed-bill-modal-title"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0 mx-4 sm:mx-0 bg-card rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between p-4 sm:p-6 pb-2 shrink-0">
-          <h2 id="fixed-bill-modal-title" className="text-lg font-bold text-foreground">
-            {isNew ? "Add fixed bill" : "Edit fixed bill"}
-          </h2>
+    <Modal
+      isOpen
+      onClose={onClose}
+      title={isNew ? "Add fixed bill" : "Edit fixed bill"}
+      size="default"
+      footer={
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="p-2 -m-2 rounded-xl text-muted-foreground hover:text-foreground active:bg-secondary touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Close"
+            className="flex-1 py-3.5 rounded-xl border border-border text-foreground font-bold text-sm active:bg-secondary touch-manipulation min-h-[48px]"
           >
-            <X className="w-5 h-5" />
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="fixed-bill-form"
+            disabled={saving}
+            className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50 active:bg-primary/90 touch-manipulation min-h-[48px]"
+          >
+            {saving ? "Saving…" : isNew ? "Add bill" : "Save changes"}
           </button>
         </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 min-w-0 p-4 sm:p-6 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-4">
+      }
+    >
+      <form
+        id="fixed-bill-form"
+        onSubmit={handleSubmit}
+        className="flex flex-col flex-1 min-h-0 min-w-0 space-y-4"
+      >
           <div className="grid grid-cols-5 gap-2">
             {FIXED_BILL_EMOJI_OPTIONS.map((emoji) => (
               <button
@@ -256,25 +260,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: FixedBi
 
           <RecurringEditor bill={draft} setDraft={setDraft} />
           <RecurringPreview bill={draft} />
-
-          <div className="flex gap-3 pt-4 pb-2 sm:pb-0">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3.5 rounded-xl border border-border text-foreground font-bold text-sm active:bg-secondary touch-manipulation min-h-[48px]"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50 active:bg-primary/90 touch-manipulation min-h-[48px]"
-            >
-              {saving ? "Saving…" : isNew ? "Add bill" : "Save changes"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }

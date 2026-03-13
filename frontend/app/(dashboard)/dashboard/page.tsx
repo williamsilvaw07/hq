@@ -142,9 +142,12 @@ export default function DashboardPage() {
     );
   }
 
+  const activeBudgets = budgets.slice(0, 3);
+  const firstFixedBill = fixedBills[0];
+
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans selection:bg-primary/20 tracking-tight">
-      <header className="z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/settings/profile" className="active:scale-95 transition-all outline-none">
             <img
@@ -160,100 +163,247 @@ export default function DashboardPage() {
             <p className="text-xs font-medium text-foreground">Overview</p>
           </div>
         </div>
-        <button
-          type="button"
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground transition-all active:scale-95"
-          aria-label="Notifications"
-        >
-          <Icon icon="solar:notification-lines-duotone" className="text-lg text-muted-foreground" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-card border border-border/50 text-foreground transition-all active:scale-95"
+            aria-label="Notifications"
+          >
+            <Icon
+              icon="solar:notification-lines-duotone"
+              className="text-lg text-muted-foreground"
+            />
+          </button>
+        </div>
       </header>
 
       <main className="px-6 space-y-8">
-        {/* Total Spent This Month - Overview */}
-        <section className="flex flex-col items-center justify-center pt-4 pb-2">
-          <p className="text-[9px] text-muted-foreground font-semibold uppercase tracking-[0.2em] mb-2">
-            Total Spent This Month
-          </p>
-          <div className="flex flex-col items-center gap-1 mb-4">
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-light text-muted-foreground/70 tracking-tighter">
-                {CURRENCY_SYMBOL}
-              </span>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter text-foreground">
-                {formatBRLocale(totalSpent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </h1>
+        {/* Variable Budgets & Fixed Bills summary cards */}
+        <section className="grid grid-cols-2 gap-3 pt-2">
+          <div className="bg-card p-4 rounded-[2rem] border border-border/40 flex flex-col justify-between min-h-[140px]">
+            <div>
+              <p className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest mb-1 opacity-60">
+                Variable Budgets
+              </p>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-xs font-light text-muted-foreground/50">{CURRENCY_SYMBOL}</span>
+                <p className="text-xl font-semibold tracking-tighter">
+                  {formatBRLocale(variableSpent, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="w-full h-1 bg-secondary rounded-full overflow-hidden">
+                <div
+                  style={{ width: `${variablePercent}%` }}
+                  className="h-full bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+                />
+              </div>
+              <div className="flex justify-between text-[8px] font-semibold text-muted-foreground uppercase tracking-tighter">
+                <span>{variablePercent.toFixed(0)}% Spent</span>
+                <span>Limit: {formatCompact(variableLimit)}</span>
+              </div>
             </div>
           </div>
-          <div className="flex flex-col items-center gap-2.5 w-full max-w-[280px]">
-            <div className="w-full h-1 bg-secondary rounded-full overflow-hidden">
-              <div
-                style={{ width: `${percentSpent}%` }}
-                className="h-full bg-white/80 rounded-full transition-all duration-300"
-              />
+
+          <div className="bg-card p-4 rounded-[2rem] border border-border/40 flex flex-col justify-between min-h-[140px]">
+            <div>
+              <p className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest mb-1 opacity-60">
+                Fixed Bills
+              </p>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-xs font-light text-muted-foreground/50">{CURRENCY_SYMBOL}</span>
+                <p className="text-xl font-semibold tracking-tighter">
+                  {formatBRLocale(monthlyFixedTotal, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
             </div>
-            <div className="flex justify-between w-full text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
-              <span>{percentSpent.toFixed(0)}% Spent</span>
-              <span>
-                Budget: {CURRENCY_SYMBOL} {formatBRLocale(totalBudget, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </span>
+            <div className="space-y-2">
+              <div className="w-full h-1 bg-secondary rounded-full overflow-hidden">
+                <div
+                  style={{ width: monthlyFixedTotal > 0 ? "100%" : "0%" }}
+                  className="h-full bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.3)]"
+                />
+              </div>
+              <div className="flex justify-between text-[8px] font-semibold text-muted-foreground uppercase tracking-tighter">
+                <span>{monthlyFixedTotal > 0 ? "Fully Paid" : "No Bills"}</span>
+                <span>Total: {formatCompact(monthlyFixedTotal)}</span>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Variable Budgets & Fixed Bills Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link
-            href="/budgets"
-            className="bg-card p-4 sm:p-5 rounded-2xl border border-border/50 shadow-lg shadow-black/5 hover:border-border/80 transition-all active:scale-[0.99] block"
-          >
-            <p className="text-[9px] text-muted-foreground font-semibold uppercase tracking-widest mb-3">
-              Variable Budgets
-            </p>
-            <div className="flex items-baseline gap-1 mb-3">
-              <span className="text-sm text-muted-foreground/80">{CURRENCY_SYMBOL}</span>
-              <span className="text-2xl sm:text-3xl font-bold text-foreground tracking-tighter">
-                {formatBRLocale(variableSpent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="w-full h-1 bg-secondary rounded-full overflow-hidden mb-2">
-              <div
-                style={{ width: `${variablePercent}%` }}
-                className="h-full bg-white/80 rounded-full transition-all duration-300"
-              />
-            </div>
-            <div className="flex justify-between text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
-              <span>{variablePercent.toFixed(0)}% Spent</span>
-              <span>Limit: {formatCompact(variableLimit)}</span>
-            </div>
-          </Link>
+        {/* Active Budgets list */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-semibold text-foreground tracking-tight uppercase tracking-widest opacity-80">
+              Active Budgets
+            </h2>
+            <Link
+              href="/budgets"
+              className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              Manage
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-3">
+            {activeBudgets.map((budget, index) => {
+              const remaining = budget.remaining ?? Math.max(0, Number(budget.amount) - Number(budget.spent));
+              const spentPercentage = Math.min(100, budget.spent_percentage || 0);
+              const colors = [
+                { bg: "bg-orange-500/10", border: "border-orange-500/20", bar: "bg-orange-500", icon: "solar:hamburger-food-bold-duotone" },
+                { bg: "bg-blue-500/10", border: "border-blue-500/20", bar: "bg-blue-500", icon: "solar:bus-bold-duotone" },
+                { bg: "bg-purple-500/10", border: "border-purple-500/20", bar: "bg-purple-500", icon: "solar:clapperboard-play-bold-duotone" },
+              ];
+              const color = colors[index % colors.length];
 
-          <Link
-            href="/settings/fixed-expenses"
-            className="bg-card p-4 sm:p-5 rounded-2xl border border-border/50 shadow-lg shadow-black/5 hover:border-border/80 transition-all active:scale-[0.99] block"
-          >
-            <p className="text-[9px] text-muted-foreground font-semibold uppercase tracking-widest mb-3">
+              return (
+                <div
+                  key={budget.id}
+                  className="bg-card p-4 rounded-[1.8rem] border border-border/50 space-y-3.5 group active:scale-[0.98] transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center border ${color.bg} ${color.border}`}
+                      >
+                        <Icon icon={budget.category?.icon || color.icon} className={`${color.bar.replace("bg-", "text-")} text-xl`} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold">{budget.category?.name ?? "Budget"}</h4>
+                        <p className="text-[9px] text-muted-foreground font-semibold uppercase tracking-widest">
+                          {budget.period_type === "weekly"
+                            ? "Weekly"
+                            : budget.period_type === "quarterly"
+                              ? "Quarterly"
+                              : "Monthly"}
+                          {budget.period_interval && budget.period_interval > 1
+                            ? ` • Every ${budget.period_interval}`
+                            : ""}{" "}
+                          • Active
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">
+                        {CURRENCY_SYMBOL}{" "}
+                        {formatBRLocale(remaining, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+                          left
+                        </span>
+                      </p>
+                      <p className="text-[8px] text-muted-foreground font-semibold uppercase tracking-widest">
+                        of {CURRENCY_SYMBOL}{" "}
+                        {formatBRLocale(budget.amount, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      style={{ width: `${100 - spentPercentage}%` }}
+                      className={`h-full rounded-full ${color.bar}`}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Fixed Bills highlight */}
+        <section className="pb-10">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="text-xs font-semibold text-foreground tracking-tight uppercase tracking-widest opacity-80">
               Fixed Bills
-            </p>
-            <div className="flex items-baseline gap-1 mb-3">
-              <span className="text-sm text-muted-foreground/80">{CURRENCY_SYMBOL}</span>
-              <span className="text-2xl sm:text-3xl font-bold text-foreground tracking-tighter">
-                {formatBRLocale(monthlyFixedTotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
+            </h2>
+            <Link
+              href="/settings/fixed-expenses"
+              className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              See all
+            </Link>
+          </div>
+          {firstFixedBill && (
+            <div className="bg-card/50 p-3.5 rounded-2xl border border-border/30 flex items-center justify-between group active:scale-[0.98] transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                  <span className="text-base">
+                    {firstFixedBill.icon ?? (
+                      <Icon
+                        icon="solar:home-2-bold-duotone"
+                        className="text-muted-foreground text-base"
+                      />
+                    )}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold">{firstFixedBill.name}</p>
+                  <p className="text-[8px] text-muted-foreground font-semibold uppercase tracking-widest">
+                    Due {firstFixedBill.due}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs font-semibold text-foreground">
+                {CURRENCY_SYMBOL}{" "}
+                {formatBRLocale(firstFixedBill.amount, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
             </div>
-            <div className="w-full h-1 bg-secondary rounded-full overflow-hidden mb-2">
-              <div
-                style={{ width: monthlyFixedTotal > 0 ? "100%" : "0%" }}
-                className="h-full bg-white/80 rounded-full transition-all duration-300"
-              />
-            </div>
-            <div className="flex justify-between text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
-              <span>{monthlyFixedTotal > 0 ? "Fully Paid" : "No Bills"}</span>
-              <span>Total: {formatCompact(monthlyFixedTotal)}</span>
-            </div>
-          </Link>
+          )}
         </section>
       </main>
+
+      {/* Bottom navigation */}
+      <div className="fixed bottom-0 left-0 w-full z-50 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+        <div className="bg-card/80 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-1.5 flex items-center justify-between shadow-2xl shadow-black/50">
+          <Link
+            href="/dashboard"
+            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-primary"
+          >
+            <Icon icon="solar:home-2-bold-duotone" className="text-xl" />
+            <span className="text-[8px] font-bold uppercase tracking-widest">Home</span>
+          </Link>
+          <Link
+            href="/history"
+            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Icon icon="solar:history-bold-duotone" className="text-xl" />
+            <span className="text-[8px] font-bold uppercase tracking-widest">History</span>
+          </Link>
+          <Link
+            href="/transactions/new"
+            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Icon icon="hugeicons:add-01" className="text-xl" />
+            <span className="text-[8px] font-bold uppercase tracking-widest">Add</span>
+          </Link>
+          <Link
+            href="/budgets"
+            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Icon icon="solar:wallet-bold-duotone" className="text-xl" />
+            <span className="text-[8px] font-bold uppercase tracking-widest">Budgets</span>
+          </Link>
+          <Link
+            href="/settings"
+            className="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Icon icon="solar:settings-bold-duotone" className="text-xl" />
+            <span className="text-[8px] font-bold uppercase tracking-widest">Setup</span>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

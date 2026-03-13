@@ -47,6 +47,35 @@ body {
   }
 }
 
+/* Modal animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.18s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
 /* Dark scrollbar */
 * {
   scrollbar-width: thin;
@@ -68,6 +97,20 @@ body {
 }
 
 /* Prevent iOS zoom on input focus - inputs need 16px minimum on mobile */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+@media (min-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: inherit;
+  }
+}
+
+/* Prevent iOS zoom on input focus - keep at least 16px on mobile */
 input,
 select,
 textarea {
