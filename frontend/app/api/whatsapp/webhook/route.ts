@@ -28,15 +28,19 @@ export async function GET(req: Request) {
 // ---------------------------------------------------------------------------
 
 export async function POST(req: Request) {
+  console.log("[whatsapp] POST webhook hit from", req.headers.get("user-agent") ?? "unknown");
   // Read raw body for signature verification
   const rawBody = await req.text();
+  console.log("[whatsapp] Raw body length:", rawBody.length, "| body preview:", rawBody.slice(0, 200));
 
   // Verify HMAC signature
   const signature = req.headers.get("x-hub-signature-256");
+  console.log("[whatsapp] Signature header:", signature ?? "MISSING");
   if (!verifySignature(rawBody, signature)) {
     console.warn("[whatsapp] Invalid signature — rejecting request");
     return new Response("Forbidden", { status: 403 });
   }
+  console.log("[whatsapp] Signature OK");
 
   let payload: any;
   try {
