@@ -27,15 +27,15 @@ export function BudgetModal({
   initialData,
   saving,
 }: BudgetModalProps) {
-  const [name, setName] = useState(initialData?.name ?? "");
-  const [icon, setIcon] = useState(initialData?.icon ?? "💰");
+  const [name, setName] = useState(initialData?.name ?? initialData?.category?.name ?? "");
+  const [icon, setIcon] = useState(initialData?.icon ?? initialData?.category?.icon ?? "💰");
   const [amount, setAmount] = useState(initialData?.amount?.toString() ?? "");
   const [periodType, setPeriodType] = useState(initialData?.period_type ?? "month");
 
   useEffect(() => {
     if (initialData) {
-      setName(initialData.name ?? "");
-      setIcon(initialData.icon ?? "💰");
+      setName(initialData.name ?? initialData.category?.name ?? "");
+      setIcon(initialData.icon ?? initialData.category?.icon ?? "💰");
       setAmount(initialData.amount?.toString() ?? "");
       setPeriodType(initialData.period_type ?? "month");
     } else {

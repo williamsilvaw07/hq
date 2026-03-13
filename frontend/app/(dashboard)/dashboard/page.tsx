@@ -31,6 +31,18 @@ type BudgetSummary = {
 
 type Category = { id: number; name: string; type: string; icon?: string | null };
 
+type Transaction = {
+  id: number;
+  type: string;
+  amount: number;
+  currency: string;
+  date: string;
+  description: string | null;
+  status: string;
+  category?: { id: number; name: string };
+  account?: { id: number; name: string } | null;
+};
+
 export default function DashboardPage() {
   const { user, workspaceId } = useAuth();
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
@@ -38,6 +50,7 @@ export default function DashboardPage() {
   const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -72,13 +85,16 @@ export default function DashboardPage() {
         .then((r) => Array.isArray(r.data) ? r.data : []),
       api<any>(`/api/workspaces/${workspaceId}/accounts`)
         .then((r) => r.data?.accounts || []),
+      api<any>(`/api/workspaces/${workspaceId}/transactions?per_page=5&page=1`)
+        .then((r) => Array.isArray(r.data?.data) ? r.data.data : []),
     ])
-      .then(([d, b, f, cat, acc]) => {
+      .then(([d, b, f, cat, acc, txs]) => {
         setDashboard(d);
         setBudgets(b);
         setFixedBills(f);
         setCategories(cat);
         setAccounts(acc);
+        setRecentTransactions(txs);
         setLoadError(null);
       })
       .catch((err) => {
@@ -281,6 +297,48 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Recent Transactions */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">Recent Transactions</h2>
+            <Link href="/transactions" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">See All</Link>
+          </div>
+          <div className="bg-card rounded-[2rem] border border-border/40 overflow-hidden divide-y divide-border/5">
+            {recentTransactions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8 opacity-50">No transactions yet.</p>
+            ) : (
+              recentTransactions.map((tx) => {
+                const isExpense = tx.type === "expense";
+                const dateLabel = new Date(tx.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+                return (
+                  <Link
+                    key={tx.id}
+                    href={`/transactions/${tx.id}`}
+                    className="flex items-center justify-between px-5 py-4 active:bg-secondary/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center text-base shrink-0">
+                        {isExpense ? "↓" : "↑"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-foreground truncate max-w-[160px]">
+                          {tx.description || tx.category?.name || "Transaction"}
+                        </p>
+                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60 mt-0.5">
+                          {dateLabel} • {tx.account?.name ?? "—"}
+                        </p>
+                      </div>
+                    </div>
+                    <p className={`text-sm font-black tracking-tight ${isExpense ? "text-foreground" : "text-chart-1"}`}>
+                      {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRLocale(tx.amount, { minimumFractionDigits: 2 })}
+                    </p>
+                  </Link>
+                );
+              })
+            )}
           </div>
         </section>
       </main>
