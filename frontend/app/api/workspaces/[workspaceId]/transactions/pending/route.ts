@@ -18,6 +18,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
       base_amount: Number(t.base_amount ?? t.amount),
       exchange_rate: Number(t.exchange_rate ?? 1),
       date: typeof t.date === "string" ? t.date.slice(0, 10) : new Date(t.date).toISOString().slice(0, 10),
+      created_at: typeof t.created_at === "string" ? t.created_at : (t.created_at ? new Date(t.created_at).toISOString() : null),
     }));
 
     return NextResponse.json({ data });

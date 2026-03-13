@@ -17,19 +17,6 @@ type Budget = {
 
 const sym = "R$";
 
-function formatDateLabel(dateStr: string): string {
-  const d = new Date(dateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const dNorm = new Date(d);
-  dNorm.setHours(0, 0, 0, 0);
-  if (dNorm.getTime() === today.getTime()) return "Today, " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  if (dNorm.getTime() === yesterday.getTime()) return "Yesterday, " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-}
-
 export default function NewTransactionPage() {
   const { workspaceId } = useAuth();
   const router = useRouter();
@@ -293,26 +280,22 @@ export default function NewTransactionPage() {
             </button>
           ))}
 
-          <label className="block cursor-pointer">
+          <label className="block">
             <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-xl sm:rounded-2xl">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/20 flex items-center justify-center shrink-0">
                 <Calendar className="w-5 h-5 text-chart-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-0.5">
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5">
                   DATE
                 </p>
-                <span className="text-sm font-medium text-foreground">
-                  {formatDateLabel(date)}
-                </span>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="sr-only"
+                  className="w-full bg-background rounded-xl border border-border px-3 py-2.5 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                 />
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
             </div>
           </label>
 

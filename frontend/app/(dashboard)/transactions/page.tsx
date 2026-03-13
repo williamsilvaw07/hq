@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import { Filter, Search, ShoppingBag, ArrowUpRight, X } from "lucide-react";
+import { Filter, Search, ShoppingBag, ArrowUpRight, X, PenLine } from "lucide-react";
 
 type Transaction = {
   id: number;
@@ -16,6 +16,7 @@ type Transaction = {
   status: string;
   category?: { id: number; name: string };
   account?: { id: number; name: string } | null;
+  created_at?: string;
 };
 
 type Paginated = { data: Transaction[]; current_page: number; last_page: number; per_page: number };
@@ -179,30 +180,47 @@ export default function TransactionsPage() {
           <div key={date} className="space-y-3 sm:space-y-4">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">{date}</p>
             <div className="space-y-2 sm:space-y-3">
-              {list.map((t) => (
-                <Link
-                  key={t.id}
-                  href={`/transactions/${t.id}`}
-                  className="flex items-center justify-between bg-card p-3 sm:p-5 rounded-2xl sm:rounded-3xl group active:scale-[0.98] transition-all"
-                >
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center border shrink-0 ${t.type === "income" ? "bg-chart-1/10 border-chart-1/10" : "bg-card"}`}>
-                      {t.type === "income" ? <ArrowUpRight className="w-5 h-5 text-chart-1" /> : <ShoppingBag className="w-5 h-5 text-muted-foreground" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-foreground">{t.description || "—"}</p>
-                      <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">{t.category?.name ?? "—"} {t.status === "draft" && "• Draft"}</p>
+              {list.map((t) => {
+                const createdDate = t.created_at ? new Date(t.created_at) : null;
+                const timeStr = createdDate
+                  ? createdDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })
+                  : null;
+                return (
+                  <div
+                    key={t.id}
+                    className="flex items-center justify-between bg-card p-3 sm:p-5 rounded-2xl sm:rounded-3xl group active:scale-[0.98] transition-all"
+                  >
+                    <Link href={`/transactions/${t.id}`} className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0">
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center border shrink-0 ${t.type === "income" ? "bg-chart-1/10 border-chart-1/10" : "bg-card"}`}>
+                        {t.type === "income" ? <ArrowUpRight className="w-5 h-5 text-chart-1" /> : <ShoppingBag className="w-5 h-5 text-muted-foreground" />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-foreground">{t.description || "—"}</p>
+                        <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">
+                          {t.category?.name ?? "—"} {t.status === "draft" && "• Draft"}
+                          {timeStr && ` • ${timeStr}`}
+                        </p>
+                      </div>
+                    </Link>
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                      <div className="text-right">
+                        <p className={`text-sm font-bold ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
+                          {t.type === "income" ? "+" : "-"}R${" "}
+                          {Math.abs(t.amount).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground font-medium">{t.account?.name ?? "—"}</p>
+                      </div>
+                      <Link
+                        href={`/transactions/${t.id}`}
+                        className="flex items-center gap-1.5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-bold shadow-lg shadow-white/5 active:scale-95 transition-all shrink-0"
+                        aria-label="Edit transaction"
+                      >
+                        <PenLine className="w-3.5 h-3.5" /> Edit
+                      </Link>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`text-sm font-bold ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
-                      {t.type === "income" ? "+" : "-"}R${" "}
-                      {Math.abs(t.amount).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground font-medium">{t.account?.name ?? "—"}</p>
-                  </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}

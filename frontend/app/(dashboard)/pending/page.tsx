@@ -16,6 +16,7 @@ type Transaction = {
   status: string;
   category?: { id: number; name: string };
   account_id: number | null;
+  created_at?: string;
 };
 
 export default function PendingPage() {
@@ -58,7 +59,11 @@ export default function PendingPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-foreground">{t.description || "—"}</p>
-                  <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">{t.date} · {t.category?.name ?? "—"}</p>
+                  <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">
+                  {t.date}
+                  {t.created_at && ` · ${new Date(t.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })}`}
+                  {" · "}{t.category?.name ?? "—"}
+                </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
