@@ -34,6 +34,15 @@ export function formatMoney(value: number, options?: MoneyFormatOptions): string
   return `${CURRENCY_SYMBOL}${formatNumberUK(value, options)}`;
 }
 
+/** Compact format for large numbers: 3200 → "3.2K", 1800 → "1.8K" */
+export function formatCompact(value: number): string {
+  if (!Number.isFinite(value) || Math.abs(value) < 1000) {
+    return String(Math.round(value));
+  }
+  const k = value / 1000;
+  return k % 1 === 0 ? `${k}K` : `${k.toFixed(1)}K`;
+}
+
 /** Brazilian locale format (3.240,50) - period for thousands, comma for decimals */
 export function formatBRLocale(value: number, options?: MoneyFormatOptions): string {
   const isWhole = Number.isFinite(value) && Math.abs(value % 1) < 1e-9;
