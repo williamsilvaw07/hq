@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { fetchOne, fetchMany, execute } from "@/lib/sql";
 
 export async function GET(
   req: Request,
@@ -13,9 +13,10 @@ export async function GET(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Category not found." }, { status: 404 });
     }
-    const category = await prisma.category.findFirst({
-      where: { id, workspaceId: wid },
-    });
+    const category = await fetchOne(
+      "SELECT id, workspace_id AS workspaceId, name, type, icon, color, created_at AS createdAt, updated_at AS updatedAt FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1",
+      [id, wid]
+    );
     if (!category) {
       return NextResponse.json({ message: "Category not found." }, { status: 404 });
     }
@@ -40,9 +41,10 @@ export async function PATCH(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Category not found." }, { status: 404 });
     }
-    const category = await prisma.category.findFirst({
-      where: { id, workspaceId: wid },
-    });
+    const category = await fetchOne(
+      "SELECT id, workspace_id AS workspaceId, name, type, icon, color, created_at AS createdAt, updated_at AS updatedAt FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1",
+      [id, wid]
+    );
     if (!category) {
       return NextResponse.json({ message: "Category not found." }, { status: 404 });
     }
@@ -60,19 +62,37 @@ export async function PATCH(
       return NextResponse.json({ message: "The type must be income or expense." }, { status: 422 });
     }
 
-    const data: { name?: string; type?: string; icon?: string | null; color?: string | null } = {};
-    if (name !== undefined) data.name = name;
-    if (type !== undefined) data.type = type;
-    if (icon !== undefined) data.icon = icon;
-    if (color !== undefined) data.color = color;
+    const fields: string[] = [];
+    const paramsArr: any[] = [];
+    if (name !== undefined) {
+      fields.push("name = ?");
+      paramsArr.push(name);
+    }
+    if (type !== undefined) {
+      fields.push("type = ?");
+      paramsArr.push(type);
+    }
+    if (icon !== undefined) {
+      fields.push("icon = ?");
+      paramsArr.push(icon);
+    }
+    if (color !== undefined) {
+      fields.push("color = ?");
+      paramsArr.push(color);
+    }
 
-    if (Object.keys(data).length === 0) {
+    if (fields.length === 0) {
       return NextResponse.json({ data: category });
     }
-    const updated = await prisma.category.update({
-      where: { id },
-      data,
-    });
+
+    fields.push("updated_at = NOW(3)");
+    paramsArr.push(id);
+    await execute(`UPDATE Category SET ${fields.join(", ")} WHERE id = ?`, paramsArr);
+
+    const updated = await fetchOne(
+      "SELECT id, workspace_id AS workspaceId, name, type, icon, color, created_at AS createdAt, updated_at AS updatedAt FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1",
+      [id, wid]
+    );
     return NextResponse.json({ data: updated });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
@@ -94,13 +114,14 @@ export async function DELETE(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Category not found." }, { status: 404 });
     }
-    const category = await prisma.category.findFirst({
-      where: { id, workspaceId: wid },
-    });
+    const category = await fetchOne(
+      "SELECT id FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1",
+      [id, wid]
+    );
     if (!category) {
       return NextResponse.json({ message: "Category not found." }, { status: 404 });
     }
-    await prisma.category.delete({ where: { id } });
+    await execute("DELETE FROM Category WHERE id = ?", [id]);
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;

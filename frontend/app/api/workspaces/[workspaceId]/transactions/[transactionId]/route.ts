@@ -1,7 +1,23 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
-import { Decimal } from "@prisma/client/runtime/library";
+import { fetchOne } from "@/lib/sql";
+import {
+  findTransactionById,
+  updateTransaction,
+  deleteTransaction,
+} from "@/lib/repos/transaction-repo";
+
+function toResponse(t: any) {
+  return {
+    ...t,
+    amount: Number(t.amount),
+    base_amount: Number(t.base_amount ?? t.amount),
+    exchange_rate: Number(t.exchange_rate ?? 1),
+    date: typeof t.date === "string" ? t.date.slice(0, 10) : new Date(t.date).toISOString().slice(0, 10),
+    account: t.acc_id ? { id: t.acc_id, name: t.acc_name } : null,
+    category: t.cat_id ? { id: t.cat_id, name: t.cat_name } : null,
+  };
+}
 
 export async function GET(
   req: Request,
@@ -14,21 +30,11 @@ export async function GET(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Transaction not found." }, { status: 404 });
     }
-    const transaction = await prisma.transaction.findFirst({
-      where: { id, workspaceId: wid },
-      include: { account: true, category: true },
-    });
+    const transaction = await findTransactionById(id, wid);
     if (!transaction) {
       return NextResponse.json({ message: "Transaction not found." }, { status: 404 });
     }
-    const t = {
-      ...transaction,
-      amount: Number(transaction.amount),
-      base_amount: Number(transaction.baseAmount),
-      exchange_rate: Number(transaction.exchangeRate),
-      date: transaction.date.toISOString().slice(0, 10),
-    };
-    return NextResponse.json({ data: t });
+    return NextResponse.json({ data: toResponse(transaction) });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
     if (status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
@@ -49,10 +55,7 @@ export async function PATCH(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Transaction not found." }, { status: 404 });
     }
-    const transaction = await prisma.transaction.findFirst({
-      where: { id, workspaceId: wid },
-      include: { account: true, category: true },
-    });
+    const transaction = await findTransactionById(id, wid);
     if (!transaction) {
       return NextResponse.json({ message: "Transaction not found." }, { status: 404 });
     }
@@ -61,9 +64,9 @@ export async function PATCH(
     const data: {
       categoryId?: number;
       type?: string;
-      amount?: Decimal;
+      amount?: number;
       currency?: string;
-      date?: Date;
+      date?: string;
       description?: string | null;
       status?: string;
       confirmedAt?: Date | null;
@@ -72,17 +75,17 @@ export async function PATCH(
 
     if (body.category_id !== undefined) {
       const cid = parseInt(String(body.category_id), 10);
-      const cat = await prisma.category.findFirst({ where: { id: cid, workspaceId: wid } });
+      const cat = await fetchOne<{ id: number }>("SELECT id FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1", [cid, wid]);
       if (!cat) return NextResponse.json({ message: "Category not found." }, { status: 422 });
       data.categoryId = cid;
     }
     if (body.type === "income" || body.type === "expense") data.type = body.type;
     if (body.amount !== undefined) {
       const a = parseFloat(String(body.amount));
-      if (!Number.isNaN(a)) data.amount = new Decimal(a);
+      if (!Number.isNaN(a)) data.amount = a;
     }
     if (typeof body.currency === "string" && body.currency.length === 3) data.currency = body.currency;
-    if (typeof body.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.date)) data.date = new Date(body.date);
+    if (typeof body.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.date)) data.date = body.date;
     if (body.description !== undefined) data.description = body.description === null ? null : String(body.description);
     if (body.status === "draft" || body.status === "confirmed" || body.status === "needs_review") {
       data.status = body.status;
@@ -93,28 +96,12 @@ export async function PATCH(
     }
 
     if (Object.keys(data).length === 0) {
-      const u = {
-        ...transaction,
-        amount: Number(transaction.amount),
-        base_amount: Number(transaction.baseAmount),
-        exchange_rate: Number(transaction.exchangeRate),
-        date: transaction.date.toISOString().slice(0, 10),
-      };
-      return NextResponse.json({ data: u });
+      return NextResponse.json({ data: toResponse(transaction) });
     }
-    const updated = await prisma.transaction.update({
-      where: { id },
-      data,
-      include: { account: true, category: true },
-    });
-    const u = {
-      ...updated,
-      amount: Number(updated.amount),
-      base_amount: Number(updated.baseAmount),
-      exchange_rate: Number(updated.exchangeRate),
-      date: updated.date.toISOString().slice(0, 10),
-    };
-    return NextResponse.json({ data: u });
+
+    await updateTransaction(id, data);
+    const updated = await findTransactionById(id, wid);
+    return NextResponse.json({ data: toResponse(updated!) });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
     if (status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
@@ -135,13 +122,11 @@ export async function DELETE(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Transaction not found." }, { status: 404 });
     }
-    const transaction = await prisma.transaction.findFirst({
-      where: { id, workspaceId: wid },
-    });
+    const transaction = await findTransactionById(id, wid);
     if (!transaction) {
       return NextResponse.json({ message: "Transaction not found." }, { status: 404 });
     }
-    await prisma.transaction.delete({ where: { id } });
+    await deleteTransaction(id);
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;

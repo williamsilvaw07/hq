@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceAdmin } from "@/lib/workspace-auth";
 import { sendInviteEmail } from "@/lib/mail";
+import { fetchOne } from "@/lib/sql";
+import {
+  findWorkspaceMember,
+  findPendingInvitation,
+  createInvitation,
+} from "@/lib/repos/invitation-repo";
 
 const INVITABLE_ROLES = ["admin", "member", "viewer"] as const;
 const EXPIRES_DAYS = 7;
@@ -22,25 +27,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
       return NextResponse.json({ message: "Invalid role for invite." }, { status: 422 });
     }
 
-    const workspace = await prisma.workspace.findUnique({ where: { id: wid } });
+    const workspace = await fetchOne<{ id: number; name: string }>(
+      "SELECT id, name FROM Workspace WHERE id = ? LIMIT 1",
+      [wid]
+    );
     if (!workspace) {
       return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await fetchOne<{ id: number }>("SELECT id FROM User WHERE email = ? LIMIT 1", [email]);
     if (existingUser) {
-      const member = await prisma.workspaceUser.findUnique({
-        where: { workspaceId_userId: { workspaceId: wid, userId: existingUser.id } },
-      });
+      const member = await findWorkspaceMember(wid, existingUser.id);
       if (member) {
         return NextResponse.json({ message: "This user is already in the workspace.", errors: { email: ["This user is already in the workspace."] } }, { status: 422 });
       }
     }
 
-    const pending = await prisma.workspaceInvitation.findFirst({
-      where: { workspaceId: wid, email, acceptedAt: null },
-    });
-    if (pending && pending.expiresAt > new Date()) {
+    const pending = await findPendingInvitation(wid, email);
+    if (pending) {
       return NextResponse.json({ message: "An invitation was already sent to this email.", errors: { email: ["An invitation was already sent to this email."] } }, { status: 422 });
     }
 
@@ -48,15 +52,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + EXPIRES_DAYS);
 
-    const invitation = await prisma.workspaceInvitation.create({
-      data: {
-        workspaceId: wid,
-        email,
-        role,
-        token,
-        invitedBy: user.id,
-        expiresAt,
-      },
+    const invitationId = await createInvitation({
+      workspaceId: wid,
+      email,
+      role,
+      token,
+      invitedBy: user.id,
+      expiresAt,
     });
 
     const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3001").replace(/\/+$/, "");
@@ -67,10 +69,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     return NextResponse.json(
       {
         data: {
-          id: invitation.id,
-          email: invitation.email,
-          role: invitation.role,
-          expires_at: invitation.expiresAt.toISOString(),
+          id: invitationId,
+          email,
+          role,
+          expires_at: expiresAt.toISOString(),
           invite_link: inviteLink,
         },
       },

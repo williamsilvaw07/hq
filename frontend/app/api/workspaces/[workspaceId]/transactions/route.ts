@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
-import { Decimal } from "@prisma/client/runtime/library";
+import { fetchOne } from "@/lib/sql";
+import {
+  countTransactions,
+  findTransactions,
+  findTransactionById,
+  createTransaction,
+} from "@/lib/repos/transaction-repo";
 
 export async function GET(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   try {
@@ -18,63 +23,51 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
     const perPage = Math.min(100, Math.max(1, parseInt(searchParams.get("per_page") ?? "15", 10)));
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
 
-    const where: {
-      workspaceId: number;
-      status?: string;
-      type?: string;
-      categoryId?: number;
-      accountId?: number;
-      date?: { gte?: Date; lte?: Date };
-      description?: { contains: string };
-    } = { workspaceId: wid };
-    if (status) where.status = status;
-    if (type && (type === "income" || type === "expense")) where.type = type;
-    if (search) where.description = { contains: search };
-    if (categoryId) where.categoryId = parseInt(categoryId, 10);
-    if (accountId) where.accountId = parseInt(accountId, 10);
-    if (from || to) {
-      where.date = {};
-      if (from) where.date.gte = new Date(from);
-      if (to) where.date.lte = new Date(to);
-    }
+    const where = {
+      workspaceId: wid,
+      status,
+      type: type === "income" || type === "expense" ? type : undefined,
+      categoryId: categoryId ? parseInt(categoryId, 10) : undefined,
+      accountId: accountId ? parseInt(accountId, 10) : undefined,
+      dateFrom: from,
+      dateTo: to,
+      search: search?.trim() || undefined,
+    };
 
     const [total, rows] = await Promise.all([
-      prisma.transaction.count({ where }),
-      prisma.transaction.findMany({
-        where,
-        include: { account: true, category: true, createdByUser: { select: { id: true, name: true, email: true } } },
-        orderBy: [{ date: "desc" }, { id: "desc" }],
-        skip: (page - 1) * perPage,
-        take: perPage,
+      countTransactions(where),
+      findTransactions(where, {
+        orderBy: "t.date DESC, t.id DESC",
+        limit: perPage,
+        offset: (page - 1) * perPage,
       }),
     ]);
 
     const lastPage = Math.ceil(total / perPage) || 1;
-    const list = rows.map((t) => ({
+    const list = rows.map((t: any) => ({
       id: t.id,
-      workspace_id: t.workspaceId,
-      account_id: t.accountId,
-      category_id: t.categoryId,
-      created_by_user_id: t.createdByUserId,
+      workspace_id: t.workspace_id,
+      account_id: t.account_id,
+      category_id: t.category_id,
+      created_by_user_id: t.created_by_user_id,
       type: t.type,
       amount: Number(t.amount),
       currency: t.currency,
-      exchange_rate: Number(t.exchangeRate),
-      base_amount: Number(t.baseAmount),
-      date: t.date.toISOString().slice(0, 10),
+      exchange_rate: Number(t.exchange_rate ?? 1),
+      base_amount: Number(t.base_amount ?? t.amount),
+      date: typeof t.date === "string" ? t.date.slice(0, 10) : new Date(t.date).toISOString().slice(0, 10),
       description: t.description,
       source: t.source,
       status: t.status,
-      confirmed_at: t.confirmedAt?.toISOString() ?? null,
-      confirmed_by_user_id: t.confirmedByUserId,
-      created_at: t.createdAt.toISOString(),
-      updated_at: t.updatedAt.toISOString(),
-      account: t.account,
-      category: t.category,
-      created_by_user: t.createdByUser,
+      confirmed_at: t.confirmed_at,
+      confirmed_by_user_id: t.confirmed_by_user_id,
+      created_at: typeof t.created_at === "string" ? t.created_at : new Date(t.created_at).toISOString(),
+      updated_at: typeof t.updated_at === "string" ? t.updated_at : new Date(t.updated_at).toISOString(),
+      account: t.acc_id ? { id: t.acc_id, name: t.acc_name } : null,
+      category: t.cat_id ? { id: t.cat_id, name: t.cat_name } : null,
+      created_by_user: null,
     }));
 
-    // Pagination shape: frontend expects { data: { data: list, current_page, last_page, per_page } }
     return NextResponse.json({
       data: {
         data: list,
@@ -125,41 +118,60 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
     }
 
     if (categoryId != null) {
-      const category = await prisma.category.findFirst({
-        where: { id: categoryId, workspaceId: wid },
-      });
+      const category = await fetchOne<{ id: number }>(
+        "SELECT id FROM Category WHERE id = ? AND workspace_id = ? LIMIT 1",
+        [categoryId, wid]
+      );
       if (!category) {
         return NextResponse.json({ message: "Category not found." }, { status: 422 });
       }
     }
 
-    const transaction = await prisma.transaction.create({
-      data: {
-        workspaceId: wid,
-        accountId: null,
-        categoryId,
-        createdByUserId: user.id,
-        type,
-        amount: new Decimal(amount),
-        currency,
-        exchangeRate: new Decimal(1),
-        baseAmount: new Decimal(amount),
-        date: new Date(date),
-        description: description ?? undefined,
-        source: "web_manual",
-        status,
-      },
-      include: { account: true, category: true },
+    const id = await createTransaction({
+      workspaceId: wid,
+      accountId: null,
+      categoryId,
+      createdByUserId: user.id,
+      type,
+      amount,
+      currency,
+      exchangeRate: 1,
+      baseAmount: amount,
+      date,
+      description: description ?? undefined,
+      source: "web_manual",
+      status,
     });
 
-    const t = {
-      ...transaction,
-      amount: Number(transaction.amount),
-      exchange_rate: Number(transaction.exchangeRate),
-      base_amount: Number(transaction.baseAmount),
-      date: transaction.date.toISOString().slice(0, 10),
-    };
-    return NextResponse.json({ data: t }, { status: 201 });
+    const t = await findTransactionById(id, wid);
+    if (!t) {
+      return NextResponse.json({ message: "Transaction created but could not fetch." }, { status: 500 });
+    }
+
+    const row = t as any;
+    return NextResponse.json(
+      {
+        data: {
+          id: row.id,
+          workspace_id: row.workspace_id,
+          account_id: row.account_id,
+          category_id: row.category_id,
+          created_by_user_id: row.created_by_user_id,
+          type: row.type,
+          amount: Number(row.amount),
+          currency: row.currency,
+          exchange_rate: Number(row.exchange_rate ?? 1),
+          base_amount: Number(row.base_amount ?? row.amount),
+          date: typeof row.date === "string" ? row.date.slice(0, 10) : new Date(row.date).toISOString().slice(0, 10),
+          description: row.description,
+          source: row.source,
+          status: row.status,
+          account: row.acc_id ? { id: row.acc_id, name: row.acc_name } : null,
+          category: row.cat_id ? { id: row.cat_id, name: row.cat_name } : null,
+        },
+      },
+      { status: 201 }
+    );
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
     if (status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });

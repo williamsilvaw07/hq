@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
-import { Decimal } from "@prisma/client/runtime/library";
+import { fetchOne, fetchMany, execute } from "@/lib/sql";
 
 export async function GET(
   req: Request,
@@ -14,10 +13,14 @@ export async function GET(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Budget not found." }, { status: 404 });
     }
-    const budget = await prisma.budget.findFirst({
-      where: { id, workspaceId: wid },
-      include: { category: true },
-    });
+    const [budget] = await fetchMany(
+      `SELECT b.*, c.id AS cat_id, c.name AS cat_name, c.icon AS cat_icon, c.color AS cat_color
+       FROM budgets b
+       LEFT JOIN Category c ON c.id = b.category_id
+       WHERE b.id = ? AND b.workspace_id = ?
+       LIMIT 1`,
+      [id, wid]
+    );
     if (!budget) {
       return NextResponse.json({ message: "Budget not found." }, { status: 404 });
     }
@@ -43,50 +46,69 @@ export async function PATCH(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Budget not found." }, { status: 404 });
     }
-    const budget = await prisma.budget.findFirst({
-      where: { id, workspaceId: wid },
-      include: { category: true },
-    });
+    const [budget] = await fetchMany(
+      `SELECT b.*, c.id AS cat_id, c.name AS cat_name, c.icon AS cat_icon, c.color AS cat_color
+       FROM budgets b
+       LEFT JOIN Category c ON c.id = b.category_id
+       WHERE b.id = ? AND b.workspace_id = ?
+       LIMIT 1`,
+      [id, wid]
+    );
     if (!budget) {
       return NextResponse.json({ message: "Budget not found." }, { status: 404 });
     }
 
     const body = await req.json();
-    const data: { month?: number; year?: number; periodType?: string; periodInterval?: number; amount?: Decimal } = {};
+    const fields: string[] = [];
+    const paramsArr: any[] = [];
+
     if (body.month != null) {
       const m = parseInt(String(body.month), 10);
       if (m < 1 || m > 12) return NextResponse.json({ message: "Invalid month." }, { status: 422 });
-      data.month = m;
+      fields.push("month = ?");
+      paramsArr.push(m);
     }
     if (body.year != null) {
       const y = parseInt(String(body.year), 10);
       if (y < 2020 || y > 2100) return NextResponse.json({ message: "Invalid year." }, { status: 422 });
-      data.year = y;
+      fields.push("year = ?");
+      paramsArr.push(y);
     }
     if (body.period_type != null) {
       if (!["day", "week", "month", "year"].includes(String(body.period_type))) {
         return NextResponse.json({ message: "Invalid period_type." }, { status: 422 });
       }
-      data.periodType = body.period_type;
+      fields.push("period_type = ?");
+      paramsArr.push(body.period_type);
     }
     if (body.period_interval != null) {
-      data.periodInterval = Math.min(12, Math.max(1, parseInt(String(body.period_interval), 10)));
+      fields.push("period_interval = ?");
+      paramsArr.push(Math.min(12, Math.max(1, parseInt(String(body.period_interval), 10))));
     }
     if (body.amount != null) {
       const a = parseFloat(String(body.amount));
       if (a < 0 || Number.isNaN(a)) return NextResponse.json({ message: "Invalid amount." }, { status: 422 });
-      data.amount = new Decimal(a);
+      fields.push("amount = ?");
+      paramsArr.push(a);
     }
 
-    if (Object.keys(data).length === 0) {
+    if (fields.length === 0) {
       const u = { ...budget, amount: Number(budget.amount) };
       return NextResponse.json({ data: u });
     }
-    const updated = await prisma.budget.update({
-      where: { id },
-      data,
-      include: { category: true },
-    });
+
+    fields.push("updated_at = NOW(3)");
+    paramsArr.push(id);
+    await execute(`UPDATE budgets SET ${fields.join(", ")} WHERE id = ?`, paramsArr);
+
+    const [updated] = await fetchMany(
+      `SELECT b.*, c.id AS cat_id, c.name AS cat_name, c.icon AS cat_icon, c.color AS cat_color
+       FROM budgets b
+       LEFT JOIN Category c ON c.id = b.category_id
+       WHERE b.id = ? AND b.workspace_id = ?
+       LIMIT 1`,
+      [id, wid]
+    );
     const u = { ...updated, amount: Number(updated.amount) };
     return NextResponse.json({ data: u });
   } catch (e: unknown) {
@@ -109,13 +131,14 @@ export async function DELETE(
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Budget not found." }, { status: 404 });
     }
-    const budget = await prisma.budget.findFirst({
-      where: { id, workspaceId: wid },
-    });
+    const budget = await fetchOne<{ id: number }>(
+      "SELECT id FROM budgets WHERE id = ? AND workspace_id = ? LIMIT 1",
+      [id, wid]
+    );
     if (!budget) {
       return NextResponse.json({ message: "Budget not found." }, { status: 404 });
     }
-    await prisma.budget.delete({ where: { id } });
+    await execute("DELETE FROM budgets WHERE id = ?", [id]);
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;

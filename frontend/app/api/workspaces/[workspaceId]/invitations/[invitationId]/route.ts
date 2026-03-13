@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceAdmin } from "@/lib/workspace-auth";
+import { deleteInvitation } from "@/lib/repos/invitation-repo";
 
 export async function DELETE(
   req: Request,
@@ -12,15 +12,9 @@ export async function DELETE(
     const workspaceIdNum = parseInt(workspaceId, 10);
     const invitationIdNum = parseInt(invitationId, 10);
 
-    const deleted = await prisma.workspaceInvitation.deleteMany({
-      where: {
-        id: invitationIdNum,
-        workspaceId: workspaceIdNum,
-        acceptedAt: null,
-      },
-    });
+    const deleted = await deleteInvitation(invitationIdNum, workspaceIdNum);
 
-    if (deleted.count === 0) {
+    if (deleted === 0) {
       return NextResponse.json({ message: "Invitation not found." }, { status: 404 });
     }
     return new NextResponse(null, { status: 204 });

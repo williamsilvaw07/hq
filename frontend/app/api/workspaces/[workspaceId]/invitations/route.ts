@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceAdmin } from "@/lib/workspace-auth";
+import { listInvitations } from "@/lib/repos/invitation-repo";
 
 export async function GET(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   try {
@@ -8,18 +8,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
     await requireWorkspaceAdmin(req, workspaceId);
     const workspaceIdNum = parseInt(workspaceId, 10);
 
-    const invitations = await prisma.workspaceInvitation.findMany({
-      where: { workspaceId: workspaceIdNum, acceptedAt: null, expiresAt: { gt: new Date() } },
-      include: { inviter: { select: { name: true, email: true } } },
-      orderBy: { createdAt: "desc" },
-    });
+    const invitations = await listInvitations(workspaceIdNum);
 
-    const data = invitations.map((inv) => ({
+    const data = invitations.map((inv: any) => ({
       id: inv.id,
       email: inv.email,
       role: inv.role,
-      expires_at: inv.expiresAt.toISOString(),
-      invited_by: inv.inviter ? { name: inv.inviter.name, email: inv.inviter.email } : null,
+      expires_at: typeof inv.expires_at === "string" ? inv.expires_at : new Date(inv.expires_at).toISOString(),
+      invited_by: inv.inviter_name ? { name: inv.inviter_name, email: inv.inviter_email } : null,
     }));
 
     return NextResponse.json({ data });

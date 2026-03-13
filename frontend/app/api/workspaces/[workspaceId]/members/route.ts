@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
 import type { WorkspaceMemberInfo } from "@/lib/workspace-auth";
+import { fetchMany } from "@/lib/sql";
 
 export async function GET(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   try {
@@ -9,17 +9,21 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
     await requireWorkspaceMember(req, workspaceId);
     const workspaceIdNum = parseInt(workspaceId, 10);
 
-    const rows = await prisma.workspaceUser.findMany({
-      where: { workspaceId: workspaceIdNum },
-      include: { user: { select: { id: true, name: true, email: true } } },
-    });
+    const rows = await fetchMany<{ id: number; user_id: number; role: string; name: string; email: string }>(
+      `SELECT wu.id, wu.user_id AS user_id, wu.role, u.name, u.email
+       FROM workspace_users wu
+       JOIN User u ON u.id = wu.user_id
+       WHERE wu.workspace_id = ?
+       ORDER BY wu.id ASC`,
+      [workspaceIdNum]
+    );
 
     const data: WorkspaceMemberInfo[] = rows.map((r) => ({
       id: r.id,
-      user_id: r.userId,
+      user_id: r.user_id,
       role: r.role,
-      name: r.user?.name ?? "",
-      email: r.user?.email ?? "",
+      name: r.name ?? "",
+      email: r.email ?? "",
     }));
 
     return NextResponse.json({ data });

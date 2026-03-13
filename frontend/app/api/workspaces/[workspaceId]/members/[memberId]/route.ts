@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceAdmin } from "@/lib/workspace-auth";
+import { fetchOne, execute } from "@/lib/sql";
 
 const ROLES = ["owner", "admin", "member", "viewer"] as const;
 
@@ -12,7 +12,7 @@ export async function PATCH(
     const { workspaceId, memberId } = await params;
     await requireWorkspaceAdmin(req, workspaceId);
     const workspaceIdNum = parseInt(workspaceId, 10);
-    const memberUserId = parseInt(memberId, 10); // frontend passes user_id
+    const memberUserId = parseInt(memberId, 10);
 
     const body = await req.json();
     const role = typeof body.role === "string" ? body.role : "";
@@ -20,9 +20,10 @@ export async function PATCH(
       return NextResponse.json({ message: "Invalid role.", errors: { role: ["Invalid role."] } }, { status: 422 });
     }
 
-    const membership = await prisma.workspaceUser.findUnique({
-      where: { workspaceId_userId: { workspaceId: workspaceIdNum, userId: memberUserId } },
-    });
+    const membership = await fetchOne<{ id: number; role: string }>(
+      "SELECT id, role FROM workspace_users WHERE workspace_id = ? AND user_id = ? LIMIT 1",
+      [workspaceIdNum, memberUserId]
+    );
     if (!membership) {
       return NextResponse.json({ message: "Member not found." }, { status: 404 });
     }
@@ -30,10 +31,11 @@ export async function PATCH(
       return NextResponse.json({ message: "Cannot change owner role.", errors: { member: ["Cannot change owner role."] } }, { status: 422 });
     }
 
-    await prisma.workspaceUser.update({
-      where: { workspaceId_userId: { workspaceId: workspaceIdNum, userId: memberUserId } },
-      data: { role },
-    });
+    await execute("UPDATE workspace_users SET role = ?, updated_at = NOW(3) WHERE workspace_id = ? AND user_id = ?", [
+      role,
+      workspaceIdNum,
+      memberUserId,
+    ]);
     return NextResponse.json({ message: "Updated." });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
@@ -52,11 +54,12 @@ export async function DELETE(
     const { workspaceId, memberId } = await params;
     await requireWorkspaceAdmin(req, workspaceId);
     const workspaceIdNum = parseInt(workspaceId, 10);
-    const memberUserId = parseInt(memberId, 10); // frontend passes user_id
+    const memberUserId = parseInt(memberId, 10);
 
-    const membership = await prisma.workspaceUser.findUnique({
-      where: { workspaceId_userId: { workspaceId: workspaceIdNum, userId: memberUserId } },
-    });
+    const membership = await fetchOne<{ id: number; role: string }>(
+      "SELECT id, role FROM workspace_users WHERE workspace_id = ? AND user_id = ? LIMIT 1",
+      [workspaceIdNum, memberUserId]
+    );
     if (!membership) {
       return NextResponse.json({ message: "Member not found." }, { status: 404 });
     }
@@ -64,9 +67,10 @@ export async function DELETE(
       return NextResponse.json({ message: "Cannot remove the owner.", errors: { member: ["Cannot remove the owner."] } }, { status: 403 });
     }
 
-    await prisma.workspaceUser.delete({
-      where: { workspaceId_userId: { workspaceId: workspaceIdNum, userId: memberUserId } },
-    });
+    await execute("DELETE FROM workspace_users WHERE workspace_id = ? AND user_id = ?", [
+      workspaceIdNum,
+      memberUserId,
+    ]);
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;

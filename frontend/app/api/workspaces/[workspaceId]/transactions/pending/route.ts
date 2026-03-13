@@ -1,24 +1,23 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { findTransactions } from "@/lib/repos/transaction-repo";
 
 export async function GET(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   try {
     const { workspaceId } = await params;
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
 
-    const list = await prisma.transaction.findMany({
-      where: { workspaceId: wid, status: "draft" },
-      include: { category: true },
-      orderBy: [{ date: "desc" }, { id: "desc" }],
-    });
+    const list = await findTransactions(
+      { workspaceId: wid, status: "draft" },
+      { orderBy: "t.date DESC, t.id DESC" }
+    );
 
-    const data = list.map((t) => ({
+    const data = list.map((t: any) => ({
       ...t,
       amount: Number(t.amount),
-      base_amount: Number(t.baseAmount),
-      exchange_rate: Number(t.exchangeRate),
-      date: t.date.toISOString().slice(0, 10),
+      base_amount: Number(t.base_amount ?? t.amount),
+      exchange_rate: Number(t.exchange_rate ?? 1),
+      date: typeof t.date === "string" ? t.date.slice(0, 10) : new Date(t.date).toISOString().slice(0, 10),
     }));
 
     return NextResponse.json({ data });

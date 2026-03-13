@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { fetchMany } from "@/lib/sql";
+import { aggregateTransactions } from "@/lib/repos/transaction-repo";
 
 const PERIODS = ["today", "this_week", "last_week", "this_month"] as const;
 
@@ -54,45 +55,42 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
       ? (periodParam as (typeof PERIODS)[number])
       : "this_month";
     const { start, end } = dateRangeForPeriod(period);
+    const startStr = start.toISOString().slice(0, 10);
+    const endStr = end.toISOString().slice(0, 10);
 
-    const [periodIncome, periodExpense, recentRows] = await Promise.all([
-      prisma.transaction.aggregate({
-        where: {
-          workspaceId: wid,
-          status: "confirmed",
-          date: { gte: start, lte: end },
-          type: "income",
-        },
-        _sum: { baseAmount: true },
-      }),
-      prisma.transaction.aggregate({
-        where: {
-          workspaceId: wid,
-          status: "confirmed",
-          date: { gte: start, lte: end },
-          type: "expense",
-        },
-        _sum: { baseAmount: true },
-      }),
-      prisma.transaction.findMany({
-        where: { workspaceId: wid, date: { gte: start, lte: end } },
-        include: { category: true },
-        orderBy: [{ date: "desc" }, { id: "desc" }],
-        take: 10,
-      }),
+    const [periodIncomeVal, periodExpenseVal, recentRows] = await Promise.all([
+      aggregateTransactions(wid, "income", startStr, endStr),
+      aggregateTransactions(wid, "expense", startStr, endStr),
+      fetchMany<{
+        id: number;
+        type: string;
+        amount: number;
+        currency: string;
+        date: string;
+        description: string | null;
+        status: string;
+        cat_id: number | null;
+        cat_name: string | null;
+      }>(
+        `SELECT t.id, t.type, t.amount, t.currency, t.date, t.description, t.status, c.id AS cat_id, c.name AS cat_name
+         FROM Transaction t
+         LEFT JOIN Category c ON c.id = t.category_id
+         WHERE t.workspace_id = ? AND t.date BETWEEN ? AND ?
+         ORDER BY t.date DESC, t.id DESC
+         LIMIT 10`,
+        [wid, startStr, endStr]
+      ),
     ]);
 
-    const periodIncomeVal = Number(periodIncome._sum.baseAmount ?? 0);
-    const periodExpenseVal = Number(periodExpense._sum.baseAmount ?? 0);
     const recent_transactions = recentRows.map((t) => ({
       id: t.id,
       type: t.type,
       amount: Number(t.amount),
       currency: t.currency,
-      date: t.date.toISOString().slice(0, 10),
+      date: typeof t.date === "string" ? t.date.slice(0, 10) : new Date(t.date).toISOString().slice(0, 10),
       description: t.description,
       status: t.status,
-      category: t.category ? { id: t.category.id, name: t.category.name } : null,
+      category: t.cat_id ? { id: t.cat_id, name: t.cat_name } : null,
     }));
 
     return NextResponse.json({

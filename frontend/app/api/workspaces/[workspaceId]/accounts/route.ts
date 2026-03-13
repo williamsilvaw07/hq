@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { fetchMany } from "@/lib/sql";
 
 export async function GET(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   try {
@@ -8,24 +8,24 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
 
     const [accounts, creditCards] = await Promise.all([
-      prisma.account.findMany({
-        where: { workspaceId: wid },
-        orderBy: { name: "asc" },
-      }),
-      prisma.creditCard.findMany({
-        where: { workspaceId: wid },
-        orderBy: { name: "asc" },
-      }),
+      fetchMany(
+        `SELECT * FROM Account WHERE workspace_id = ? ORDER BY name ASC`,
+        [wid]
+      ),
+      fetchMany(
+        `SELECT * FROM CreditCard WHERE workspace_id = ? ORDER BY name ASC`,
+        [wid]
+      ),
     ]);
 
-    const accountsData = accounts.map((a) => ({
+    const accountsData = accounts.map((a: any) => ({
       ...a,
-      balance: Number(a.balance),
+      balance: Number(a.balance ?? 0),
     }));
-    const credit_cards = creditCards.map((c) => ({
+    const credit_cards = creditCards.map((c: any) => ({
       ...c,
-      credit_limit: Number(c.creditLimit),
-      current_balance: Number(c.currentBalance),
+      credit_limit: Number(c.credit_limit ?? 0),
+      current_balance: Number(c.current_balance ?? 0),
     }));
 
     return NextResponse.json({
