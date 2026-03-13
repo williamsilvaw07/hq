@@ -218,8 +218,10 @@ async function processExpenseText(
 
   const { amount, description } = parsed;
 
-  // AI category resolution
-  const categoryId = await resolveCategory(description, workspaceId);
+  // AI category resolution (with retry)
+  const { categoryId, isDraft } = await resolveCategory(description, workspaceId);
+
+  const status = isDraft ? "draft" : "confirmed";
 
   // Insert transaction
   const today = new Date().toISOString().slice(0, 10);
@@ -227,8 +229,8 @@ async function processExpenseText(
     `INSERT INTO Transaction
        (workspace_id, category_id, created_by_user_id, type, amount, currency,
         exchange_rate, base_amount, date, description, source, status, created_at, updated_at)
-     VALUES (?, ?, ?, 'expense', ?, 'BRL', 1, ?, ?, ?, 'telegram', 'confirmed', NOW(3), NOW(3))`,
-    [workspaceId, categoryId, user.id, amount, amount, today, description],
+     VALUES (?, ?, ?, 'expense', ?, 'BRL', 1, ?, ?, ?, 'telegram', ?, NOW(3), NOW(3))`,
+    [workspaceId, categoryId, user.id, amount, amount, today, description, status],
   );
 
   const amountFormatted = new Intl.NumberFormat("pt-BR", {
@@ -236,41 +238,61 @@ async function processExpenseText(
     currency: "BRL",
   }).format(amount);
 
-  // Include category name in reply
-  const categories = await fetchMany<CategoryRow>(
-    "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense'",
-    [workspaceId],
-  );
-  const categoryName = categories.find((c) => c.id === categoryId)?.name ?? "Uncategorized";
+  if (isDraft) {
+    await sendTelegramMessage(
+      chatId,
+      `⏳ Expense saved for review!\n\nAmount: ${amountFormatted}\nDescription: ${description}\nDate: ${today}\n\nCouldn't match a budget — open the app to assign one.`,
+    );
+  } else {
+    const categories = await fetchMany<CategoryRow>(
+      "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense'",
+      [workspaceId],
+    );
+    const categoryName = categories.find((c) => c.id === categoryId)?.name ?? "Uncategorized";
+    await sendTelegramMessage(
+      chatId,
+      `✅ Expense recorded!\n\nAmount: ${amountFormatted}\nDescription: ${description}\nCategory: ${categoryName}\nDate: ${today}`,
+    );
+  }
 
-  await sendTelegramMessage(
-    chatId,
-    `✅ Expense recorded!\n\nAmount: ${amountFormatted}\nDescription: ${description}\nCategory: ${categoryName}\nDate: ${today}`,
-  );
-
-  console.log(`[telegram] Transaction created for user ${user.id} — ${amountFormatted} ${description} [${categoryName}]`);
+  console.log(`[telegram] Transaction created for user ${user.id} — ${amountFormatted} ${description} [${status}]`);
 }
 
 // ---------------------------------------------------------------------------
 // AI-powered category resolution
 // ---------------------------------------------------------------------------
 
-async function resolveCategory(description: string, workspaceId: number): Promise<number | null> {
+type CategoryResult = { categoryId: number | null; isDraft: boolean };
+
+async function resolveCategory(description: string, workspaceId: number): Promise<CategoryResult> {
   const categories = await fetchMany<CategoryRow>(
     "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY id ASC",
     [workspaceId],
   );
 
-  if (categories.length === 0) return null;
-  if (categories.length === 1) return categories[0].id;
+  if (categories.length === 0) return { categoryId: null, isDraft: true };
+  if (categories.length === 1) return { categoryId: categories[0].id, isDraft: false };
 
   try {
-    const aiPick = await categorizeExpense(description, categories);
-    if (aiPick !== null) return aiPick;
+    // First attempt
+    const firstPick = await categorizeExpense(description, categories, false);
+    if (firstPick !== null) {
+      console.log(`[telegram] AI picked category ${firstPick} on first attempt`);
+      return { categoryId: firstPick, isDraft: false };
+    }
+
+    // Retry with lenient prompt
+    console.log("[telegram] AI first attempt returned null — retrying");
+    const retryPick = await categorizeExpense(description, categories, true);
+    if (retryPick !== null) {
+      console.log(`[telegram] AI picked category ${retryPick} on retry`);
+      return { categoryId: retryPick, isDraft: false };
+    }
   } catch (err) {
-    console.error("[telegram] AI categorization failed, using fallback:", err);
+    console.error("[telegram] AI categorization failed:", err);
   }
 
-  // Fallback to first category
-  return categories[0].id;
+  // Both attempts failed — save as draft for user to review
+  console.log("[telegram] AI could not categorize — saving as draft");
+  return { categoryId: null, isDraft: true };
 }

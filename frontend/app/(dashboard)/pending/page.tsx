@@ -49,7 +49,7 @@ export default function PendingPage() {
         {list.length === 0 ? (
           <div className="bg-card rounded-lg sm:rounded-xl p-5 sm:p-8 text-center">
             <p className="text-muted-foreground text-sm">No pending transactions.</p>
-            <p className="text-[11px] text-muted-foreground mt-2">Send a message via WhatsApp to record an expense or income.</p>
+            <p className="text-[11px] text-muted-foreground mt-2">Send a message via Telegram to record an expense or income.</p>
           </div>
         ) : (
           list.map((t) => (
