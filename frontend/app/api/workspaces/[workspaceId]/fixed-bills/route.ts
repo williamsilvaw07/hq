@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { ensureFixedBillTable } from "@/lib/fixed-bill-migrate";
 import {
   findFixedBillsByWorkspace,
   createFixedBill,
@@ -46,6 +47,7 @@ export async function GET(
   try {
     const { workspaceId } = await params;
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    await ensureFixedBillTable();
     const rows = await findFixedBillsByWorkspace(wid);
     const data = rows.map(toApiBill);
     return NextResponse.json({ data });
@@ -65,6 +67,7 @@ export async function POST(
   try {
     const { workspaceId } = await params;
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    await ensureFixedBillTable();
     const body = await req.json();
     const name = typeof body.name === "string" ? body.name.trim() : "New bill";
     const category = typeof body.category === "string" ? body.category.trim() : "General";

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { ensureFixedBillTable } from "@/lib/fixed-bill-migrate";
 import {
   findFixedBillById,
   updateFixedBill,
@@ -47,6 +48,7 @@ export async function PATCH(
   try {
     const { workspaceId, billId } = await params;
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    await ensureFixedBillTable();
     const id = parseInt(billId, 10);
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Bill not found." }, { status: 404 });
@@ -89,6 +91,7 @@ export async function DELETE(
   try {
     const { workspaceId, billId } = await params;
     const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    await ensureFixedBillTable();
     const id = parseInt(billId, 10);
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: "Bill not found." }, { status: 404 });
