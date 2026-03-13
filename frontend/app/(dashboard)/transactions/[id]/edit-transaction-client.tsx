@@ -47,7 +47,7 @@ export default function EditTransactionClient() {
         setTransaction(txRes.data);
         setAccounts(accRes.data?.accounts ?? []);
         const budgets = Array.isArray(budgetRes.data) ? budgetRes.data : [];
-        setCategories(budgets.map((b: any) => ({ id: b.id, name: b.name || b.category?.name || "Budget" })));
+        setCategories(budgets.map((b: any) => ({ id: b.id, name: b.name || b.category?.name || "Budget", type: "expense" })));
       })
       .catch((err) => setLoadError(err instanceof Error ? err.message : "Could not load transaction."));
   }, [workspaceId, id]);
