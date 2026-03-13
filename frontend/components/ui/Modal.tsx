@@ -23,74 +23,59 @@ export function Modal({ isOpen, title, subtitle, showCloseButton = true, childre
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-
     return () => {
       document.body.style.overflow = originalOverflow;
-      window.removeEventListener("keydown", onKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const maxWidthClass = size === "lg" ? "max-w-lg" : "max-w-md";
+  const maxWidthClass = size === "lg" ? "max-w-l" : "max-w-md";
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/60 backdrop-blur-[2px] animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-300"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
         ref={dialogRef}
-        className={`w-full ${maxWidthClass} max-h-[92vh] sm:max-h-[90vh] overflow-hidden bg-card rounded-t-[32px] sm:rounded-[32px] shadow-2xl flex flex-col transform origin-bottom sm:origin-center animate-scale-in transition-transform duration-300 ease-out`}
         onClick={(e) => e.stopPropagation()}
+        className={`w-full ${maxWidthClass} max-h-[96vh] sm:max-h-[90vh] bg-background border-t sm:border border-border/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col transform origin-bottom animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden`}
       >
-        <div className="w-12 h-1.5 rounded-full bg-border/40 mx-auto mt-3 mb-1 shrink-0 cursor-grab active:cursor-grabbing" />
+        <div className="w-12 h-1.5 rounded-full bg-border/20 mx-auto mt-3 mb-1 shrink-0" />
         
-        <div className="flex flex-col items-center justify-center p-4 sm:p-6 pb-2 shrink-0 relative">
+        <header className="px-6 pt-4 pb-2 text-center relative shrink-0">
           {subtitle && (
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1.5 text-center opacity-70">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1 opacity-60">
               {subtitle}
-            </span>
+            </p>
           )}
-          {title ? (
-            <h2 className="text-xl font-bold text-foreground text-center tracking-tight">{title}</h2>
-          ) : (
-            <span />
+          {title && (
+            <h2 className="text-lg font-bold text-foreground tracking-tight">{title}</h2>
           )}
           {showCloseButton && (
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-xl text-muted-foreground hover:text-foreground active:bg-secondary transition-colors"
-              aria-label="Close"
+              className="absolute right-6 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           )}
-        </div>
+        </header>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 pt-2 pb-safe-offset-4 w-full">
-          <div className="w-full max-w-full mx-auto space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar min-h-0">
+          <div className="max-w-full mx-auto pb-[env(safe-area-inset-bottom)]">
             {children}
           </div>
         </div>
 
-        {footer ? (
-          <div className="px-4 sm:px-6 pb-6 sm:pb-8 pt-4 border-t border-border/10 bg-card/80 backdrop-blur-md flex flex-col gap-3 shrink-0 mb-safe mt-auto">
+        {footer && (
+          <footer className="p-6 pt-2 border-t border-border/5 px-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] bg-background/50 backdrop-blur-xl">
             {footer}
-          </div>
-        ) : (
-          <div className="h-6 sm:hidden shrink-0" />
+          </footer>
         )}
       </div>
     </div>
