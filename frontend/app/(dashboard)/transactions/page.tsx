@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import { formatNumberUK } from "@/lib/format";
 import { Filter, Search, ShoppingBag, ArrowUpRight, X, PenLine } from "lucide-react";
 
 type Transaction = {
@@ -244,7 +245,7 @@ export default function TransactionsPage() {
                       <div className="text-right">
                         <p className={`text-sm font-black ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
                           {t.type === "income" ? "+" : "-"}R${" "}
-                          {Math.abs(t.amount).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {formatNumberUK(Math.abs(t.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">{t.account?.name ?? "—"}</p>
                       </div>

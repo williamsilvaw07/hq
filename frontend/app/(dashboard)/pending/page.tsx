@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import { formatNumberUK } from "@/lib/format";
 import { Settings, ShoppingBag, PenLine } from "lucide-react";
 
 type Transaction = {
@@ -69,7 +70,7 @@ export default function PendingPage() {
               <div className="flex items-center gap-3">
                 <p className={`text-sm font-bold ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
                   {t.type === "income" ? "+" : "-"}R${" "}
-                  {Math.abs(t.amount).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatNumberUK(Math.abs(t.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <Link href={`/transactions/${t.id}`} className="flex items-center gap-1.5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-bold shadow-lg shadow-white/5 active:scale-95 transition-all shrink-0">
                   <PenLine className="w-3.5 h-3.5" /> Confirm / Edit
