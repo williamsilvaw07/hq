@@ -63,71 +63,12 @@ export const MOCK_FIXED_BILLS: FixedBill[] = [
   },
 ];
 
-const STORAGE_KEY_PREFIX = "fixedBills:v1:";
-
 export function fixedBillsTotal(bills: FixedBill[]): number {
   return bills.reduce((sum, bill) => sum + bill.amount, 0);
 }
 
 export function fixedBillsCount(bills: FixedBill[]): number {
   return bills.length;
-}
-
-function getStorageKey(workspaceId: number | null): string {
-  const suffix = workspaceId && workspaceId > 0 ? String(workspaceId) : "default";
-  return `${STORAGE_KEY_PREFIX}${suffix}`;
-}
-
-export function loadFixedBills(workspaceId: number | null): FixedBill[] {
-  if (typeof window === "undefined") {
-    return MOCK_FIXED_BILLS;
-  }
-  try {
-    const raw = window.localStorage.getItem(getStorageKey(workspaceId));
-    if (!raw) return MOCK_FIXED_BILLS;
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return MOCK_FIXED_BILLS;
-    return parsed.map((b) => {
-      const safeDue = String(b.due ?? "");
-      const parsedDay =
-        typeof b.dayOfMonth === "number"
-          ? b.dayOfMonth
-          : Number.parseInt(safeDue.slice(0, 2), 10) || null;
-
-      const frequency: FixedBillFrequency =
-        b.frequency === "weekly" || b.frequency === "monthly"
-          ? b.frequency
-          : "monthly";
-
-      return {
-        id: typeof b.id === "number" ? b.id : 0,
-        name: String(b.name ?? ""),
-        category: String(b.category ?? ""),
-        amount: Number(b.amount ?? 0),
-        icon: typeof b.icon === "string" && b.icon.trim() ? b.icon.trim() : null,
-        due: safeDue,
-        dueSoon: Boolean(b.dueSoon),
-        frequency,
-        dayOfMonth: parsedDay,
-        dayOfWeek:
-          typeof b.dayOfWeek === "number" && b.dayOfWeek >= 0 && b.dayOfWeek <= 6
-            ? b.dayOfWeek
-            : null,
-        endDate: typeof b.endDate === "string" ? b.endDate : null,
-      } as FixedBill;
-    });
-  } catch {
-    return MOCK_FIXED_BILLS;
-  }
-}
-
-export function saveFixedBills(workspaceId: number | null, bills: FixedBill[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(getStorageKey(workspaceId), JSON.stringify(bills));
-  } catch {
-    // ignore storage errors
-  }
 }
 /**
  * Parse a stored bill date string into a Date.

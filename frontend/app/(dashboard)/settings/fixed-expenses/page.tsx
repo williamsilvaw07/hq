@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Home, Pencil, Trash2, Check, X, Plus } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 import {
-  MOCK_FIXED_BILLS,
   type FixedBill,
   fixedBillsTotal,
-  loadFixedBills,
-  saveFixedBills,
   computeNextOccurrence,
   formatBillDisplayDate,
   formatBillInputDate,
@@ -161,50 +159,77 @@ function RecurringPreview({ bill }: RecurringPreviewProps) {
 
 export default function FixedExpensesPage() {
   const { workspaceId } = useAuth();
-  const [bills, setBills] = useState<FixedBill[]>(MOCK_FIXED_BILLS);
+  const [bills, setBills] = useState<FixedBill[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<FixedBill | null>(null);
+  const [saving, setSaving] = useState(false);
   const monthlyTotal = fixedBillsTotal(bills);
 
-  useEffect(() => {
-    setBills(loadFixedBills(workspaceId ?? null));
+  const fetchBills = useCallback(() => {
+    if (!workspaceId) return;
+    setLoading(true);
+    api<FixedBill[]>(`/api/workspaces/${workspaceId}/fixed-bills`)
+      .then((r) => setBills(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setBills([]))
+      .finally(() => setLoading(false));
   }, [workspaceId]);
 
   useEffect(() => {
-    saveFixedBills(workspaceId ?? null, bills);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("fixed-bills-refresh"));
-    }
-  }, [workspaceId, bills]);
+    fetchBills();
+  }, [fetchBills]);
 
-  function handleDelete(id: number) {
-    setBills((prev) => prev.filter((bill) => bill.id !== id));
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const onRefresh = () => fetchBills();
+      window.addEventListener("fixed-bills-refresh", onRefresh);
+      return () => window.removeEventListener("fixed-bills-refresh", onRefresh);
+    }
+  }, [fetchBills]);
+
+  async function handleDelete(id: number) {
+    if (!workspaceId) return;
+    try {
+      await api(`/api/workspaces/${workspaceId}/fixed-bills/${id}`, { method: "DELETE" });
+      setBills((prev) => prev.filter((bill) => bill.id !== id));
+      window.dispatchEvent(new Event("fixed-bills-refresh"));
+    } catch {
+      // ignore
+    }
   }
 
-  function handleAdd() {
-    const nextId =
-      bills.length > 0 ? Math.max(...bills.map((bill) => bill.id)) + 1 : 1;
+  async function handleAdd() {
+    if (!workspaceId) return;
     const today = new Date();
-    const day = String(today.getDate()).padStart(2, "0");
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const year = today.getFullYear();
-    const newBill: FixedBill = {
-      id: nextId,
-      name: "New bill",
-      category: "General",
-      amount: 0,
-      icon: "🏠",
-      // Store next date in ISO so it works well with <input type="date" />
-      due: `${year}-${month}-${day}`,
-      dueSoon: false,
-      frequency: "monthly",
-      dayOfMonth: today.getDate(),
-      dayOfWeek: null,
-      endDate: null,
-    };
-    setBills((prev) => [...prev, newBill]);
-    setEditingId(newBill.id);
-    setDraft(newBill);
+    const due = today.toISOString().slice(0, 10);
+    setSaving(true);
+    try {
+      const r = await api<FixedBill>(`/api/workspaces/${workspaceId}/fixed-bills`, {
+        method: "POST",
+        body: JSON.stringify({
+          name: "New bill",
+          category: "General",
+          amount: 0,
+          icon: "🏠",
+          due,
+          frequency: "monthly",
+          dayOfMonth: today.getDate(),
+          dayOfWeek: null,
+          endDate: null,
+        }),
+      });
+      const newBill = r.data;
+      if (newBill) {
+        setBills((prev) => [...prev, newBill]);
+        setEditingId(newBill.id);
+        setDraft(newBill);
+        window.dispatchEvent(new Event("fixed-bills-refresh"));
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSaving(false);
+    }
   }
 
   function startEdit(bill: FixedBill) {
@@ -217,11 +242,35 @@ export default function FixedExpensesPage() {
     setDraft(null);
   }
 
-  function saveEdit() {
-    if (!draft) return;
-    setBills((prev) => prev.map((bill) => (bill.id === draft.id ? draft : bill)));
-    setEditingId(null);
-    setDraft(null);
+  async function saveEdit() {
+    if (!draft || !workspaceId) return;
+    setSaving(true);
+    try {
+      const updated = await api<FixedBill>(`/api/workspaces/${workspaceId}/fixed-bills/${draft.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: draft.name,
+          category: draft.category,
+          amount: draft.amount,
+          icon: draft.icon,
+          due: draft.due,
+          frequency: draft.frequency,
+          dayOfMonth: draft.dayOfMonth,
+          dayOfWeek: draft.dayOfWeek,
+          endDate: draft.endDate,
+        }),
+      });
+      if (updated.data) {
+        setBills((prev) => prev.map((bill) => (bill.id === draft.id ? updated.data! : bill)));
+        window.dispatchEvent(new Event("fixed-bills-refresh"));
+      }
+      setEditingId(null);
+      setDraft(null);
+    } catch {
+      // ignore
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -241,14 +290,17 @@ export default function FixedExpensesPage() {
           <button
             type="button"
             onClick={handleAdd}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary/10 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-primary/20 active:scale-95 transition-all"
+            disabled={saving}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary/10 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-primary/20 active:scale-95 transition-all disabled:opacity-50"
           >
             <Plus className="w-3 h-3" />
             Add bill
           </button>
         </div>
         <div className="space-y-4">
-          {bills.length === 0 ? (
+          {loading ? (
+            <p className="text-xs text-muted-foreground px-1">Loading…</p>
+          ) : bills.length === 0 ? (
             <p className="text-xs text-muted-foreground px-1">
               You do not have any fixed expenses yet. Add one to see it here.
             </p>
@@ -371,7 +423,8 @@ export default function FixedExpensesPage() {
                           <button
                             type="button"
                             onClick={saveEdit}
-                            className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+                            disabled={saving}
+                            className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors disabled:opacity-50"
                             aria-label="Save"
                           >
                             <Check className="w-4 h-4 text-primary" />

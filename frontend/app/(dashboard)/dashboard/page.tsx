@@ -7,7 +7,6 @@ import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import {
   fixedBillsTotal,
-  loadFixedBills,
   computeNextOccurrence,
   type FixedBill,
 } from "@/lib/fixed-expenses";
@@ -98,7 +97,22 @@ export default function DashboardPage() {
   }, [workspaceId]);
 
   useEffect(() => {
-    setFixedBills(loadFixedBills(workspaceId ?? null));
+    if (!workspaceId) return;
+    api<FixedBill[]>(`/api/workspaces/${workspaceId}/fixed-bills`)
+      .then((r) => setFixedBills(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setFixedBills([]));
+  }, [workspaceId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onRefresh = () => {
+      if (!workspaceId) return;
+      api<FixedBill[]>(`/api/workspaces/${workspaceId}/fixed-bills`)
+        .then((r) => setFixedBills(Array.isArray(r.data) ? r.data : []))
+        .catch(() => {});
+    };
+    window.addEventListener("fixed-bills-refresh", onRefresh);
+    return () => window.removeEventListener("fixed-bills-refresh", onRefresh);
   }, [workspaceId]);
 
   const retryLoad = useCallback(() => {

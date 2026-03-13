@@ -17,7 +17,7 @@ import {
   Flag,
   LineChart,
 } from "lucide-react";
-import { loadFixedBills, type FixedBill } from "@/lib/fixed-expenses";
+import { type FixedBill } from "@/lib/fixed-expenses";
 import { formatMoney } from "@/lib/format";
 
 function WorkspaceSettingsSection() {
@@ -133,7 +133,10 @@ export default function SettingsPage() {
   const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
 
   const refreshFixedBills = useCallback(() => {
-    setFixedBills(loadFixedBills(workspaceId ?? null));
+    if (!workspaceId) return;
+    api<FixedBill[]>(`/api/workspaces/${workspaceId}/fixed-bills`)
+      .then((r) => setFixedBills(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setFixedBills([]));
   }, [workspaceId]);
 
   useEffect(() => {

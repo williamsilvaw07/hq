@@ -131,52 +131,53 @@ export default function DashboardLayout({
       <main className="px-4 pt-3 pb-24 w-full sm:max-w-md sm:mx-auto sm:px-6">
         {children}
       </main>
-      <div className="fixed bottom-0 left-0 w-full z-40 px-4 sm:px-6 pb-6 sm:pb-8 pt-3 sm:pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
-        <div className="w-full sm:max-w-md sm:mx-auto bg-card/80 backdrop-blur-2xl border border-white/5 rounded-2xl sm:rounded-[2.5rem] p-1.5 sm:p-2 flex items-center justify-between shadow-2xl shadow-black/50">
+      <div className="fixed bottom-0 left-0 w-full z-40 px-4 sm:px-6 pb-6 sm:pb-8 pt-3 sm:pt-4 bg-gradient-to-t from-background via-background/98 to-transparent pointer-events-none">
+        <div className="w-full sm:max-w-md sm:mx-auto pointer-events-auto bg-zinc-900/95 border border-zinc-800 rounded-[2rem] sm:rounded-[2.5rem] px-2 py-3 flex items-center justify-between shadow-xl">
           <Link
             href="/dashboard"
-            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 sm:py-3 text-[9px] font-black uppercase tracking-widest ${
-              isDashboard ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest transition-colors ${
+              isDashboard ? "text-white" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             <Icon icon="solar:home-2-bold-duotone" className="text-xl sm:text-2xl" />
-            <span>Home</span>
+            <span>HOME</span>
           </Link>
           <Link
             href="/transactions"
-            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 sm:py-3 text-[9px] font-black uppercase tracking-widest ${
-              isTransactions ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest transition-colors ${
+              isTransactions ? "text-white" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             <Icon icon="solar:history-bold-duotone" className="text-xl sm:text-2xl" />
-            <span>History</span>
+            <span>HISTORY</span>
           </Link>
-          <div className="flex-1 flex justify-center relative -top-6 sm:-top-8">
-            <Link
-              href="/transactions/new"
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white text-black shadow-xl shadow-white/10 flex items-center justify-center hover:scale-105 active:scale-95 transition-all border-4 border-background"
-              aria-label="Add transaction"
-            >
-              <Icon icon="hugeicons:add-01" className="text-xl sm:text-2xl" />
-            </Link>
-          </div>
+          <Link
+            href="/transactions/new"
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest transition-colors ${
+              isAddTransaction ? "text-white" : "text-zinc-400 hover:text-zinc-200"
+            }`}
+            aria-label="Add transaction"
+          >
+            <Icon icon="hugeicons:add-01" className="text-xl sm:text-2xl" />
+            <span>ADD</span>
+          </Link>
           <Link
             href="/budgets"
-            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 sm:py-3 text-[9px] font-black uppercase tracking-widest ${
-              isBudgets ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest transition-colors ${
+              isBudgets ? "text-white" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             <Icon icon="solar:wallet-bold-duotone" className="text-xl sm:text-2xl" />
-            <span>Budgets</span>
+            <span>BUDGETS</span>
           </Link>
           <Link
             href="/settings"
-            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 sm:py-3 text-[9px] font-black uppercase tracking-widest ${
-              isSetupRoot || isSettings ? "text-primary" : "text-muted-foreground hover:text-foreground transition-colors"
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest transition-colors ${
+              isSetupRoot || isSettings ? "text-white" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             <Icon icon="solar:settings-bold-duotone" className="text-xl sm:text-2xl" />
-            <span>Setup</span>
+            <span>SETUP</span>
           </Link>
         </div>
       </div>
