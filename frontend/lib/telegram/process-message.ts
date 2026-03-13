@@ -1,4 +1,4 @@
-import { fetchOne, insertOne } from "@/lib/sql";
+import { fetchOne, fetchMany, insertOne } from "@/lib/sql";
 import { parseExpenseMessage, suggestCategory } from "./parse";
 import { sendTelegramMessage } from "./send";
 import { validateLinkCode, linkTelegramAccount } from "./link";
@@ -113,27 +113,37 @@ export async function processTelegramMessage(
 // ---------------------------------------------------------------------------
 
 async function resolveCategory(description: string, workspaceId: number): Promise<number | null> {
-  const suggested = suggestCategory(description);
-
-  if (suggested) {
-    const match = await fetchOne<CategoryRow>(
-      "SELECT id, name FROM Category WHERE workspace_id = ? AND LOWER(name) = LOWER(?) AND type = 'expense' LIMIT 1",
-      [workspaceId, suggested],
-    );
-    if (match) return match.id;
-
-    const partial = await fetchOne<CategoryRow>(
-      "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' AND LOWER(name) LIKE ? LIMIT 1",
-      [workspaceId, `%${suggested.toLowerCase()}%`],
-    );
-    if (partial) return partial.id;
-  }
-
-  const fallback = await fetchOne<CategoryRow>(
-    "SELECT id FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY id ASC LIMIT 1",
+  // Load all expense categories for this workspace (these are the user's actual budgets)
+  const categories = await fetchMany<CategoryRow>(
+    "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY id ASC",
     [workspaceId],
   );
-  if (fallback) return fallback.id;
 
-  return null;
+  if (categories.length === 0) return null;
+
+  const descLower = description.toLowerCase();
+  const words = descLower.split(/\s+/);
+
+  // 1. Direct match: any word in the description matches a category name
+  for (const cat of categories) {
+    const catLower = cat.name.toLowerCase();
+    if (words.some((w) => catLower.includes(w) || w.includes(catLower))) {
+      return cat.id;
+    }
+  }
+
+  // 2. Keyword map hint: map description to a generic category name, then match against user's categories
+  const suggested = suggestCategory(description);
+  if (suggested) {
+    const suggestedLower = suggested.toLowerCase();
+    for (const cat of categories) {
+      const catLower = cat.name.toLowerCase();
+      if (catLower.includes(suggestedLower) || suggestedLower.includes(catLower)) {
+        return cat.id;
+      }
+    }
+  }
+
+  // 3. Fall back to first budget category
+  return categories[0].id;
 }
