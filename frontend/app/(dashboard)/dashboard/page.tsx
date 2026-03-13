@@ -115,11 +115,29 @@ export default function DashboardPage() {
   const variableLimit = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
   const variableSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
   const monthlyFixedTotal = fixedBillsTotal(fixedBills);
-  const totalBudget = variableLimit + monthlyFixedTotal;
-  const totalSpent = periodExpense + monthlyFixedTotal;
-  const percentSpent = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
 
-  const variablePercent = variableLimit > 0 ? Math.min(100, (variableSpent / variableLimit) * 100) : 0;
+  // Projected monthly spending = fixed bills + total variable budget limit
+  const projectedMonthlySpending = monthlyFixedTotal + variableLimit;
+
+  const variablePercent =
+    variableLimit > 0 ? Math.min(100, (variableSpent / Math.max(variableLimit, 1)) * 100) : 0;
+
+  // Month progress
+  const today = new Date();
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const totalMonthDays =
+    (monthEnd.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24) + 1;
+  const daysPassed =
+    (today.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24) + 1;
+  const daysLeft = Math.max(
+    0,
+    Math.round(totalMonthDays - Math.floor(daysPassed)),
+  );
+  const monthProgressPercent =
+    totalMonthDays > 0
+      ? Math.min(100, (daysPassed / totalMonthDays) * 100)
+      : 0;
 
   if (loadError) {
     return (
@@ -178,8 +196,59 @@ export default function DashboardPage() {
       </header>
 
       <main className="px-6 space-y-8">
+        {/* Projected Monthly Spending hero card */}
+        <section className="space-y-2 pt-2">
+          <div className="bg-card p-6 rounded-[2.5rem] border border-border/40 relative overflow-hidden group">
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors" />
+            <div className="relative z-10">
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mb-4 opacity-60">
+                Projected Monthly Spending
+              </p>
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="text-2xl font-light text-muted-foreground/30 tracking-tighter">
+                  {CURRENCY_SYMBOL}
+                </span>
+                <h2 className="text-5xl font-heading font-semibold tracking-tighter">
+                  {formatBRLocale(projectedMonthlySpending, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </h2>
+              </div>
+              <div className="space-y-4">
+                <div className="w-full h-1 bg-secondary/50 rounded-full overflow-hidden">
+                  <div
+                    style={{ width: `${monthProgressPercent}%` }}
+                    className="h-full bg-white rounded-full"
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon="solar:calendar-bold-duotone"
+                      className="text-xs text-white/40"
+                    />
+                    <span>
+                      Ends{" "}
+                      {monthEnd.toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "short",
+                      })}{" "}
+                      •{" "}
+                      <span className="text-white">
+                        {daysLeft} {daysLeft === 1 ? "Day" : "Days"} Left
+                      </span>
+                    </span>
+                  </div>
+                  <span>{monthProgressPercent.toFixed(0)}% through month</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Variable Budgets & Fixed Bills summary cards */}
-        <section className="grid grid-cols-2 gap-3 pt-2">
+        <section className="grid grid-cols-2 gap-3">
           <div className="bg-card p-4 rounded-[2rem] border border-border/40 flex flex-col justify-between min-h-[140px]">
             <div>
               <p className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest mb-1 opacity-60">
