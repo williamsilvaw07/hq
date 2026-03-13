@@ -67,6 +67,20 @@ body {
   background: #333;
 }
 
+/* Prevent iOS zoom on input focus - inputs need 16px minimum on mobile */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+@media (min-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: inherit;
+  }
+}
+
 /* Consistent focus ring for inputs/buttons */
 input:focus-visible,
 button:focus-visible,

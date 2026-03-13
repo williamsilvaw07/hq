@@ -42,7 +42,7 @@ function RecurringEditor({ bill, setDraft }: RecurringEditorProps) {
                 frequency: e.target.value === "weekly" ? "weekly" : "monthly",
               }))
             }
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-medium text-foreground min-h-[44px] touch-manipulation"
+            className="w-full min-w-0 max-w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-medium text-foreground min-h-[44px] touch-manipulation"
           >
             <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
@@ -69,7 +69,7 @@ function RecurringEditor({ bill, setDraft }: RecurringEditorProps) {
                 };
               });
             }}
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-medium text-foreground min-h-[44px] touch-manipulation"
+            className="w-full min-w-0 max-w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-medium text-foreground min-h-[44px] touch-manipulation"
           />
         </label>
 
@@ -83,7 +83,7 @@ function RecurringEditor({ bill, setDraft }: RecurringEditorProps) {
               onChange={(e) =>
                 setDraft((prev) => ({ ...prev, dayOfWeek: Number(e.target.value), dayOfMonth: null }))
               }
-              className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-medium text-foreground min-h-[44px] touch-manipulation"
+              className="w-full min-w-0 max-w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-medium text-foreground min-h-[44px] touch-manipulation"
             >
               <option value={1}>Monday</option>
               <option value={2}>Tuesday</option>
@@ -106,7 +106,7 @@ function RecurringEditor({ bill, setDraft }: RecurringEditorProps) {
             onChange={(e) =>
               setDraft((prev) => ({ ...prev, endDate: e.target.value || null }))
             }
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-medium text-foreground min-h-[44px] touch-manipulation"
+            className="w-full min-w-0 max-w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-medium text-foreground min-h-[44px] touch-manipulation"
           />
         </label>
       </div>
@@ -186,7 +186,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: FixedBi
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-card rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col"
+        className="w-full max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0 mx-4 sm:mx-0 bg-card rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 sm:p-6 pb-2 shrink-0">
@@ -203,7 +203,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: FixedBi
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 p-4 sm:p-6 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 min-w-0 p-4 sm:p-6 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-4">
           <div className="grid grid-cols-5 gap-2">
             {FIXED_BILL_EMOJI_OPTIONS.map((emoji) => (
               <button
@@ -229,7 +229,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: FixedBi
               value={draft.name}
               onChange={(e) => setDraft((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="Bill name"
-              className="w-full text-base font-bold text-foreground bg-transparent border-b border-border py-2 focus:outline-none focus:ring-0 min-h-[44px]"
+              className="w-full min-w-0 max-w-full text-base font-bold text-foreground bg-transparent border-b border-border py-2 focus:outline-none focus:ring-0 min-h-[44px]"
             />
             <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest mt-1">
               {draft.category} • {draft.frequency === "weekly" ? "Weekly" : "Monthly"}
@@ -250,7 +250,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, saving }: FixedBi
               onChange={(e) =>
                 setDraft((prev) => ({ ...prev, amount: Number(e.target.value) || 0 }))
               }
-              className="w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-bold text-foreground min-h-[44px] touch-manipulation"
+              className="w-full min-w-0 max-w-full bg-background border border-border rounded-xl px-4 py-3 text-base font-bold text-foreground min-h-[44px] touch-manipulation"
             />
           </div>
 
