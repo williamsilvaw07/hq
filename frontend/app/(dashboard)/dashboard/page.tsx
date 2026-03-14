@@ -203,9 +203,9 @@ export default function DashboardPage() {
 
           {/* Recent transactions */}
           <section className="space-y-4">
-            <div className="bg-card rounded-xl overflow-hidden space-y-1">
+            <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between px-5 py-4">
+                <div key={i} className="flex items-center justify-between px-5 py-4 bg-card rounded-xl">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <SkeletonBox className="w-10 h-10 shrink-0" />
                     <div className="space-y-2 min-w-0 flex-1">
@@ -359,37 +359,45 @@ export default function DashboardPage() {
             <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">Recent Transactions</h2>
             <Link href="/transactions" className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">See All</Link>
           </div>
-          <div className="bg-card rounded-xl overflow-hidden space-y-1">
+          <div className="space-y-2.5">
             {recentTransactions.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8 opacity-50">No transactions yet.</p>
+              <div className="bg-card rounded-xl p-6">
+                <p className="text-xs text-muted-foreground text-center opacity-50">No transactions yet.</p>
+              </div>
             ) : (
               recentTransactions.map((tx) => {
                 const isExpense = tx.type === "expense";
-                const dateLabel = new Date(tx.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+                const createdDate = tx.date ? new Date(tx.date) : null;
+                const timeStr = createdDate
+                  ? createdDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })
+                  : null;
                 return (
                   <Link
                     key={tx.id}
                     href={`/transactions/${tx.id}`}
-                    className="flex items-center justify-between px-5 py-4 active:bg-secondary/30 transition-colors"
+                    className="flex items-center justify-between px-3 py-3 bg-card rounded-lg active:scale-[0.98] transition-all"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isExpense ? "bg-chart-2/10" : "bg-chart-1/10"}`}>
-                        <span className={`text-lg font-bold ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${isExpense ? "bg-chart-2/10 border-chart-2/20" : "bg-chart-1/10 border-chart-1/20"}`}>
+                        <span className={`text-sm font-bold ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
                           {isExpense ? "↓" : "↑"}
                         </span>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-foreground truncate">
+                        <p className="text-xs font-bold text-foreground truncate">
                           {tx.description || tx.category?.name || "Transaction"}
                         </p>
-                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">
-                          {dateLabel} • {tx.account?.name ?? "—"}
+                        <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">
+                          {tx.category?.name ?? "—"} {timeStr && `• ${timeStr}`}
                         </p>
                       </div>
                     </div>
-                    <p className={`text-sm font-black tracking-tight shrink-0 ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
-                      {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRLocale(tx.amount, { minimumFractionDigits: 2 })}
-                    </p>
+                    <div className="text-right shrink-0">
+                      <p className={`text-xs font-black tracking-tight ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
+                        {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRLocale(tx.amount, { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground font-normal opacity-50 mt-0.5">{tx.account?.name ?? "—"}</p>
+                    </div>
                   </Link>
                 );
               })
