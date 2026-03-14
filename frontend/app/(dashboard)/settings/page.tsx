@@ -115,25 +115,18 @@ function WorkspaceSettingsSection() {
   useEffect(() => {
     let cancelled = false;
     async function loadName() {
-      if (!workspaceId) {
-        setWorkspaceName(null);
-        return;
-      }
+      if (!workspaceId) { setWorkspaceName(null); return; }
       try {
         const r = await api<{ id: number; name: string }[]>("/api/workspaces");
         const list = Array.isArray(r.data) ? r.data : [];
         const current = list.find((w) => w.id === workspaceId);
-        if (!cancelled) {
-          setWorkspaceName(current?.name ?? null);
-        }
+        if (!cancelled) setWorkspaceName(current?.name ?? null);
       } catch {
         if (!cancelled) setWorkspaceName(null);
       }
     }
     void loadName();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [workspaceId]);
 
   return (
@@ -142,24 +135,27 @@ function WorkspaceSettingsSection() {
         Workspace
       </h3>
       <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between p-3 sm:p-5 border-b border-border/50">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/10 flex items-center justify-center shrink-0">
-              <Users className="w-5 h-5 text-chart-4" />
+        {/* Current workspace → goes to its settings (currency, members, etc.) */}
+        {workspaceId && (
+          <Link
+            href={`/settings/workspaces/${workspaceId}`}
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/10 flex items-center justify-center shrink-0">
+                <Users className="w-5 h-5 text-chart-4" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold">{workspaceName ?? "Workspace"}</p>
+                <p className="text-[10px] text-muted-foreground font-medium">
+                  Currency, members &amp; settings
+                </p>
+              </div>
             </div>
-            <div className="text-left">
-              <p className="text-sm font-bold">Workspace</p>
-              <p className="text-[10px] text-muted-foreground font-medium">
-                {workspaceName ?? "Personal Flow"}
-              </p>
-            </div>
-          </div>
-          {workspaceName && (
-            <span className="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20 uppercase tracking-widest">
-              Active
-            </span>
-          )}
-        </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          </Link>
+        )}
+        {/* Switch workspace */}
         <Link
           href="/settings/workspaces"
           className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
@@ -169,9 +165,9 @@ function WorkspaceSettingsSection() {
               <Users className="w-5 h-5 text-chart-4" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-bold">Switch Workspace</p>
+              <p className="text-sm font-bold">All Workspaces</p>
               <p className="text-[10px] text-muted-foreground font-medium">
-                Jump between your finance hubs
+                Switch or create a workspace
               </p>
             </div>
           </div>
