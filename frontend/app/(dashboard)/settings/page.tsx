@@ -276,7 +276,7 @@ export default function SettingsPage() {
           </Link>
           <Link
             href="/settings/fixed-expenses"
-            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
           >
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -290,56 +290,54 @@ export default function SettingsPage() {
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </Link>
         </div>
-      </section>
 
-      {/* Active Bills */}
-      <section className="space-y-3 sm:space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-            Active Bills
-          </h3>
-          <Link
-            href="/settings/fixed-expenses"
-            className="text-[10px] font-bold text-primary uppercase tracking-widest"
-          >
-            + Add New
-          </Link>
-        </div>
-        <div className="space-y-3">
+        {/* Active Bills — inline under Fixed Expenses */}
+        <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-3 sm:px-5 pt-3 sm:pt-4 pb-2">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Active Bills</p>
+            <Link
+              href="/settings/fixed-expenses"
+              className="text-[10px] font-bold text-primary uppercase tracking-widest"
+            >
+              + Add New
+            </Link>
+          </div>
           {fixedBills.length === 0 ? (
-            <p className="text-xs text-muted-foreground px-1">
-              You do not have any fixed expenses yet. Add one to see it here.
+            <p className="text-xs text-muted-foreground px-3 sm:px-5 pb-4">
+              No fixed expenses yet.
             </p>
           ) : (
-            fixedBills.map((bill) => (
-              <div
-                key={bill.id}
-                className="flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-xl sm:rounded-lg"
-              >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-background flex items-center justify-center shrink-0">
-                    {bill.icon ? (
-                      <span className="text-lg">{bill.icon}</span>
-                    ) : (
-                      <Home className="w-5 h-5 text-muted-foreground" />
-                    )}
+            <div className="divide-y divide-border/30">
+              {fixedBills.map((bill) => (
+                <div
+                  key={bill.id}
+                  className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4"
+                >
+                  <div className="flex items-center gap-2.5 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-background flex items-center justify-center shrink-0">
+                      {bill.icon ? (
+                        <span className="text-lg">{bill.icon}</span>
+                      ) : (
+                        <Home className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold">{bill.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                        {bill.frequency === "weekly"
+                          ? "Weekly"
+                          : bill.dayOfMonth
+                            ? `Day ${bill.dayOfMonth} • Monthly`
+                            : "Monthly"}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold">{bill.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                      {bill.frequency === "weekly"
-                        ? "Weekly"
-                        : bill.dayOfMonth
-                          ? `Day ${bill.dayOfMonth} • Monthly`
-                          : "Monthly"}
-                    </p>
-                  </div>
+                  <p className="text-sm font-bold text-foreground">
+                    {formatMoney(bill.amount)}
+                  </p>
                 </div>
-                <p className="text-sm font-bold text-foreground">
-                  {formatMoney(bill.amount)}
-                </p>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </section>
