@@ -275,19 +275,19 @@ export default function DashboardPage() {
                 }}
                 className="bg-card p-5 rounded-xl flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer hover:border-border/80"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-secondary/50 flex items-center justify-center text-2xl shadow-inner">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-12 h-12 rounded-lg bg-secondary/50 flex items-center justify-center text-2xl shadow-inner shrink-0">
                       {budget.icon || budget.category?.icon || "💰"}
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold">{budget.name || budget.category?.name || "Budget"}</h4>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold truncate">{budget.name || budget.category?.name || "Budget"}</h4>
                       <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
                         {budget.period_type ?? "Monthly"} • {budget.next_reset_date}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <p className="text-sm font-bold">{CURRENCY_SYMBOL} {formatBRLocale(budget.remaining, { minimumFractionDigits: 2 })}</p>
                     <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60">left of {formatCompact(budget.amount)}</p>
                   </div>
@@ -327,12 +327,12 @@ export default function DashboardPage() {
                     href={`/transactions/${tx.id}`}
                     className="flex items-center justify-between px-5 py-4 active:bg-secondary/30 transition-colors"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center text-base shrink-0">
                         {isExpense ? "↓" : "↑"}
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-foreground truncate max-w-[160px]">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-foreground truncate">
                           {tx.description || tx.category?.name || "Transaction"}
                         </p>
                         <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60 mt-0.5">
@@ -340,7 +340,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <p className={`text-sm font-black tracking-tight ${isExpense ? "text-foreground" : "text-chart-1"}`}>
+                    <p className={`text-sm font-black tracking-tight shrink-0 ${isExpense ? "text-foreground" : "text-chart-1"}`}>
                       {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRLocale(tx.amount, { minimumFractionDigits: 2 })}
                     </p>
                   </Link>

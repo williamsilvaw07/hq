@@ -54,12 +54,12 @@ export default function PendingPage() {
         ) : (
           list.map((t) => (
             <div key={t.id} className="bg-card p-3 sm:p-5 rounded-lg sm:rounded-xl flex items-center justify-between gap-3 active:scale-[0.98] transition-all">
-              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-lg bg-chart-2/10 border border-chart-2/20 flex items-center justify-center shrink-0">
                   <ShoppingBag className="w-5 h-5 text-chart-2" />
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">{t.description || "—"}</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-foreground truncate">{t.description || "—"}</p>
                   <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">
                   {t.date}
                   {t.created_at && ` · ${new Date(t.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })}`}
@@ -72,7 +72,7 @@ export default function PendingPage() {
                   {t.type === "income" ? "+" : "-"}R${" "}
                   {formatNumberUK(Math.abs(t.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <Link href={`/transactions/${t.id}`} className="flex items-center gap-1.5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold shadow-lg shadow-white/5 active:scale-95 transition-all shrink-0">
+                <Link href={`/transactions/${t.id}`} className="flex items-center gap-1.5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-3 py-2.5 sm:px-4 sm:py-2 min-h-[40px] text-xs font-bold shadow-lg shadow-white/5 active:scale-95 transition-all shrink-0">
                   <PenLine className="w-3.5 h-3.5" /><span className="hidden sm:inline">Confirm / </span>Edit
                 </Link>
               </div>
