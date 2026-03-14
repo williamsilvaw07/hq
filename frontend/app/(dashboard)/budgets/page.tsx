@@ -217,7 +217,7 @@ export default function BudgetsPage() {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-foreground">{budget.name || budget.category?.name || "Budget"}</h4>
-                          <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
+                          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
                             {budget.period_type ?? "Monthly"} • {budget.next_reset_date || "Active"}
                           </p>
                         </div>
@@ -227,7 +227,7 @@ export default function BudgetsPage() {
                           {CURRENCY_SYMBOL} {formatBRL(remaining, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter ml-1">left</span>
                         </p>
-                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
+                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
                           of {CURRENCY_SYMBOL} {formatBRL(amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
                       </div>
@@ -240,10 +240,10 @@ export default function BudgetsPage() {
                         />
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
                           {CURRENCY_SYMBOL} {formatBRL(spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
                         </p>
-                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
                           {pct.toFixed(0)}%
                         </p>
                       </div>

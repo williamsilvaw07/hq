@@ -267,7 +267,7 @@ export default function TransactionsPage() {
                           {t.type === "income" ? "+" : "-"}R${" "}
                           {formatNumberUK(Math.abs(t.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
-                        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">{t.account?.name ?? "—"}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">{t.account?.name ?? "—"}</p>
                       </div>
                     </div>
                   </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { CURRENCY_SYMBOL } from "@/lib/format";
+import { Loader2, ChevronDown } from "lucide-react";
 
 const BUDGET_EMOJI_OPTIONS = [
   "🍔", "🍕", "🚗", "🍿", "🏠", "💡", "💳", "🛍️", "📱", "🎮",
@@ -46,28 +47,46 @@ export function BudgetModal({
     }
   }, [initialData, isOpen]);
 
+  const canSave = !saving && !!amount && parseFloat(amount) > 0 && !!name.trim();
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={initialData ? "Edit Budget" : "New Budget"}
-      subtitle="BUDGET CONFIG"
+      subtitle={initialData ? "EDIT BUDGET" : "NEW BUDGET"}
       showCloseButton={true}
       footer={
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => onSave({ name, icon, amount: parseFloat(amount), period_type: periodType })}
-            disabled={saving || !amount || !name}
-            className="w-full py-4 rounded-lg bg-white text-black text-sm font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40"
-          >
-            {saving ? "Confirming..." : initialData ? "Confirm Changes" : "Confirm Budget"}
-          </button>
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="flex-1 py-4 rounded-xl bg-white/5 border border-white/[0.08] text-sm font-semibold text-muted-foreground active:scale-95 transition-all disabled:opacity-40"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => onSave({ name, icon, amount: parseFloat(amount), period_type: periodType })}
+              disabled={!canSave}
+              className="flex-1 py-4 rounded-xl bg-white text-black text-sm font-bold active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving…
+                </>
+              ) : initialData ? "Save Changes" : "Create Budget"}
+            </button>
+          </div>
           {initialData && onDelete && (
             <button
               type="button"
               onClick={() => onDelete(initialData.id)}
-              className="w-full py-2 text-[10px] font-black text-chart-2 uppercase tracking-widest hover:opacity-80 transition-opacity"
+              disabled={saving}
+              className="w-full py-3 rounded-xl text-sm font-semibold text-chart-2 active:scale-95 transition-all disabled:opacity-40"
             >
               Delete Budget
             </button>
@@ -75,73 +94,74 @@ export function BudgetModal({
         </div>
       }
     >
-      <div className="space-y-10 py-2">
-        {/* Name & Icon */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-lg bg-white/5 flex items-center justify-center text-3xl shadow-inner">
-              {icon || "💰"}
-            </div>
-            <div className="flex-1 space-y-1">
-              <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">Budget Title</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Groceries, Travel..."
-                className="w-full bg-transparent border-none outline-none text-xl font-bold text-foreground placeholder:text-muted-foreground/30 ring-0 p-0"
-                autoFocus={!initialData}
-              />
-            </div>
-          </div>
+      <div className="space-y-6 py-1">
 
-          <div className="bg-white/5 rounded-lg p-3">
-            <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-50">Icon</p>
+        {/* Icon + Name */}
+        <div className="flex items-center gap-3">
+          {/* Icon picker */}
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-background border border-white/[0.08] flex items-center justify-center text-3xl">
+              {icon}
+            </div>
             <select
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              className="w-full bg-transparent border-none outline-none text-sm font-bold text-foreground appearance-none ring-0 p-0"
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+              aria-label="Pick icon"
             >
               {BUDGET_EMOJI_OPTIONS.map((e) => (
                 <option key={e} value={e}>{e}</option>
               ))}
             </select>
           </div>
+
+          {/* Name input */}
+          <div className="flex-1 bg-background border border-white/[0.08] rounded-xl px-4 py-3.5 focus-within:border-white/20 transition-colors">
+            <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider mb-0.5">Budget Name</p>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Groceries, Travel…"
+              className="w-full bg-transparent outline-none text-sm font-medium text-foreground placeholder:text-muted-foreground/30"
+              autoFocus={!initialData}
+            />
+          </div>
         </div>
 
-        {/* Amount Input */}
+        {/* Amount */}
         <div className="flex flex-col items-center py-2">
-          <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Set Limit</label>
+          <p className="text-xs font-semibold text-muted-foreground/50 uppercase tracking-widest mb-3">Monthly Limit</p>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-light text-muted-foreground/30 tracking-tighter">{CURRENCY_SYMBOL}</span>
+            <span className="text-3xl font-light text-muted-foreground/25 tracking-tighter">{CURRENCY_SYMBOL}</span>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="text-6xl font-black bg-transparent border-none outline-none text-center w-full max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="text-6xl font-black bg-transparent border-none outline-none text-center w-full max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
               placeholder="0"
             />
           </div>
         </div>
 
         {/* Reset Frequency */}
-        <div className="bg-white/5 rounded-xl overflow-hidden divide-y divide-border/5">
-          <div className="p-5 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center text-lg">⏱</div>
-              <span className="text-sm font-bold">Reset Frequency</span>
-            </div>
+        <div className="flex items-center gap-3 bg-background border border-white/[0.08] rounded-xl px-4 py-3.5 focus-within:border-white/20 transition-colors">
+          <span className="text-xl shrink-0">🔄</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider mb-0.5">Resets Every</p>
             <select
               value={periodType}
               onChange={(e) => setPeriodType(e.target.value)}
-              className="bg-transparent border-none outline-none text-[11px] font-black text-primary uppercase tracking-widest appearance-none text-right"
+              className="w-full bg-transparent outline-none text-sm font-medium text-foreground appearance-none cursor-pointer"
             >
-              <option value="weekly">Weekly</option>
-              <option value="month">Monthly</option>
-              <option value="quarterly">Quarterly</option>
+              <option value="weekly">Week</option>
+              <option value="month">Month</option>
+              <option value="quarterly">Quarter</option>
             </select>
           </div>
+          <ChevronDown className="w-4 h-4 text-muted-foreground/30 shrink-0" />
         </div>
+
       </div>
     </Modal>
   );

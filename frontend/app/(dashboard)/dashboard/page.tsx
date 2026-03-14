@@ -197,8 +197,8 @@ export default function DashboardPage() {
             />
           </Link>
           <div>
-            <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest opacity-60">Overview</p>
-            <p className="text-xs font-bold text-foreground">Welcome back</p>
+            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest opacity-60">Overview</p>
+            <p className="text-sm font-bold text-foreground">Welcome back</p>
           </div>
         </div>
         <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-muted-foreground">
@@ -219,7 +219,7 @@ export default function DashboardPage() {
             <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
               <div style={{ width: `${monthProgressPercent}%` }} className="h-full bg-white rounded-full transition-all duration-1000" />
             </div>
-            <div className="flex items-center justify-between text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
+            <div className="flex items-center justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
               <span className="flex items-center gap-1.5">
                 <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
                 Ends {monthEnd.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
@@ -232,7 +232,7 @@ export default function DashboardPage() {
         <section className="grid grid-cols-2 gap-3.5">
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
-              <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-50">Variable</p>
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-50">Variable</p>
               <p className="text-2xl font-black tracking-tighter">
                 {CURRENCY_SYMBOL} {formatBRLocale(variableSpent, { minimumFractionDigits: 2 })}
               </p>
@@ -241,12 +241,12 @@ export default function DashboardPage() {
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
                 <div style={{ width: `${variablePercent}%` }} className="h-full bg-white rounded-full shadow-[0_0_12px_rgba(255,255,255,0.3)]" />
               </div>
-              <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-60">{variablePercent.toFixed(0)}% of {formatCompact(variableLimit)}</p>
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-60">{variablePercent.toFixed(0)}% of {formatCompact(variableLimit)}</p>
             </div>
           </div>
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
-              <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
               <p className="text-2xl font-black tracking-tighter text-chart-1">
                 {CURRENCY_SYMBOL} {formatBRLocale(monthlyFixedTotal, { minimumFractionDigits: 2 })}
               </p>
@@ -255,7 +255,7 @@ export default function DashboardPage() {
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
                 <div style={{ width: "100%" }} className="h-full bg-chart-1 rounded-full shadow-[0_0_12px_rgba(var(--chart-1),0.3)]" />
               </div>
-              <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-60">100% committed</p>
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-60">100% committed</p>
             </div>
           </div>
         </section>
@@ -282,14 +282,14 @@ export default function DashboardPage() {
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-sm font-bold truncate">{budget.name || budget.category?.name || "Budget"}</h4>
-                      <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
+                      <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
                         {budget.period_type ?? "Monthly"} • {budget.next_reset_date}
                       </p>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold">{CURRENCY_SYMBOL} {formatBRLocale(budget.remaining, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60">left of {formatCompact(budget.amount)}</p>
+                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">left of {formatCompact(budget.amount)}</p>
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -299,7 +299,7 @@ export default function DashboardPage() {
                       className={`h-full rounded-full transition-all duration-700 ${budget.spent_percentage >= 90 ? "bg-chart-2" : budget.spent_percentage >= 70 ? "bg-yellow-400" : "bg-white"}`}
                     />
                   </div>
-                  <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
                     {budget.spent_percentage.toFixed(0)}% used • {CURRENCY_SYMBOL} {formatBRLocale(budget.spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
                   </p>
                 </div>
@@ -335,7 +335,7 @@ export default function DashboardPage() {
                         <p className="text-sm font-bold text-foreground truncate">
                           {tx.description || tx.category?.name || "Transaction"}
                         </p>
-                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60 mt-0.5">
+                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60 mt-0.5">
                           {dateLabel} • {tx.account?.name ?? "—"}
                         </p>
                       </div>
