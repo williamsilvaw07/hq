@@ -12,6 +12,7 @@ import {
 import { CURRENCY_SYMBOL, formatBRLocale, formatCompact } from "@/lib/format";
 import { TransactionModal } from "../transactions/TransactionModal";
 import { BudgetModal } from "../budgets/BudgetModal";
+import { CardModal, type CreditCard } from "./CardModal";
 import { SkeletonBox } from "@/components/ui/Skeleton";
 
 type DashboardData = {
@@ -53,6 +54,7 @@ export default function DashboardPage() {
   const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -60,7 +62,9 @@ export default function DashboardPage() {
   // Modal states
   const [budgetModalOpen, setBudgetModalOpen] = useState(false);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
+  const [cardModalOpen, setCardModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<any>(null);
+  const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -88,15 +92,18 @@ export default function DashboardPage() {
         .then((r) => Array.isArray(r.data) ? r.data : []),
       api<any>(`/api/workspaces/${workspaceId}/accounts`)
         .then((r) => r.data?.accounts || []),
+      api<CreditCard[]>(`/api/workspaces/${workspaceId}/credit-cards`)
+        .then((r) => Array.isArray(r.data) ? r.data : []),
       api<any>(`/api/workspaces/${workspaceId}/transactions?per_page=5&page=1`)
         .then((r) => Array.isArray(r.data?.data) ? r.data.data : []),
     ])
-      .then(([d, b, f, cat, acc, txs]) => {
+      .then(([d, b, f, cat, acc, cards, txs]) => {
         setDashboard(d);
         setBudgets(b);
         setFixedBills(f);
         setCategories(cat);
         setAccounts(acc);
+        setCreditCards(cards);
         setRecentTransactions(txs);
         setLoadError(null);
       })
@@ -158,23 +165,49 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleSaveCard(data: { name: string; owner: string; credit_limit: number; payment_due_day: number }) {
+    if (!workspaceId) return;
+    setSaving(true);
+    try {
+      const isEdit = !!editingCard;
+      const url = isEdit
+        ? `/api/workspaces/${workspaceId}/credit-cards/${editingCard.id}`
+        : `/api/workspaces/${workspaceId}/credit-cards`;
+      await api(url, {
+        method: isEdit ? "PATCH" : "POST",
+        body: JSON.stringify(data),
+      });
+      fetchData();
+      setCardModalOpen(false);
+      setEditingCard(null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteCard(id: number) {
+    if (!workspaceId) return;
+    setSaving(true);
+    try {
+      await api(`/api/workspaces/${workspaceId}/credit-cards/${id}`, { method: "DELETE" });
+      fetchData();
+      setCardModalOpen(false);
+      setEditingCard(null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (!workspaceId) return null;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-foreground pb-32 font-sans tracking-tight">
-        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <SkeletonBox className="w-9 h-9 rounded-full" />
-            <div className="space-y-1.5">
-              <SkeletonBox className="h-2.5 w-16" />
-              <SkeletonBox className="h-3.5 w-24" />
-            </div>
-          </div>
-          <SkeletonBox className="w-9 h-9" />
-        </header>
-
-        <main className="px-6 space-y-8 mt-2">
+        <main className="px-6 space-y-8 mt-4">
           {/* Hero spending card */}
           <SkeletonBox className="h-40 w-full" />
 
@@ -258,26 +291,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans tracking-tight">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/settings/profile" className="active:scale-95 transition-all">
-            <img
-              alt={user?.name ?? "User"}
-              src={user?.avatar_url ?? "https://api.dicebear.com/7.x/avataaars/svg?seed=user"}
-              className="w-9 h-9 rounded-full object-cover grayscale border border-white/10"
-            />
-          </Link>
-          <div>
-            <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">Overview</p>
-            <p className="text-sm font-bold text-foreground">Welcome back</p>
-          </div>
-        </div>
-        <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-muted-foreground">
-          <Icon icon="solar:notification-lines-duotone" className="text-xl" />
-        </button>
-      </header>
-
-      <main className="px-6 space-y-8 mt-2">
+      <main className="px-6 space-y-8 mt-4">
         <section className="bg-card p-6 rounded-xl relative overflow-hidden group shadow-2xl shadow-black/10">
           <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Projected Monthly Spending</p>
           <div className="flex items-baseline gap-2 mb-6 text-foreground">
@@ -329,6 +343,64 @@ export default function DashboardPage() {
               <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">100% committed</p>
             </div>
           </div>
+        </section>
+
+        {/* Cards */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">My Cards</h2>
+            <button
+              onClick={() => { setEditingCard(null); setCardModalOpen(true); }}
+              className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
+            >
+              + Add Card
+            </button>
+          </div>
+          {creditCards.length === 0 ? (
+            <button
+              onClick={() => { setEditingCard(null); setCardModalOpen(true); }}
+              className="w-full bg-card/50 p-6 rounded-xl text-center active:scale-[0.98] transition-all"
+            >
+              <p className="text-sm text-muted-foreground">No cards added yet.</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-1">Tap to add your first card</p>
+            </button>
+          ) : (
+            <div className="flex gap-3.5 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
+              {creditCards.map((card) => {
+                const usedPct = card.credit_limit > 0 ? Math.min(100, (card.current_balance / card.credit_limit) * 100) : 0;
+                return (
+                  <div
+                    key={card.id}
+                    onClick={() => { setEditingCard(card); setCardModalOpen(true); }}
+                    className="min-w-[240px] bg-card p-5 rounded-xl flex flex-col justify-between gap-5 active:scale-[0.98] transition-all cursor-pointer shrink-0"
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{card.name}</p>
+                      {card.owner && (
+                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">{card.owner}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2.5">
+                      <div className="flex items-baseline justify-between">
+                        <p className="text-lg font-black tracking-tighter">
+                          {CURRENCY_SYMBOL} {formatBRLocale(card.credit_limit, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
+                          Due {card.payment_due_day}th
+                        </p>
+                      </div>
+                      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          style={{ width: usedPct > 0 ? `${Math.max(usedPct, 2)}%` : "0%" }}
+                          className={`h-full rounded-full transition-all duration-500 ${usedPct >= 90 ? "bg-chart-2" : usedPct >= 70 ? "bg-yellow-400" : "bg-white"}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         <section className="space-y-4">
@@ -430,6 +502,7 @@ export default function DashboardPage() {
         onSave={handleSaveBudget}
         initialData={editingBudget}
         categories={categories}
+        creditCards={creditCards.map((c) => ({ id: c.id, name: c.name }))}
         saving={saving}
       />
 
@@ -439,6 +512,15 @@ export default function DashboardPage() {
         onSave={handleSaveTransaction}
         categories={budgets.map((b) => ({ id: b.category?.id ?? (b as any).categoryId, name: b.name || b.category?.name || "Budget", type: "expense" }))}
         accounts={accounts}
+        saving={saving}
+      />
+
+      <CardModal
+        isOpen={cardModalOpen}
+        onClose={() => { setCardModalOpen(false); setEditingCard(null); }}
+        onSave={handleSaveCard}
+        onDelete={editingCard ? handleDeleteCard : undefined}
+        initialData={editingCard}
         saving={saving}
       />
     </div>

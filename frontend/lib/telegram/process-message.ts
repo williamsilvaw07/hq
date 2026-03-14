@@ -264,7 +264,54 @@ async function processExpenseText(
 
 type CategoryResult = { categoryId: number | null; isDraft: boolean };
 
+type BudgetCategoryRow = {
+  category_id: number;
+  budget_name: string | null;
+  category_name: string;
+};
+
 async function resolveCategory(description: string, workspaceId: number): Promise<CategoryResult> {
+  // First try to match against budget categories (what the user actually sees)
+  const budgetCategories = await fetchMany<BudgetCategoryRow>(
+    `SELECT b.category_id, b.name AS budget_name, c.name AS category_name
+     FROM budgets b
+     JOIN Category c ON c.id = b.category_id
+     WHERE b.workspace_id = ?
+     ORDER BY b.id ASC`,
+    [workspaceId],
+  );
+
+  if (budgetCategories.length > 0) {
+    // Use budget names (what user sees) as labels, but return category_id
+    const categoryList = budgetCategories.map((bc) => ({
+      id: bc.category_id,
+      name: bc.budget_name || bc.category_name,
+    }));
+
+    // Deduplicate by category_id
+    const unique = categoryList.filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
+
+    if (unique.length === 1) return { categoryId: unique[0].id, isDraft: false };
+
+    try {
+      const firstPick = await categorizeExpense(description, unique, false);
+      if (firstPick !== null) {
+        console.log(`[telegram] AI picked budget category ${firstPick} on first attempt`);
+        return { categoryId: firstPick, isDraft: false };
+      }
+
+      console.log("[telegram] AI first attempt returned null — retrying");
+      const retryPick = await categorizeExpense(description, unique, true);
+      if (retryPick !== null) {
+        console.log(`[telegram] AI picked budget category ${retryPick} on retry`);
+        return { categoryId: retryPick, isDraft: false };
+      }
+    } catch (err) {
+      console.error("[telegram] AI categorization (budgets) failed:", err);
+    }
+  }
+
+  // Fallback: try all expense categories (even if no budget exists for them)
   const categories = await fetchMany<CategoryRow>(
     "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY id ASC",
     [workspaceId],
@@ -274,15 +321,13 @@ async function resolveCategory(description: string, workspaceId: number): Promis
   if (categories.length === 1) return { categoryId: categories[0].id, isDraft: false };
 
   try {
-    // First attempt
     const firstPick = await categorizeExpense(description, categories, false);
     if (firstPick !== null) {
       console.log(`[telegram] AI picked category ${firstPick} on first attempt`);
       return { categoryId: firstPick, isDraft: false };
     }
 
-    // Retry with lenient prompt
-    console.log("[telegram] AI first attempt returned null — retrying");
+    console.log("[telegram] AI first attempt returned null — retrying (fallback)");
     const retryPick = await categorizeExpense(description, categories, true);
     if (retryPick !== null) {
       console.log(`[telegram] AI picked category ${retryPick} on retry`);
@@ -292,7 +337,7 @@ async function resolveCategory(description: string, workspaceId: number): Promis
     console.error("[telegram] AI categorization failed:", err);
   }
 
-  // Both attempts failed — save as draft for user to review
+  // All attempts failed — save as draft
   console.log("[telegram] AI could not categorize — saving as draft");
   return { categoryId: null, isDraft: true };
 }

@@ -99,6 +99,10 @@ export async function PATCH(
       fields.push("amount = ?");
       paramsArr.push(a);
     }
+    if (body.credit_card_id !== undefined) {
+      fields.push("credit_card_id = ?");
+      paramsArr.push(body.credit_card_id != null ? parseInt(String(body.credit_card_id), 10) : null);
+    }
 
     if (fields.length === 0) {
       const u = { ...budget, amount: Number(budget.amount) };

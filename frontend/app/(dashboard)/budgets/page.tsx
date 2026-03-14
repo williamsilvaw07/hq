@@ -46,6 +46,7 @@ export default function BudgetsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [creditCards, setCreditCards] = useState<{ id: number; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -67,6 +68,9 @@ export default function BudgetsPage() {
     api<Category[]>(`/api/workspaces/${workspaceId}/categories`)
       .then((r) => setCategories(Array.isArray(r.data) ? r.data : []))
       .catch(() => setCategories([]));
+    api<any[]>(`/api/workspaces/${workspaceId}/credit-cards`)
+      .then((r) => setCreditCards(Array.isArray(r.data) ? r.data.map((c: any) => ({ id: c.id, name: c.name })) : []))
+      .catch(() => setCreditCards([]));
   }, [workspaceId, modalOpen]);
 
   async function handleSaveBudget(data: any) {
@@ -290,6 +294,7 @@ export default function BudgetsPage() {
           onDelete={handleDeleteBudget}
           initialData={editingBudget}
           categories={categories}
+          creditCards={creditCards}
           saving={saving}
         />
       )}

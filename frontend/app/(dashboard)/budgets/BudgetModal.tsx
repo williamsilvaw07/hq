@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { CURRENCY_SYMBOL } from "@/lib/format";
-import { Loader2, Pencil, RefreshCw } from "lucide-react";
+import { Loader2, Pencil, RefreshCw, CreditCard } from "lucide-react";
 
 const BUDGET_EMOJI_OPTIONS = [
   "🍔", "🍕", "🚗", "🍿", "🏠", "💡", "💳", "🛍️", "📱", "🎮",
@@ -16,6 +16,8 @@ const PERIOD_OPTIONS = [
   { value: "quarterly", label: "Quarterly" },
 ];
 
+type CardOption = { id: number; name: string };
+
 type BudgetModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -23,14 +25,16 @@ type BudgetModalProps = {
   onDelete?: (id: number) => Promise<void>;
   initialData?: any;
   categories?: any[];
+  creditCards?: CardOption[];
   saving: boolean;
 };
 
-export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, saving }: BudgetModalProps) {
+export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, creditCards = [], saving }: BudgetModalProps) {
   const [name, setName] = useState(initialData?.name ?? initialData?.category?.name ?? "");
   const [icon, setIcon] = useState(initialData?.icon ?? initialData?.category?.icon ?? "💰");
   const [amount, setAmount] = useState(initialData?.amount?.toString() ?? "");
   const [periodType, setPeriodType] = useState(initialData?.period_type ?? "month");
+  const [cardId, setCardId] = useState<string>(initialData?.credit_card_id?.toString() ?? "");
 
   useEffect(() => {
     if (initialData) {
@@ -38,8 +42,9 @@ export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, sa
       setIcon(initialData.icon ?? initialData.category?.icon ?? "💰");
       setAmount(initialData.amount?.toString() ?? "");
       setPeriodType(initialData.period_type ?? "month");
+      setCardId(initialData.credit_card_id?.toString() ?? "");
     } else {
-      setName(""); setIcon("💰"); setAmount(""); setPeriodType("month");
+      setName(""); setIcon("💰"); setAmount(""); setPeriodType("month"); setCardId("");
     }
   }, [initialData, isOpen]);
 
@@ -64,7 +69,7 @@ export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, sa
             </button>
             <button
               type="button"
-              onClick={() => onSave({ name, icon, amount: parseFloat(amount), period_type: periodType })}
+              onClick={() => onSave({ name, icon, amount: parseFloat(amount), period_type: periodType, credit_card_id: cardId ? parseInt(cardId, 10) : null })}
               disabled={!canSave}
               className="flex-[1.4] py-4 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
             >
@@ -158,6 +163,26 @@ export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, sa
             ))}
           </div>
         </div>
+
+        {/* Linked Card */}
+        {creditCards.length > 0 && (
+          <div className="border border-white/[0.08] rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Linked Card</p>
+              <CreditCard className="w-3.5 h-3.5 text-muted-foreground/30" />
+            </div>
+            <select
+              value={cardId}
+              onChange={(e) => setCardId(e.target.value)}
+              className="w-full bg-transparent outline-none text-sm font-bold text-foreground appearance-none cursor-pointer"
+            >
+              <option value="">No card linked</option>
+              {creditCards.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
       </div>
     </Modal>

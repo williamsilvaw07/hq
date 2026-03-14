@@ -33,6 +33,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
            b.id,
            b.workspace_id AS workspaceId,
            b.category_id AS categoryId,
+           b.credit_card_id AS creditCardId,
            b.name,
            b.icon,
            b.month,
@@ -82,6 +83,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
             id: budget.id,
             name: (budget as any).name || budget.categoryName,
             icon: (budget as any).icon || budget.categoryIcon,
+            credit_card_id: (budget as any).creditCardId || null,
             category: budget.categoryIdNullable
               ? {
                   id: budget.categoryIdNullable,
@@ -198,10 +200,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ workspa
       }
     }
 
+    const creditCardId = body.credit_card_id != null ? parseInt(String(body.credit_card_id), 10) : null;
+
     const id = await insertOne(
-      `INSERT INTO budgets (workspace_id, category_id, name, icon, month, year, period_type, period_interval, start_date, amount, currency, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NOW(3), NOW(3))`,
-      [wid, categoryId, name, icon, month, year, periodType, periodInterval, amount, currency],
+      `INSERT INTO budgets (workspace_id, category_id, credit_card_id, name, icon, month, year, period_type, period_interval, start_date, amount, currency, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NOW(3), NOW(3))`,
+      [wid, categoryId, creditCardId, name, icon, month, year, periodType, periodInterval, amount, currency],
     );
 
     const [budget] = await fetchMany(
