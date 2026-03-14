@@ -8,6 +8,7 @@ import {
   Wallet,
   ChevronRight,
   Calendar,
+  CreditCard,
   LogOut,
   Users,
 } from "lucide-react";
@@ -125,7 +126,7 @@ export default function SettingsPage() {
           </Link>
           <Link
             href="/settings/fixed-expenses"
-            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
           >
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -134,6 +135,21 @@ export default function SettingsPage() {
               <div className="text-left">
                 <p className="text-sm font-bold">Fixed Expenses</p>
                 <p className="text-[10px] text-muted-foreground font-normal">Manage recurring bills</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <Link
+            href="/cards"
+            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                <CreditCard className="w-5 h-5 text-purple-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold">My Cards</p>
+                <p className="text-[10px] text-muted-foreground font-normal">Manage credit cards & limits</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />

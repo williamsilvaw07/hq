@@ -12,7 +12,6 @@ import {
 import { CURRENCY_SYMBOL, formatBRLocale, formatCompact } from "@/lib/format";
 import { TransactionModal } from "../transactions/TransactionModal";
 import { BudgetModal } from "../budgets/BudgetModal";
-import { CardModal, type CreditCard } from "./CardModal";
 import { SkeletonBox } from "@/components/ui/Skeleton";
 
 type DashboardData = {
@@ -54,7 +53,7 @@ export default function DashboardPage() {
   const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
-  const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
+  const [creditCards, setCreditCards] = useState<{ id: number; name: string }[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -62,9 +61,7 @@ export default function DashboardPage() {
   // Modal states
   const [budgetModalOpen, setBudgetModalOpen] = useState(false);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
-  const [cardModalOpen, setCardModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<any>(null);
-  const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -92,8 +89,8 @@ export default function DashboardPage() {
         .then((r) => Array.isArray(r.data) ? r.data : []),
       api<any>(`/api/workspaces/${workspaceId}/accounts`)
         .then((r) => r.data?.accounts || []),
-      api<CreditCard[]>(`/api/workspaces/${workspaceId}/credit-cards`)
-        .then((r) => Array.isArray(r.data) ? r.data : []),
+      api<{ id: number; name: string }[]>(`/api/workspaces/${workspaceId}/credit-cards`)
+        .then((r) => Array.isArray(r.data) ? r.data.map((c: any) => ({ id: c.id, name: c.name })) : []),
       api<any>(`/api/workspaces/${workspaceId}/transactions?per_page=5&page=1`)
         .then((r) => Array.isArray(r.data?.data) ? r.data.data : []),
     ])
@@ -158,43 +155,6 @@ export default function DashboardPage() {
       });
       fetchData();
       setTransactionModalOpen(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleSaveCard(data: { name: string; owner: string; credit_limit: number; payment_due_day: number }) {
-    if (!workspaceId) return;
-    setSaving(true);
-    try {
-      const isEdit = !!editingCard;
-      const url = isEdit
-        ? `/api/workspaces/${workspaceId}/credit-cards/${editingCard.id}`
-        : `/api/workspaces/${workspaceId}/credit-cards`;
-      await api(url, {
-        method: isEdit ? "PATCH" : "POST",
-        body: JSON.stringify(data),
-      });
-      fetchData();
-      setCardModalOpen(false);
-      setEditingCard(null);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDeleteCard(id: number) {
-    if (!workspaceId) return;
-    setSaving(true);
-    try {
-      await api(`/api/workspaces/${workspaceId}/credit-cards/${id}`, { method: "DELETE" });
-      fetchData();
-      setCardModalOpen(false);
-      setEditingCard(null);
     } catch (err) {
       console.error(err);
     } finally {
@@ -345,64 +305,6 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Cards */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">My Cards</h2>
-            <button
-              onClick={() => { setEditingCard(null); setCardModalOpen(true); }}
-              className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
-            >
-              + Add Card
-            </button>
-          </div>
-          {creditCards.length === 0 ? (
-            <button
-              onClick={() => { setEditingCard(null); setCardModalOpen(true); }}
-              className="w-full bg-card/50 p-6 rounded-xl text-center active:scale-[0.98] transition-all"
-            >
-              <p className="text-sm text-muted-foreground">No cards added yet.</p>
-              <p className="text-[10px] text-muted-foreground/60 mt-1">Tap to add your first card</p>
-            </button>
-          ) : (
-            <div className="flex gap-3.5 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-              {creditCards.map((card) => {
-                const usedPct = card.credit_limit > 0 ? Math.min(100, (card.current_balance / card.credit_limit) * 100) : 0;
-                return (
-                  <div
-                    key={card.id}
-                    onClick={() => { setEditingCard(card); setCardModalOpen(true); }}
-                    className="min-w-[240px] bg-card p-5 rounded-xl flex flex-col justify-between gap-5 active:scale-[0.98] transition-all cursor-pointer shrink-0"
-                  >
-                    <div>
-                      <p className="text-sm font-bold text-foreground">{card.name}</p>
-                      {card.owner && (
-                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">{card.owner}</p>
-                      )}
-                    </div>
-                    <div className="space-y-2.5">
-                      <div className="flex items-baseline justify-between">
-                        <p className="text-lg font-black tracking-tighter">
-                          {CURRENCY_SYMBOL} {formatBRLocale(card.credit_limit, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
-                          Due {card.payment_due_day}th
-                        </p>
-                      </div>
-                      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          style={{ width: usedPct > 0 ? `${Math.max(usedPct, 2)}%` : "0%" }}
-                          className={`h-full rounded-full transition-all duration-500 ${usedPct >= 90 ? "bg-chart-2" : usedPct >= 70 ? "bg-yellow-400" : "bg-white"}`}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">Active Budgets</h2>
@@ -515,14 +417,6 @@ export default function DashboardPage() {
         saving={saving}
       />
 
-      <CardModal
-        isOpen={cardModalOpen}
-        onClose={() => { setCardModalOpen(false); setEditingCard(null); }}
-        onSave={handleSaveCard}
-        onDelete={editingCard ? handleDeleteCard : undefined}
-        initialData={editingCard}
-        saving={saving}
-      />
     </div>
   );
 }
