@@ -98,11 +98,12 @@ export default function DashboardLayout({
   const isSettings = pathname?.startsWith("/settings");
   const isSettingsProfile = pathname === "/settings/profile";
   const isSettingsTeam = pathname === "/settings/team";
+  const isFixedExpenses = pathname === "/settings/fixed-expenses";
   const isDashboard = pathname === "/dashboard";
   const isTransactions = pathname === "/transactions";
   const isBudgets = pathname === "/budgets";
   const isSetupRoot = pathname === "/settings";
-  const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam;
+  const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam && !isFixedExpenses;
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-28 font-sans transition-colors duration-500">

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Home, Pencil, Trash2, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Home, Pencil, Plus } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -11,12 +12,12 @@ import {
   computeNextOccurrence,
   formatBillDisplayDate,
   formatRecurrenceRule,
-  parseBillDate,
 } from "@/lib/fixed-expenses";
 import { FixedBillModal } from "./FixedBillModal";
 
 export default function FixedExpensesPage() {
   const { workspaceId } = useAuth();
+  const router = useRouter();
   const [bills, setBills] = useState<FixedBill[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,39 +33,23 @@ export default function FixedExpensesPage() {
       .finally(() => setLoading(false));
   }, [workspaceId]);
 
-  useEffect(() => {
-    fetchBills();
-  }, [fetchBills]);
+  useEffect(() => { fetchBills(); }, [fetchBills]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const onRefresh = () => fetchBills();
-      window.addEventListener("fixed-bills-refresh", onRefresh);
-      return () => window.removeEventListener("fixed-bills-refresh", onRefresh);
-    }
+    const onRefresh = () => fetchBills();
+    window.addEventListener("fixed-bills-refresh", onRefresh);
+    return () => window.removeEventListener("fixed-bills-refresh", onRefresh);
   }, [fetchBills]);
 
   async function handleDelete(id: number) {
     if (!workspaceId) return;
     try {
       await api(`/api/workspaces/${workspaceId}/fixed-bills/${id}`, { method: "DELETE" });
-      setBills((prev) => prev.filter((bill) => bill.id !== id));
+      setBills((prev) => prev.filter((b) => b.id !== id));
       window.dispatchEvent(new Event("fixed-bills-refresh"));
     } catch {
       // ignore
     }
-  }
-
-  function openAddModal() {
-    setModalBill("new");
-  }
-
-  function openEditModal(bill: FixedBill) {
-    setModalBill({ ...bill });
-  }
-
-  function closeModal() {
-    setModalBill(null);
   }
 
   async function handleSave(bill: FixedBill): Promise<boolean> {
@@ -122,53 +107,83 @@ export default function FixedExpensesPage() {
   }
 
   return (
-    <div className="space-y-5 pt-4 pb-8">
-      <div className="flex flex-col items-center justify-center py-4 bg-card rounded-lg text-center px-4">
-        <p className="section-title mb-2">Monthly Total</p>
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter">
-          {formatMoney(monthlyTotal)}
-        </h2>
-        <p className="text-[9px] text-chart-1 font-bold uppercase tracking-widest mt-2 px-3 py-1 bg-chart-1/5 rounded-full border border-chart-1/10">
-          {bills.length} active fixed bill{bills.length !== 1 ? "s" : ""}
-        </p>
-      </div>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="section-title">Active Recurring Bills</h3>
-          <button
-            type="button"
-            onClick={openAddModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary/10 text-xs font-bold uppercase tracking-widest text-primary active:bg-primary/20 active:scale-95 transition-all touch-manipulation min-h-[44px]"
-          >
-            <Plus className="w-3 h-3" />
-            Add bill
-          </button>
+    <div className="min-h-screen bg-background">
+      {/* Custom header */}
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-4">
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-foreground active:scale-95 transition-all"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-base font-bold flex-1">Fixed Expenses</h1>
+        <button
+          type="button"
+          onClick={() => setModalBill("new")}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-black text-xs font-bold uppercase tracking-widest active:scale-95 transition-all"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          New Bill
+        </button>
+      </header>
+
+      <div className="px-4 space-y-5 pt-2 pb-10">
+        {/* Summary card */}
+        <div className="bg-card rounded-2xl p-6 text-center">
+          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-3">
+            Monthly Total
+          </p>
+          <h2 className="text-4xl font-black tracking-tighter text-foreground">
+            {formatMoney(monthlyTotal)}
+          </h2>
+          <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+              {bills.length} active bill{bills.length !== 1 ? "s" : ""}
+            </span>
+          </div>
         </div>
-        <div className="space-y-4">
+
+        {/* Bills list */}
+        <div className="space-y-3">
+          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] px-1">
+            Recurring Bills
+          </p>
+
           {loading ? (
-            <p className="text-xs text-muted-foreground px-1">Loading…</p>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-card rounded-2xl h-28 animate-pulse" />
+              ))}
+            </div>
           ) : bills.length === 0 ? (
-            <p className="text-xs text-muted-foreground px-1">
-              You do not have any fixed expenses yet. Add one to see it here.
-            </p>
+            <div className="bg-card rounded-2xl p-8 text-center">
+              <p className="text-sm text-muted-foreground">No fixed expenses yet.</p>
+              <button
+                type="button"
+                onClick={() => setModalBill("new")}
+                className="mt-4 px-5 py-2.5 rounded-full bg-white text-black text-xs font-bold uppercase tracking-widest active:scale-95 transition-all"
+              >
+                Add your first bill
+              </button>
+            </div>
           ) : (
             bills.map((bill) => (
               <BillCard
                 key={bill.id}
                 bill={bill}
-                onEdit={() => openEditModal(bill)}
-                onDelete={() => handleDelete(bill.id)}
+                onEdit={() => setModalBill({ ...bill })}
               />
             ))
           )}
         </div>
       </div>
 
-      {(modalBill === "new" || modalBill) && (
+      {modalBill !== null && (
         <FixedBillModal
           initialBill={modalBill === "new" ? null : modalBill}
-          onClose={closeModal}
+          onClose={() => setModalBill(null)}
           onSave={handleSave}
+          onDelete={typeof modalBill === "object" ? (id) => { handleDelete(id); setModalBill(null); } : undefined}
           saving={saving}
         />
       )}
@@ -179,78 +194,60 @@ export default function FixedExpensesPage() {
 function BillCard({
   bill,
   onEdit,
-  onDelete,
 }: {
   bill: FixedBill;
   onEdit: () => void;
-  onDelete: () => void;
 }) {
   const next = computeNextOccurrence(bill);
+  const nextLabel = next ? formatBillDisplayDate(next) : "—";
   const rule = formatRecurrenceRule(bill);
-  const nextLabel = next ? formatBillDisplayDate(next) : "No upcoming date";
 
   return (
-    <div className="bg-card p-4 rounded-lg space-y-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-            {bill.icon ? (
-              <span className="text-xl">{bill.icon}</span>
-            ) : (
-              <Home className="w-5 h-5 text-muted-foreground" />
-            )}
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-foreground truncate">{bill.name}</p>
-            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">
-              {bill.category} • {bill.frequency === "weekly" ? "Weekly" : "Monthly"}
-            </p>
-          </div>
+    <div className="bg-card rounded-2xl overflow-hidden">
+      {/* Top section: icon + name + amount */}
+      <div className="flex items-center gap-4 p-4">
+        <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center shrink-0">
+          {bill.icon ? (
+            <span className="text-2xl">{bill.icon}</span>
+          ) : (
+            <Home className="w-6 h-6 text-muted-foreground" />
+          )}
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-base font-bold text-foreground">{formatMoney(bill.amount)}</p>
-          <p className={`text-[9px] font-bold uppercase tracking-widest ${bill.dueSoon ? "text-chart-2" : "text-muted-foreground"}`}>
-            {bill.dueSoon ? "Due in 5 days" : bill.frequency === "weekly" && bill.dayOfWeek !== null
-              ? `Every ${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][bill.dayOfWeek]}`
-              : (() => {
-                  const parsed = parseBillDate(bill.due);
-                  return parsed ? `Day ${parsed.getDate()}` : "Day --";
-                })()}
+        <div className="flex-1 min-w-0">
+          <p className="text-base font-bold text-foreground truncate">{bill.name}</p>
+          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">
+            {bill.category} · {bill.frequency === "weekly" ? "Weekly" : "Monthly"}
           </p>
         </div>
+        <div className="shrink-0 text-right">
+          <p className="text-lg font-bold text-foreground">{formatMoney(bill.amount)}</p>
+          {bill.dueSoon && (
+            <p className="text-[10px] font-bold text-chart-2 uppercase tracking-widest">Due soon</p>
+          )}
+        </div>
       </div>
-      <div className="flex items-center justify-between pt-2">
-        <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-              Next:
-            </span>
-            <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">
-              {nextLabel}
-            </span>
-          </div>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-widest">
-            {rule}
-          </span>
+
+      {/* Divider */}
+      <div className="border-t border-white/[0.06] mx-4" />
+
+      {/* Bottom section: next date + edit button */}
+      <div className="flex items-center justify-between px-4 py-3">
+        <div>
+          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+            Next Bill Date
+          </p>
+          <p className="text-sm font-semibold text-foreground mt-0.5">
+            {nextLabel} · {rule}
+          </p>
         </div>
-        <div className="flex items-center gap-2 ml-auto">
-          <button
-            type="button"
-            onClick={onEdit}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-secondary flex items-center justify-center active:bg-secondary/80 transition-colors touch-manipulation"
-            aria-label="Edit recurring bill"
-          >
-            <Pencil className="w-5 h-5 text-muted-foreground" />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-chart-2/10 flex items-center justify-center active:bg-chart-2/20 transition-colors touch-manipulation"
-            aria-label={`Delete ${bill.name}`}
-          >
-            <Trash2 className="w-5 h-5 text-chart-2" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onEdit}
+          className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-md active:scale-90 transition-all"
+          aria-label={`Edit ${bill.name}`}
+        >
+          <Pencil className="w-3.5 h-3.5 text-black" />
+        </button>
       </div>
     </div>
   );

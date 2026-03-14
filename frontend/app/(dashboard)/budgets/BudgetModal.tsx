@@ -3,11 +3,17 @@
 import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { CURRENCY_SYMBOL } from "@/lib/format";
-import { Loader2, ChevronDown } from "lucide-react";
+import { Loader2, Pencil, RefreshCw } from "lucide-react";
 
 const BUDGET_EMOJI_OPTIONS = [
   "🍔", "🍕", "🚗", "🍿", "🏠", "💡", "💳", "🛍️", "📱", "🎮",
   "✈️", "🏥", "📚", "🛒", "💧", "🔧", "📦", "🎵", "🐾", "💰",
+];
+
+const PERIOD_OPTIONS = [
+  { value: "weekly", label: "Weekly" },
+  { value: "month", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
 ];
 
 type BudgetModalProps = {
@@ -20,14 +26,7 @@ type BudgetModalProps = {
   saving: boolean;
 };
 
-export function BudgetModal({
-  isOpen,
-  onClose,
-  onSave,
-  onDelete,
-  initialData,
-  saving,
-}: BudgetModalProps) {
+export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, saving }: BudgetModalProps) {
   const [name, setName] = useState(initialData?.name ?? initialData?.category?.name ?? "");
   const [icon, setIcon] = useState(initialData?.icon ?? initialData?.category?.icon ?? "💰");
   const [amount, setAmount] = useState(initialData?.amount?.toString() ?? "");
@@ -40,10 +39,7 @@ export function BudgetModal({
       setAmount(initialData.amount?.toString() ?? "");
       setPeriodType(initialData.period_type ?? "month");
     } else {
-      setName("");
-      setIcon("💰");
-      setAmount("");
-      setPeriodType("month");
+      setName(""); setIcon("💰"); setAmount(""); setPeriodType("month");
     }
   }, [initialData, isOpen]);
 
@@ -53,32 +49,26 @@ export function BudgetModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? "Edit Budget" : "New Budget"}
       subtitle={initialData ? "EDIT BUDGET" : "NEW BUDGET"}
-      showCloseButton={true}
+      title={name || (initialData ? "Edit Budget" : "New Budget")}
       footer={
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
+        <div className="space-y-3">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 py-4 rounded-xl bg-white/5 border border-white/[0.08] text-sm font-semibold text-muted-foreground active:scale-95 transition-all disabled:opacity-40"
+              className="flex-1 py-4 rounded-full bg-white/[0.07] text-sm font-bold uppercase tracking-widest text-muted-foreground active:scale-95 transition-all disabled:opacity-40"
             >
-              Cancel
+              Discard
             </button>
             <button
               type="button"
               onClick={() => onSave({ name, icon, amount: parseFloat(amount), period_type: periodType })}
               disabled={!canSave}
-              className="flex-1 py-4 rounded-xl bg-white text-black text-sm font-bold active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+              className="flex-[1.4] py-4 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
             >
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving…
-                </>
-              ) : initialData ? "Save Changes" : "Create Budget"}
+              {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving…</> : initialData ? "Save Changes" : "Create Budget"}
             </button>
           </div>
           {initialData && onDelete && (
@@ -86,7 +76,7 @@ export function BudgetModal({
               type="button"
               onClick={() => onDelete(initialData.id)}
               disabled={saving}
-              className="w-full py-3 rounded-xl text-sm font-semibold text-chart-2 active:scale-95 transition-all disabled:opacity-40"
+              className="w-full py-2 text-sm font-bold text-chart-2 uppercase tracking-widest text-center active:opacity-70 transition-all disabled:opacity-40"
             >
               Delete Budget
             </button>
@@ -94,72 +84,79 @@ export function BudgetModal({
         </div>
       }
     >
-      <div className="space-y-6 py-1">
+      <div className="space-y-5 pb-2">
 
-        {/* Icon + Name */}
-        <div className="flex items-center gap-3">
-          {/* Icon picker */}
+        {/* Category / Icon row */}
+        <div className="flex items-center gap-4 border border-white/[0.08] rounded-2xl p-4">
           <div className="relative shrink-0">
-            <div className="w-16 h-16 rounded-2xl bg-background border border-white/[0.08] flex items-center justify-center text-3xl">
-              {icon}
+            <div className="w-14 h-14 rounded-xl bg-white/[0.06] flex flex-col items-center justify-center gap-0.5">
+              <span className="text-3xl leading-none">{icon}</span>
+              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-wider">Emoji</span>
             </div>
+            {/* Edit badge */}
+            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md pointer-events-none">
+              <Pencil className="w-2.5 h-2.5 text-black" />
+            </div>
+            {/* Invisible select overlaid */}
             <select
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
               aria-label="Pick icon"
             >
-              {BUDGET_EMOJI_OPTIONS.map((e) => (
-                <option key={e} value={e}>{e}</option>
-              ))}
+              {BUDGET_EMOJI_OPTIONS.map((e) => <option key={e} value={e}>{e}</option>)}
             </select>
           </div>
-
-          {/* Name input */}
-          <div className="flex-1 bg-background border border-white/[0.08] rounded-xl px-4 py-3.5 focus-within:border-white/20 transition-colors">
-            <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider mb-0.5">Budget Name</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Category</p>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Groceries, Travel…"
-              className="w-full bg-transparent outline-none text-sm font-medium text-foreground placeholder:text-muted-foreground/30"
+              placeholder="Budget name…"
+              className="w-full bg-transparent outline-none text-base font-bold text-foreground placeholder:text-muted-foreground/25"
               autoFocus={!initialData}
             />
           </div>
         </div>
 
-        {/* Amount */}
-        <div className="flex flex-col items-center py-2">
-          <p className="text-xs font-semibold text-muted-foreground/50 uppercase tracking-widest mb-3">Monthly Limit</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-light text-muted-foreground/25 tracking-tighter">{CURRENCY_SYMBOL}</span>
+        {/* Budget Limit */}
+        <div className="text-center py-4">
+          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-5">Budget Limit</p>
+          <div className="flex items-baseline justify-center gap-3">
+            <span className="text-2xl font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="text-6xl font-black bg-transparent border-none outline-none text-center w-full max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
+              className="text-7xl font-black bg-transparent outline-none text-center w-auto min-w-[80px] max-w-[220px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
               placeholder="0"
             />
           </div>
         </div>
 
         {/* Reset Frequency */}
-        <div className="flex items-center gap-3 bg-background border border-white/[0.08] rounded-xl px-4 py-3.5 focus-within:border-white/20 transition-colors">
-          <span className="text-xl shrink-0">🔄</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider mb-0.5">Resets Every</p>
-            <select
-              value={periodType}
-              onChange={(e) => setPeriodType(e.target.value)}
-              className="w-full bg-transparent outline-none text-sm font-medium text-foreground appearance-none cursor-pointer"
-            >
-              <option value="weekly">Week</option>
-              <option value="month">Month</option>
-              <option value="quarterly">Quarter</option>
-            </select>
+        <div className="border border-white/[0.08] rounded-2xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Reset Frequency</p>
+            <RefreshCw className="w-3.5 h-3.5 text-muted-foreground/30" />
           </div>
-          <ChevronDown className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+          <div className="grid grid-cols-3 bg-black/30 p-1 rounded-full gap-1">
+            {PERIOD_OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setPeriodType(value)}
+                className={`py-2.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all ${
+                  periodType === value
+                    ? "bg-white text-black shadow-sm"
+                    : "text-muted-foreground/60"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
       </div>
