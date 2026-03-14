@@ -41,7 +41,7 @@ export function TransactionModal({
     }
   }, [initialData, isOpen]);
 
-  const canSave = !saving && !!amount && parseFloat(amount) > 0 && !!categoryId;
+  const canSave = !saving && !!amount && parseFloat(amount) > 0 && (type === "income" || !!categoryId);
 
   return (
     <Modal
@@ -137,22 +137,24 @@ export function TransactionModal({
             </div>
           </div>
 
-          {/* Category */}
-          <div className="flex items-center gap-3 px-4 py-4">
-            <Tag className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Category</p>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full bg-transparent outline-none text-sm font-semibold text-foreground appearance-none cursor-pointer"
-              >
-                <option value="">Select a category…</option>
-                {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+          {/* Category — expense only */}
+          {type === "expense" && (
+            <div className="flex items-center gap-3 px-4 py-4">
+              <Tag className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Category</p>
+                <select
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  className="w-full bg-transparent outline-none text-sm font-semibold text-foreground appearance-none cursor-pointer"
+                >
+                  <option value="">Select a category…</option>
+                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <ChevronDown className="w-4 h-4 text-muted-foreground/20 shrink-0" />
             </div>
-            <ChevronDown className="w-4 h-4 text-muted-foreground/20 shrink-0" />
-          </div>
+          )}
 
           {/* Date */}
           <div className="flex items-center gap-3 px-4 py-4">

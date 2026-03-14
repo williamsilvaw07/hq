@@ -340,7 +340,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <p className={`text-sm font-black tracking-tight shrink-0 ${isExpense ? "text-foreground" : "text-chart-1"}`}>
+                    <p className={`text-sm font-black tracking-tight shrink-0 ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
                       {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRLocale(tx.amount, { minimumFractionDigits: 2 })}
                     </p>
                   </Link>

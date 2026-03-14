@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -8,15 +8,12 @@ import {
   Wallet,
   ChevronRight,
   Calendar,
-  Home,
   LogOut,
   Users,
   Send,
   Copy,
   CheckCheck,
 } from "lucide-react";
-import { type FixedBill } from "@/lib/fixed-expenses";
-import { formatMoney } from "@/lib/format";
 
 function TelegramLinkSection() {
   const [code, setCode] = useState<string | null>(null);
@@ -179,25 +176,7 @@ function WorkspaceSettingsSection() {
 }
 
 export default function SettingsPage() {
-  const { user, logout, workspaceId } = useAuth();
-  const [fixedBills, setFixedBills] = useState<FixedBill[]>([]);
-
-  const refreshFixedBills = useCallback(() => {
-    if (!workspaceId) return;
-    api<FixedBill[]>(`/api/workspaces/${workspaceId}/fixed-bills`)
-      .then((r) => setFixedBills(Array.isArray(r.data) ? r.data : []))
-      .catch(() => setFixedBills([]));
-  }, [workspaceId]);
-
-  useEffect(() => {
-    refreshFixedBills();
-  }, [refreshFixedBills]);
-
-  useEffect(() => {
-    const onRefresh = () => refreshFixedBills();
-    window.addEventListener("fixed-bills-refresh", onRefresh);
-    return () => window.removeEventListener("fixed-bills-refresh", onRefresh);
-  }, [refreshFixedBills]);
+  const { user, logout } = useAuth();
 
   return (
     <div className="space-y-5 sm:space-y-8 pt-2 sm:pt-4 px-4 sm:px-6">
@@ -254,56 +233,6 @@ export default function SettingsPage() {
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </Link>
-        </div>
-
-        {/* Active Bills — inline under Fixed Expenses */}
-        <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-3 sm:px-5 pt-3 sm:pt-4 pb-2">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Active Bills</p>
-            <Link
-              href="/settings/fixed-expenses"
-              className="text-[10px] font-bold text-primary uppercase tracking-widest"
-            >
-              + Add New
-            </Link>
-          </div>
-          {fixedBills.length === 0 ? (
-            <p className="text-xs text-muted-foreground px-3 sm:px-5 pb-4">
-              No fixed expenses yet.
-            </p>
-          ) : (
-            <div className="divide-y divide-border/30">
-              {fixedBills.map((bill) => (
-                <div
-                  key={bill.id}
-                  className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4"
-                >
-                  <div className="flex items-center gap-2.5 sm:gap-3">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-background flex items-center justify-center shrink-0">
-                      {bill.icon ? (
-                        <span className="text-lg">{bill.icon}</span>
-                      ) : (
-                        <Home className="w-5 h-5 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold">{bill.name}</p>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                        {bill.frequency === "weekly"
-                          ? "Weekly"
-                          : bill.dayOfMonth
-                            ? `Day ${bill.dayOfMonth} • Monthly`
-                            : "Monthly"}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-sm font-bold text-foreground">
-                    {formatMoney(bill.amount)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 

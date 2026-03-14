@@ -250,8 +250,8 @@ export default function TransactionsPage() {
                     className="flex items-center justify-between bg-card p-3 sm:p-5 rounded-lg sm:rounded-xl active:scale-[0.98] transition-all cursor-pointer group hover:border-border/80"
                   >
                     <div className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0">
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-lg flex items-center justify-center border shrink-0 ${t.type === "income" ? "bg-chart-1/10 border-chart-1/20" : "bg-card/50"}`}>
-                        {t.type === "income" ? <ArrowUpRight className="w-5 h-5 text-chart-1" /> : <ShoppingBag className="w-5 h-5 text-muted-foreground" />}
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-lg flex items-center justify-center border shrink-0 ${t.type === "income" ? "bg-chart-1/10 border-chart-1/20" : "bg-chart-2/10 border-chart-2/20"}`}>
+                        {t.type === "income" ? <ArrowUpRight className="w-5 h-5 text-chart-1" /> : <ShoppingBag className="w-5 h-5 text-chart-2" />}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-foreground truncate">{t.description || "—"}</p>
@@ -263,7 +263,7 @@ export default function TransactionsPage() {
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                       <div className="text-right">
-                        <p className={`text-sm font-black ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
+                        <p className={`text-sm font-black ${t.type === "income" ? "text-chart-1" : "text-chart-2"}`}>
                           {t.type === "income" ? "+" : "-"}R${" "}
                           {formatNumberUK(Math.abs(t.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
