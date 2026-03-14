@@ -32,7 +32,7 @@ export default function PendingPage() {
   }, [workspaceId]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 pb-4">
+    <div className="space-y-4 sm:space-y-6 pb-4 px-4 sm:px-6">
       <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">Pending Review</h1>
@@ -67,13 +67,13 @@ export default function PendingPage() {
                 </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <p className={`text-sm font-bold ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <p className={`text-sm font-bold shrink-0 ${t.type === "income" ? "text-chart-1" : "text-foreground"}`}>
                   {t.type === "income" ? "+" : "-"}R${" "}
                   {formatNumberUK(Math.abs(t.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <Link href={`/transactions/${t.id}`} className="flex items-center gap-1.5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-bold shadow-lg shadow-white/5 active:scale-95 transition-all shrink-0">
-                  <PenLine className="w-3.5 h-3.5" /> Confirm / Edit
+                <Link href={`/transactions/${t.id}`} className="flex items-center gap-1.5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold shadow-lg shadow-white/5 active:scale-95 transition-all shrink-0">
+                  <PenLine className="w-3.5 h-3.5" /><span className="hidden sm:inline">Confirm / </span>Edit
                 </Link>
               </div>
             </div>

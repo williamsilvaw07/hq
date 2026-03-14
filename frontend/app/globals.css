@@ -3,24 +3,24 @@
 @tailwind utilities;
 
 :root {
-  /* Dark fintech palette – section colors slightly lighter, minimal borders */
+  /* Dark fintech palette – cards clearly elevated above background */
   --background: #0b0b0b;
   --foreground: #ffffff;
   --primary: #ffffff;
   --primary-foreground: #0b0b0b;
-  --secondary: #181818;
+  --secondary: #242424;
   --secondary-foreground: #ffffff;
-  --muted: #1c1c1c;
+  --muted: #2a2a2a;
   --muted-foreground: #a0a0a0;
-  --accent: #1a1a1a;
+  --accent: #222222;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --card: #161616;
+  --card: #1e1e1e;
   --card-foreground: #ffffff;
-  --popover: #1a1a1a;
+  --popover: #222222;
   --popover-foreground: #ffffff;
-  --border: transparent;
-  --input: #1a1a1a;
+  --border: rgba(255, 255, 255, 0.06);
+  --input: #1e1e1e;
   --ring: rgba(255, 255, 255, 0.15);
   --chart-1: #4ade80;
   --chart-2: #f87171;

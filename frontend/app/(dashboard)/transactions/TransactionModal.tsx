@@ -98,18 +98,18 @@ export function TransactionModal({
     >
       <div className="space-y-8 py-2">
         {/* Type Toggle */}
-        <div className="grid grid-cols-2 gap-2 bg-secondary/30 p-1 rounded-[1.5rem]">
+        <div className="grid grid-cols-2 gap-2 bg-black/30 p-1 rounded-[1.5rem]">
           <button
             type="button"
             onClick={() => setType("expense")}
-            className={`py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${type === "expense" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+            className={`py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${type === "expense" ? "bg-white/10 text-foreground shadow-sm" : "text-muted-foreground"}`}
           >
             Expense
           </button>
           <button
             type="button"
             onClick={() => setType("income")}
-            className={`py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${type === "income" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+            className={`py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${type === "income" ? "bg-white/10 text-foreground shadow-sm" : "text-muted-foreground"}`}
           >
             Income
           </button>
@@ -133,8 +133,8 @@ export function TransactionModal({
 
         {/* Form Fields */}
         <div className="space-y-3">
-          <div className="bg-card/50 rounded-lg p-4 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground shrink-0 shadow-inner">
+          <div className="bg-white/5 rounded-lg p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-muted-foreground shrink-0 shadow-inner">
               <Icon icon="solar:pen-new-square-linear" className="text-xl" />
             </div>
             <div className="flex-1">
@@ -150,7 +150,7 @@ export function TransactionModal({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="bg-card/50 rounded-lg p-3 flex items-center gap-3 overflow-hidden">
+            <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3 overflow-hidden">
               <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
                 <Icon icon="solar:tag-linear" className="text-lg" />
               </div>
@@ -167,7 +167,7 @@ export function TransactionModal({
               </div>
             </div>
 
-            <div className="bg-card/50 rounded-lg p-3 flex items-center gap-3 overflow-hidden">
+            <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3 overflow-hidden">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
                 <Icon icon="solar:calendar-linear" className="text-lg" />
               </div>
@@ -182,7 +182,7 @@ export function TransactionModal({
               </div>
             </div>
 
-            <div className="bg-card/50 rounded-lg p-3 flex items-center gap-3 overflow-hidden">
+            <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3 overflow-hidden">
               <div className="w-8 h-8 rounded-lg bg-zinc-500/10 flex items-center justify-center text-zinc-500 shrink-0">
                 <Icon icon="solar:notes-linear" className="text-lg" />
               </div>

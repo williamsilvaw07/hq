@@ -137,8 +137,8 @@ export default function WorkspacesPage() {
 
       {/* Sheet overlay */}
       {sheet && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-0">
-          <div className="w-full max-w-lg bg-card rounded-t-xl p-6 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm px-0">
+          <div className="w-full max-w-lg bg-popover border-t border-border/20 rounded-t-2xl p-6 shadow-2xl space-y-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-foreground">Create Workspace</h2>
               <button type="button" onClick={closeSheet} className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary/50 text-muted-foreground">

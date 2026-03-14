@@ -42,9 +42,9 @@ export function Modal({ isOpen, title, subtitle, showCloseButton = true, childre
       <div
         ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full ${maxWidthClass} max-h-[96vh] sm:max-h-[90vh] bg-background border-t sm:border border-border/10 rounded-t-[2.5rem] sm:rounded-xl shadow-2xl flex flex-col transform origin-bottom animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden`}
+        className={`w-full ${maxWidthClass} max-h-[96vh] sm:max-h-[90vh] bg-popover border-t sm:border border-border/20 rounded-t-[2.5rem] sm:rounded-xl shadow-2xl flex flex-col transform origin-bottom animate-in slide-in-from-bottom duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden`}
       >
-        <div className="w-12 h-1.5 rounded-full bg-border/20 mx-auto mt-3 mb-1 shrink-0" />
+        <div className="w-12 h-1.5 rounded-full bg-white/10 mx-auto mt-3 mb-1 shrink-0" />
         
         <header className="px-6 pt-4 pb-2 text-center relative shrink-0">
           {subtitle && (
@@ -73,7 +73,7 @@ export function Modal({ isOpen, title, subtitle, showCloseButton = true, childre
         </div>
 
         {footer && (
-          <footer className="p-6 pt-2 border-t border-border/5 px-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] bg-background/50 backdrop-blur-xl">
+          <footer className="p-6 pt-2 border-t border-border/10 px-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] bg-popover backdrop-blur-xl">
             {footer}
           </footer>
         )}

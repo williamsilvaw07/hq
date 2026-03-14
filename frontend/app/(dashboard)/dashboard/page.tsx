@@ -292,8 +292,16 @@ export default function DashboardPage() {
                     <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest opacity-60">left of {formatCompact(budget.amount)}</p>
                   </div>
                 </div>
-                <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
-                  <div style={{ width: `${budget.spent_percentage}%` }} className="h-full bg-white rounded-full transition-all duration-700" />
+                <div className="space-y-1.5">
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      style={{ width: budget.spent_percentage > 0 ? `${Math.max(budget.spent_percentage, 2)}%` : "0%" }}
+                      className={`h-full rounded-full transition-all duration-700 ${budget.spent_percentage >= 90 ? "bg-chart-2" : budget.spent_percentage >= 70 ? "bg-yellow-400" : "bg-white"}`}
+                    />
+                  </div>
+                  <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                    {budget.spent_percentage.toFixed(0)}% used • {CURRENCY_SYMBOL} {formatBRLocale(budget.spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
+                  </p>
                 </div>
               </div>
             ))}

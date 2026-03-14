@@ -313,8 +313,8 @@ export default function WorkspaceSettingsPage() {
 
       {/* Sheet overlay */}
       {sheet && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70">
-          <div className="w-full max-w-lg bg-card rounded-t-xl p-6 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-popover border-t border-border/20 rounded-t-2xl p-6 shadow-2xl space-y-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-between">
               <p className="text-sm font-bold">
                 {sheet.type === "edit-name" && "Edit Name"}
@@ -393,13 +393,13 @@ export default function WorkspaceSettingsPage() {
                   className="w-full rounded-lg bg-background border border-border/60 px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
                   autoFocus
                 />
-                <div className="bg-secondary/30 rounded-lg p-1 grid grid-cols-3 gap-1">
+                <div className="bg-black/30 rounded-lg p-1 grid grid-cols-3 gap-1">
                   {(["member", "admin", "viewer"] as const).map((r) => (
                     <button
                       key={r}
                       type="button"
                       onClick={() => setInviteRole(r)}
-                      className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${inviteRole === r ? "bg-background text-foreground" : "text-muted-foreground"}`}
+                      className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${inviteRole === r ? "bg-white/10 text-foreground" : "text-muted-foreground"}`}
                     >
                       {r}
                     </button>
@@ -418,13 +418,13 @@ export default function WorkspaceSettingsPage() {
             {sheet.type === "change-role" && (
               <form onSubmit={handleChangeRole} className="space-y-4">
                 <p className="text-xs text-muted-foreground">Changing role for <span className="font-bold text-foreground">{sheet.member.name}</span></p>
-                <div className="bg-secondary/30 rounded-lg p-1 grid grid-cols-3 gap-1">
+                <div className="bg-black/30 rounded-lg p-1 grid grid-cols-3 gap-1">
                   {(["admin", "member", "viewer"] as const).map((r) => (
                     <button
                       key={r}
                       type="button"
                       onClick={() => setSelectedRole(r)}
-                      className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedRole === r ? "bg-background text-foreground" : "text-muted-foreground"}`}
+                      className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedRole === r ? "bg-white/10 text-foreground" : "text-muted-foreground"}`}
                     >
                       {r}
                     </button>

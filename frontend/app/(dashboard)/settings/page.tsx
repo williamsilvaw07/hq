@@ -209,7 +209,7 @@ export default function SettingsPage() {
   }, [refreshFixedBills]);
 
   return (
-    <div className="space-y-5 sm:space-y-8 pt-2 sm:pt-4">
+    <div className="space-y-5 sm:space-y-8 pt-2 sm:pt-4 px-4 sm:px-6">
       {/* Profile card */}
       <section className="flex flex-col items-center py-4 sm:py-6 bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
         <div className="relative group">

@@ -233,11 +233,19 @@ export default function BudgetsPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                         <div
-                          style={{ width: `${pct}%` }}
-                          className="h-full bg-white rounded-full transition-all duration-500"
+                          style={{ width: pct > 0 ? `${Math.max(pct, 2)}%` : "0%" }}
+                          className={`h-full rounded-full transition-all duration-500 ${pct >= 90 ? "bg-chart-2" : pct >= 70 ? "bg-yellow-400" : "bg-white"}`}
                         />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                          {CURRENCY_SYMBOL} {formatBRL(spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
+                        </p>
+                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                          {pct.toFixed(0)}%
+                        </p>
                       </div>
                     </div>
                   </div>
