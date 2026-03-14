@@ -46,9 +46,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
            c.id AS categoryIdNullable,
            c.name AS categoryName,
            c.icon AS categoryIcon,
-           c.color AS categoryColor
+           c.color AS categoryColor,
+           cc.name AS creditCardName
          FROM budgets b
          LEFT JOIN Category c ON c.id = b.category_id
+         LEFT JOIN CreditCard cc ON cc.id = b.credit_card_id
          WHERE b.workspace_id = ?`,
         [wid],
       );
@@ -84,6 +86,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
             name: (budget as any).name || budget.categoryName,
             icon: (budget as any).icon || budget.categoryIcon,
             credit_card_id: (budget as any).creditCardId || null,
+            credit_card_name: (budget as any).creditCardName || null,
             category: budget.categoryIdNullable
               ? {
                   id: budget.categoryIdNullable,

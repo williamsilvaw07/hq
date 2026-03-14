@@ -249,6 +249,7 @@ export default function BudgetsPage() {
                           <h4 className="text-sm font-bold text-foreground">{budget.name || budget.category?.name || "Budget"}</h4>
                           <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mt-0.5">
                             {budget.period_type ?? "Monthly"} • {budget.next_reset_date || "Active"}
+                            {(budget as any).credit_card_name && <> • 💳 {(budget as any).credit_card_name}</>}
                           </p>
                         </div>
                       </div>

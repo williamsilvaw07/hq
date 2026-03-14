@@ -329,6 +329,7 @@ export default function DashboardPage() {
                       <h4 className="text-sm font-bold truncate">{budget.name || budget.category?.name || "Budget"}</h4>
                       <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">
                         {budget.period_type ?? "Monthly"} • {budget.next_reset_date}
+                        {(budget as any).credit_card_name && <> • 💳 {(budget as any).credit_card_name}</>}
                       </p>
                     </div>
                   </div>
