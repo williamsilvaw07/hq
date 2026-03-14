@@ -39,9 +39,9 @@ export async function processTelegramMessage(
   // 2. Check if this is a linking code (6 alphanumeric chars)
   const trimmed = text.trim();
   if (/^[A-Z0-9]{6}$/i.test(trimmed)) {
-    const userId = await validateLinkCode(trimmed);
-    if (userId) {
-      await linkTelegramAccount(userId, chatId);
+    const linkResult = await validateLinkCode(trimmed);
+    if (linkResult) {
+      await linkTelegramAccount(linkResult.userId, chatId, linkResult.workspaceId);
       await sendTelegramMessage(chatId, "✅ Account linked! You can now log expenses.\n\nTry sending:\n  20 uber\n  gastei 50 em mercado\n\nOr send a voice message!");
       return;
     }

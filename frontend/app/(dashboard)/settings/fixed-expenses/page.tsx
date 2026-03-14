@@ -130,14 +130,14 @@ export default function FixedExpensesPage() {
       <div className="px-4 space-y-5 pt-2 pb-10">
         {/* Summary card */}
         <div className="bg-card rounded-2xl p-6 text-center">
-          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-3">
+          <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-[0.2em] mb-3">
             Monthly Total
           </p>
           <h2 className="text-4xl font-black tracking-tighter text-foreground">
             {formatMoney(monthlyTotal)}
           </h2>
           <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+            <span className="text-[10px] font-normal text-emerald-400 uppercase tracking-widest">
               {bills.length} active bill{bills.length !== 1 ? "s" : ""}
             </span>
           </div>
@@ -145,7 +145,7 @@ export default function FixedExpensesPage() {
 
         {/* Bills list */}
         <div className="space-y-3">
-          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] px-1">
+          <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-[0.2em] px-1">
             Recurring Bills
           </p>
 
@@ -215,14 +215,14 @@ function BillCard({
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-base font-bold text-foreground truncate">{bill.name}</p>
-          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">
+          <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mt-0.5">
             {bill.category} · {bill.frequency === "weekly" ? "Weekly" : "Monthly"}
           </p>
         </div>
         <div className="shrink-0 text-right">
           <p className="text-lg font-bold text-foreground">{formatMoney(bill.amount)}</p>
           {bill.dueSoon && (
-            <p className="text-[10px] font-bold text-chart-2 uppercase tracking-widest">Due soon</p>
+            <p className="text-[10px] font-normal text-chart-2 uppercase tracking-widest">Due soon</p>
           )}
         </div>
       </div>
@@ -233,20 +233,20 @@ function BillCard({
       {/* Bottom section: next date + edit button */}
       <div className="flex items-center justify-between px-4 py-3">
         <div>
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+          <p className="text-[9px] font-normal text-muted-foreground/50 uppercase tracking-widest">
             Next Bill Date
           </p>
-          <p className="text-sm font-semibold text-foreground mt-0.5">
+          <p className="text-xs font-medium text-foreground mt-0.5">
             {nextLabel} · {rule}
           </p>
         </div>
         <button
           type="button"
           onClick={onEdit}
-          className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-md active:scale-90 transition-all"
+          className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-md active:scale-90 transition-all"
           aria-label={`Edit ${bill.name}`}
         >
-          <Pencil className="w-3.5 h-3.5 text-black" />
+          <Pencil className="w-3 h-3 text-black" />
         </button>
       </div>
     </div>

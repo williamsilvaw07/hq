@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { formatBRL, CURRENCY_SYMBOL } from "@/lib/format";
 import { Plus } from "lucide-react";
 import { BudgetModal } from "./BudgetModal";
+import { SkeletonBox } from "@/components/ui/Skeleton";
 
 type Budget = {
   id: number;
@@ -133,50 +134,75 @@ export default function BudgetsPage() {
       </header>
 
       <div className="px-4 sm:px-0">
-        <div className="bg-card p-4 sm:p-6 rounded-lg sm:rounded-xl shadow-xl shadow-black/10">
-          <div className="flex justify-between items-end mb-3 sm:mb-4">
-            <div>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-60">
-                Total Monthly Budget
-              </p>
-              <p className="text-2xl sm:text-3xl font-black">
-                {CURRENCY_SYMBOL}{" "}
-                {formatBRL(totalBudget, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
+        {loading ? (
+          <SkeletonBox className="h-32 w-full" />
+        ) : (
+          <div className="bg-card p-4 sm:p-6 rounded-lg sm:rounded-xl shadow-xl shadow-black/10">
+            <div className="flex justify-between items-end mb-3 sm:mb-4">
+              <div>
+                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-60">
+                  Total Monthly Budget
+                </p>
+                <p className="text-2xl sm:text-3xl font-black">
+                  {CURRENCY_SYMBOL}{" "}
+                  {formatBRL(totalBudget, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-60">
+                  Remaining
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-chart-1">
+                  {CURRENCY_SYMBOL}{" "}
+                  {formatBRL(totalRemaining, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-60">
-                Remaining
-              </p>
-              <p className="text-xl sm:text-2xl font-bold text-chart-1">
-                {CURRENCY_SYMBOL}{" "}
-                {formatBRL(totalRemaining, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
+            <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+              <div
+                style={{ width: `${totalPct}%` }}
+                className="h-full bg-white rounded-full transition-all duration-500"
+              />
             </div>
           </div>
-          <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-            <div
-              style={{ width: `${totalPct}%` }}
-              className="h-full bg-white rounded-full transition-all duration-500"
-            />
-          </div>
-        </div>
+        )}
       </div>
 
       <main className="px-4 sm:px-0 py-6 sm:py-8 space-y-6 sm:space-y-10">
         <section className="space-y-4">
-          <h3 className="text-[10px] font-bold text-muted-foreground ml-1 uppercase tracking-[0.2em] opacity-60">
-            Active Budgets
-          </h3>
+          {!loading && (
+            <h3 className="text-[10px] font-normal text-muted-foreground ml-1 uppercase tracking-[0.2em] opacity-60">
+              Active Budgets
+            </h3>
+          )}
           <div className="grid grid-cols-1 gap-3.5">
             {loading && workspaceId ? (
-              <p className="text-muted-foreground text-sm py-4 px-1">Loading…</p>
+              <div className="space-y-3.5">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="bg-card p-4 sm:p-6 rounded-xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <SkeletonBox className="w-12 h-12" />
+                        <div className="space-y-2">
+                          <SkeletonBox className="h-4 w-28" />
+                          <SkeletonBox className="h-3 w-20" />
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-right">
+                        <SkeletonBox className="h-4 w-20" />
+                        <SkeletonBox className="h-3 w-14" />
+                      </div>
+                    </div>
+                    <SkeletonBox className="h-1.5 w-full rounded-full" />
+                  </div>
+                ))}
+              </div>
             ) : budgets.length === 0 ? (
               <div className="bg-card/50 p-8 rounded-xl text-center space-y-4">
                 <p className="text-muted-foreground text-sm">No budgets set yet.</p>
@@ -217,7 +243,7 @@ export default function BudgetsPage() {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-foreground">{budget.name || budget.category?.name || "Budget"}</h4>
-                          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
+                          <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mt-0.5">
                             {budget.period_type ?? "Monthly"} • {budget.next_reset_date || "Active"}
                           </p>
                         </div>
@@ -225,9 +251,9 @@ export default function BudgetsPage() {
                       <div className="text-right">
                         <p className="text-sm font-bold">
                           {CURRENCY_SYMBOL} {formatBRL(remaining, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter ml-1">left</span>
+                          <span className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter ml-1">left</span>
                         </p>
-                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
+                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mt-0.5">
                           of {CURRENCY_SYMBOL} {formatBRL(amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
                       </div>
@@ -240,10 +266,10 @@ export default function BudgetsPage() {
                         />
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
                           {CURRENCY_SYMBOL} {formatBRL(spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
                         </p>
-                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
                           {pct.toFixed(0)}%
                         </p>
                       </div>

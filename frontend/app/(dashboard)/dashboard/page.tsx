@@ -12,6 +12,7 @@ import {
 import { CURRENCY_SYMBOL, formatBRLocale, formatCompact } from "@/lib/format";
 import { TransactionModal } from "../transactions/TransactionModal";
 import { BudgetModal } from "../budgets/BudgetModal";
+import { SkeletonBox } from "@/components/ui/Skeleton";
 
 type DashboardData = {
   period_expense?: number;
@@ -159,6 +160,76 @@ export default function DashboardPage() {
 
   if (!workspaceId) return null;
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground pb-32 font-sans tracking-tight">
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <SkeletonBox className="w-9 h-9 rounded-full" />
+            <div className="space-y-1.5">
+              <SkeletonBox className="h-2.5 w-16" />
+              <SkeletonBox className="h-3.5 w-24" />
+            </div>
+          </div>
+          <SkeletonBox className="w-9 h-9" />
+        </header>
+
+        <main className="px-6 space-y-8 mt-2">
+          {/* Hero spending card */}
+          <SkeletonBox className="h-40 w-full" />
+
+          {/* 2-col mini cards */}
+          <section className="grid grid-cols-2 gap-3.5">
+            <SkeletonBox className="h-[150px]" />
+            <SkeletonBox className="h-[150px]" />
+          </section>
+
+          {/* Budget list */}
+          <section className="space-y-4">
+            <div className="space-y-3.5">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-card p-5 rounded-xl space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-4">
+                      <SkeletonBox className="w-12 h-12" />
+                      <div className="space-y-2">
+                        <SkeletonBox className="h-4 w-28" />
+                        <SkeletonBox className="h-3 w-20" />
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-right">
+                      <SkeletonBox className="h-4 w-20" />
+                      <SkeletonBox className="h-3 w-14" />
+                    </div>
+                  </div>
+                  <SkeletonBox className="h-1.5 w-full rounded-full" />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Recent transactions */}
+          <section className="space-y-4">
+            <div className="bg-card rounded-xl overflow-hidden space-y-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between px-5 py-4">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <SkeletonBox className="w-10 h-10 shrink-0" />
+                    <div className="space-y-2 min-w-0 flex-1">
+                      <SkeletonBox className="h-4 w-3/5" />
+                      <SkeletonBox className="h-3 w-2/5" />
+                    </div>
+                  </div>
+                  <SkeletonBox className="h-5 w-20 shrink-0" />
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   const variableLimit = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
   const variableSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
   const monthlyFixedTotal = fixedBillsTotal(fixedBills);
@@ -197,7 +268,7 @@ export default function DashboardPage() {
             />
           </Link>
           <div>
-            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest opacity-60">Overview</p>
+            <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">Overview</p>
             <p className="text-sm font-bold text-foreground">Welcome back</p>
           </div>
         </div>
@@ -208,7 +279,7 @@ export default function DashboardPage() {
 
       <main className="px-6 space-y-8 mt-2">
         <section className="bg-card p-6 rounded-xl relative overflow-hidden group shadow-2xl shadow-black/10">
-          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mb-4 opacity-50">Projected Monthly Spending</p>
+          <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Projected Monthly Spending</p>
           <div className="flex items-baseline gap-2 mb-6 text-foreground">
             <span className="text-2xl font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
             <h2 className="text-5xl font-black tracking-tighter leading-none">
@@ -219,7 +290,7 @@ export default function DashboardPage() {
             <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
               <div style={{ width: `${monthProgressPercent}%` }} className="h-full bg-white rounded-full transition-all duration-1000" />
             </div>
-            <div className="flex items-center justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
+            <div className="flex items-center justify-between text-[10px] font-normal text-muted-foreground uppercase tracking-widest opacity-60">
               <span className="flex items-center gap-1.5">
                 <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
                 Ends {monthEnd.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
@@ -232,7 +303,7 @@ export default function DashboardPage() {
         <section className="grid grid-cols-2 gap-3.5">
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-50">Variable</p>
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Variable</p>
               <p className="text-2xl font-black tracking-tighter">
                 {CURRENCY_SYMBOL} {formatBRLocale(variableSpent, { minimumFractionDigits: 2 })}
               </p>
@@ -241,12 +312,12 @@ export default function DashboardPage() {
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
                 <div style={{ width: `${variablePercent}%` }} className="h-full bg-white rounded-full shadow-[0_0_12px_rgba(255,255,255,0.3)]" />
               </div>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-60">{variablePercent.toFixed(0)}% of {formatCompact(variableLimit)}</p>
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">{variablePercent.toFixed(0)}% of {formatCompact(variableLimit)}</p>
             </div>
           </div>
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
               <p className="text-2xl font-black tracking-tighter text-chart-1">
                 {CURRENCY_SYMBOL} {formatBRLocale(monthlyFixedTotal, { minimumFractionDigits: 2 })}
               </p>
@@ -255,15 +326,15 @@ export default function DashboardPage() {
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
                 <div style={{ width: "100%" }} className="h-full bg-chart-1 rounded-full shadow-[0_0_12px_rgba(var(--chart-1),0.3)]" />
               </div>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-60">100% committed</p>
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">100% committed</p>
             </div>
           </div>
         </section>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">Active Budgets</h2>
-            <Link href="/budgets" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Manage All</Link>
+            <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">Active Budgets</h2>
+            <Link href="/budgets" className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Manage All</Link>
           </div>
           <div className="grid grid-cols-1 gap-3.5">
             {activeBudgets.map((budget) => (
@@ -282,14 +353,14 @@ export default function DashboardPage() {
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-sm font-bold truncate">{budget.name || budget.category?.name || "Budget"}</h4>
-                      <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
+                      <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">
                         {budget.period_type ?? "Monthly"} • {budget.next_reset_date}
                       </p>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold">{CURRENCY_SYMBOL} {formatBRLocale(budget.remaining, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">left of {formatCompact(budget.amount)}</p>
+                    <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">left of {formatCompact(budget.amount)}</p>
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -299,7 +370,7 @@ export default function DashboardPage() {
                       className={`h-full rounded-full transition-all duration-700 ${budget.spent_percentage >= 90 ? "bg-chart-2" : budget.spent_percentage >= 70 ? "bg-yellow-400" : "bg-white"}`}
                     />
                   </div>
-                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-50">
+                  <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
                     {budget.spent_percentage.toFixed(0)}% used • {CURRENCY_SYMBOL} {formatBRLocale(budget.spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
                   </p>
                 </div>
@@ -311,10 +382,10 @@ export default function DashboardPage() {
         {/* Recent Transactions */}
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">Recent Transactions</h2>
-            <Link href="/transactions" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">See All</Link>
+            <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">Recent Transactions</h2>
+            <Link href="/transactions" className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">See All</Link>
           </div>
-          <div className="bg-card rounded-xl overflow-hidden divide-y divide-border/5">
+          <div className="bg-card rounded-xl overflow-hidden space-y-1">
             {recentTransactions.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8 opacity-50">No transactions yet.</p>
             ) : (
@@ -328,14 +399,16 @@ export default function DashboardPage() {
                     className="flex items-center justify-between px-5 py-4 active:bg-secondary/30 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center text-base shrink-0">
-                        {isExpense ? "↓" : "↑"}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isExpense ? "bg-chart-2/10" : "bg-chart-1/10"}`}>
+                        <span className={`text-lg font-bold ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
+                          {isExpense ? "↓" : "↑"}
+                        </span>
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-foreground truncate">
                           {tx.description || tx.category?.name || "Transaction"}
                         </p>
-                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60 mt-0.5">
+                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">
                           {dateLabel} • {tx.account?.name ?? "—"}
                         </p>
                       </div>

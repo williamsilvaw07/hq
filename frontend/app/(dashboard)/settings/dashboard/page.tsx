@@ -37,7 +37,7 @@ export default function DashboardSettingsPage() {
             month-focused view and a more detailed timeline at any time.
           </p>
           {saved && (
-            <p className="text-[11px] text-chart-1 font-medium mt-1">
+            <p className="text-[11px] text-chart-1 font-normal mt-1">
               Preference saved for this workspace.
             </p>
           )}
@@ -64,7 +64,7 @@ export default function DashboardSettingsPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold">Monthly Focus</p>
-                  <p className="text-[10px] text-muted-foreground font-medium">
+                  <p className="text-[10px] text-muted-foreground font-normal">
                     Simpler dashboard optimised for month-based planning.
                   </p>
                 </div>
@@ -92,7 +92,7 @@ export default function DashboardSettingsPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold">Full Timeline</p>
-                  <p className="text-[10px] text-muted-foreground font-medium">
+                  <p className="text-[10px] text-muted-foreground font-normal">
                     Richer timeline with short-term and monthly views.
                   </p>
                 </div>

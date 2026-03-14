@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { formatNumberUK } from "@/lib/format";
 import { Settings, ShoppingBag, PenLine } from "lucide-react";
+import { SkeletonBox } from "@/components/ui/Skeleton";
 
 type Transaction = {
   id: number;
@@ -23,12 +24,15 @@ type Transaction = {
 export default function PendingPage() {
   const { workspaceId } = useAuth();
   const [list, setList] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!workspaceId) return;
+    setLoading(true);
     api<Transaction[]>(`/api/workspaces/${workspaceId}/transactions/pending`)
       .then((r) => setList(r.data || []))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [workspaceId]);
 
   return (
@@ -36,7 +40,7 @@ export default function PendingPage() {
       <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">Pending Review</h1>
-          <p className="text-[11px] text-chart-1 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
+          <p className="text-[11px] text-chart-1 font-normal uppercase tracking-widest mt-1 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-chart-1 animate-pulse" />
             {list.length} Transaction{list.length !== 1 ? "s" : ""} captured
           </p>
@@ -46,7 +50,20 @@ export default function PendingPage() {
         </Link>
       </header>
       <main className="space-y-4">
-        {list.length === 0 ? (
+        {loading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 bg-card p-3 sm:p-5 rounded-lg sm:rounded-xl">
+                <SkeletonBox className="w-10 h-10 sm:w-12 sm:h-12 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <SkeletonBox className="h-4 w-3/5" />
+                  <SkeletonBox className="h-3 w-2/5" />
+                </div>
+                <SkeletonBox className="h-5 w-20 shrink-0" />
+              </div>
+            ))}
+          </div>
+        ) : list.length === 0 ? (
           <div className="bg-card rounded-lg sm:rounded-xl p-5 sm:p-8 text-center">
             <p className="text-muted-foreground text-sm">No pending transactions.</p>
             <p className="text-[11px] text-muted-foreground mt-2">Send a message via Telegram to record an expense or income.</p>
@@ -60,7 +77,7 @@ export default function PendingPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-foreground truncate">{t.description || "—"}</p>
-                  <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">
+                  <p className="text-[11px] text-muted-foreground font-normal uppercase tracking-tighter">
                   {t.date}
                   {t.created_at && ` · ${new Date(t.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })}`}
                   {" · "}{t.category?.name ?? "—"}

@@ -25,6 +25,7 @@ type Paginated = { data: Transaction[]; current_page: number; last_page: number;
 const DEBOUNCE_MS = 350;
 
 import { TransactionModal } from "./TransactionModal";
+import { SkeletonBox } from "@/components/ui/Skeleton";
 
 export default function TransactionsPage() {
   const { workspaceId } = useAuth();
@@ -127,8 +128,36 @@ export default function TransactionsPage() {
 
   if (!result) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-muted-foreground text-sm animate-pulse">Loading activity…</div>
+      <div className="space-y-4 sm:space-y-6 pb-24 px-4 sm:px-6">
+        <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between">
+            <SkeletonBox className="h-7 w-36" />
+            <div className="flex items-center gap-2">
+              <SkeletonBox className="w-9 h-9 sm:w-10 sm:h-10" />
+              <SkeletonBox className="w-9 h-9 sm:w-10 sm:h-10" />
+            </div>
+          </div>
+          <SkeletonBox className="h-10 w-full" />
+          <div className="flex items-center gap-2">
+            <SkeletonBox className="h-8 w-24" />
+            <SkeletonBox className="h-8 w-20" />
+            <SkeletonBox className="h-8 w-24" />
+          </div>
+        </header>
+        <div className="space-y-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between bg-card p-3 sm:p-5 rounded-lg sm:rounded-xl">
+              <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <SkeletonBox className="w-10 h-10 sm:w-12 sm:h-12 shrink-0" />
+                <div className="space-y-2 min-w-0 flex-1">
+                  <SkeletonBox className="h-4 w-3/5" />
+                  <SkeletonBox className="h-3 w-2/5" />
+                </div>
+              </div>
+              <SkeletonBox className="h-5 w-20 shrink-0" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -176,7 +205,7 @@ export default function TransactionsPage() {
         {filterOpen && (
           <div className="bg-card rounded-xl sm:rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3 shadow-xl">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-foreground uppercase tracking-wider">Filter Activity</span>
+              <span className="text-xs font-medium text-foreground uppercase tracking-wider">Filter Activity</span>
               <button type="button" onClick={() => setFilterOpen(false)} className="p-1 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Close">
                 <X className="w-4 h-4" />
               </button>
@@ -233,7 +262,7 @@ export default function TransactionsPage() {
 
         {Object.entries(byDate).sort(([a], [b]) => b.localeCompare(a)).map(([date, items]) => (
           <div key={date} className="space-y-3 sm:space-y-4">
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1 opacity-60">{date}</p>
+            <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1 opacity-60">{date}</p>
             <div className="space-y-2.5 sm:space-y-3.5">
               {items.map((t) => {
                 const createdDate = t.created_at ? new Date(t.created_at) : null;
@@ -255,7 +284,7 @@ export default function TransactionsPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-foreground truncate">{t.description || "—"}</p>
-                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-70">
+                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-70">
                           {t.category?.name ?? "—"} {t.status === "draft" && <span className="text-chart-2 ml-1">• Draft</span>}
                           {timeStr && ` • ${timeStr}`}
                         </p>
@@ -267,7 +296,7 @@ export default function TransactionsPage() {
                           {t.type === "income" ? "+" : "-"}R${" "}
                           {formatNumberUK(Math.abs(t.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">{t.account?.name ?? "—"}</p>
+                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">{t.account?.name ?? "—"}</p>
                       </div>
                     </div>
                   </div>
@@ -281,7 +310,7 @@ export default function TransactionsPage() {
       {result.last_page > 1 && (
         <div className="flex gap-2 justify-center pt-8">
           <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Prev</button>
-          <span className="py-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest self-center">Page {result.current_page} / {result.last_page}</span>
+          <span className="py-2 text-[10px] font-normal text-muted-foreground uppercase tracking-widest self-center">Page {result.current_page} / {result.last_page}</span>
           <button type="button" disabled={page >= result.last_page} onClick={() => setPage((p) => p + 1)} className="rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Next</button>
         </div>
       )}
