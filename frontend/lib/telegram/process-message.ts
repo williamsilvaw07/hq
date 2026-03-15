@@ -88,7 +88,20 @@ export async function processTelegramMessage(
     }
   }
 
-  // 4. Check if this is a confirmation/cancel/category reply
+  // 4. Handle numbered replies (1=confirm, 2=cancel, 3=categories, 4+=category picks)
+  if (/^\d+$/.test(trimmed)) {
+    const num = parseInt(trimmed, 10);
+    // Numbers > 3 are always category picks
+    if (num > 3) {
+      const handled = await handleCategoryPick(chatId, num - 3);
+      if (handled) return;
+    }
+    if (num === 1) { await handleConfirmation(chatId, "confirm"); return; }
+    if (num === 2) { await handleConfirmation(chatId, "cancel"); return; }
+    if (num === 3) { await handleCategoryList(chatId); return; }
+  }
+
+  // 4b. Check text-based confirmation/cancel/category replies
   const reply = detectReply(trimmed);
   if (reply === "confirm" || reply === "cancel") {
     await handleConfirmation(chatId, reply);
@@ -97,13 +110,6 @@ export async function processTelegramMessage(
   if (reply === "category") {
     await handleCategoryList(chatId);
     return;
-  }
-
-  // 4b. Check if this is a category number pick (e.g. "3" while a pending tx exists)
-  const pickNum = parseInt(trimmed, 10);
-  if (!isNaN(pickNum) && pickNum >= 1 && trimmed === String(pickNum)) {
-    const handled = await handleCategoryPick(chatId, pickNum);
-    if (handled) return;
   }
 
   // 5. Process as new expense/income
@@ -431,13 +437,14 @@ async function processExpenseText(
     msg += `Category: ${categoryName ?? "None (will need review)"}\n`;
   }
   msg += `Date: ${today}\n\n`;
-  msg += `Reply:\n`;
-  msg += `  ✅ or "yes" — Confirm\n`;
-  msg += `  ❌ or "no" — Cancel\n`;
   if (type === "expense") {
-    msg += `  "category" — Change category\n`;
+    msg += `1 — ✅ Confirm\n`;
+    msg += `2 — ❌ Cancel\n`;
+    msg += `3 — 📋 Change category\n`;
+  } else {
+    msg += `1 — ✅ Confirm\n`;
+    msg += `2 — ❌ Cancel\n`;
   }
-  msg += `  Or send a new message to replace this one`;
 
   await sendTelegramMessage(chatId, msg);
 
@@ -551,9 +558,9 @@ async function handleCategoryList(chatId: number): Promise<void> {
   let msg = "📋 Pick a category:\n\n";
   categories.forEach((c, i) => {
     const current = c.id === pending.category_id ? " ← current" : "";
-    msg += `  ${i + 1}. ${c.name}${current}\n`;
+    msg += `  ${i + 4}. ${c.name}${current}\n`;
   });
-  msg += `\nReply with a number (1-${categories.length}) to change and confirm.`;
+  msg += `\nReply with the number to change and confirm.`;
 
   await sendTelegramMessage(chatId, msg);
 }
