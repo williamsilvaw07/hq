@@ -47,7 +47,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
            c.name AS categoryName,
            c.icon AS categoryIcon,
            c.color AS categoryColor,
-           cc.name AS creditCardName
+           cc.name AS creditCardName,
+           cc.payment_due_day AS creditCardDueDay
          FROM budgets b
          LEFT JOIN Category c ON c.id = b.category_id
          LEFT JOIN CreditCard cc ON cc.id = b.credit_card_id
@@ -87,6 +88,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
             icon: (budget as any).icon || budget.categoryIcon,
             credit_card_id: (budget as any).creditCardId || null,
             credit_card_name: (budget as any).creditCardName || null,
+            credit_card_due_day: (budget as any).creditCardDueDay || null,
             category: budget.categoryIdNullable
               ? {
                   id: budget.categoryIdNullable,

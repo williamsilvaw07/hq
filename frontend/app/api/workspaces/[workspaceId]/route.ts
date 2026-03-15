@@ -18,10 +18,11 @@ export async function GET(req: Request, { params }: Params) {
     return NextResponse.json({ data: workspace });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;
+    const msg = (e as Error).message || "Unknown error";
+    console.error("GET /api/workspaces/[id] error:", { status, msg, stack: (e as Error).stack });
     if (status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
-    if (status === 404) return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
-    console.error("GET /api/workspaces/[id] error:", e);
-    return NextResponse.json({ message: "Request failed." }, { status: 500 });
+    if (status === 404) return NextResponse.json({ message: `Workspace not found: ${msg}` }, { status: 404 });
+    return NextResponse.json({ message: `Request failed: ${msg}` }, { status: 500 });
   }
 }
 

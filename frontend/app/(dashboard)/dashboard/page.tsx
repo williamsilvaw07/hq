@@ -333,6 +333,14 @@ export default function DashboardPage() {
                       {(budget as any).credit_card_name && (
                         <p className="text-[9px] text-muted-foreground/40 font-normal uppercase tracking-widest mt-0.5">
                           💳 {(budget as any).credit_card_name}
+                          {(budget as any).credit_card_due_day && (() => {
+                            const dueDay = (budget as any).credit_card_due_day;
+                            const now = new Date();
+                            const thisMonth = new Date(now.getFullYear(), now.getMonth(), dueDay);
+                            const target = thisMonth > now ? thisMonth : new Date(now.getFullYear(), now.getMonth() + 1, dueDay);
+                            const days = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                            return <span className={days <= 5 ? "text-yellow-400/60" : ""}> · {days}d until due</span>;
+                          })()}
                         </p>
                       )}
                     </div>

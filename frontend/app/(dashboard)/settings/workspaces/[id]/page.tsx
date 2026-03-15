@@ -48,6 +48,7 @@ export default function WorkspaceSettingsPage() {
   const [sheet, setSheet] = useState<Sheet | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("BRL");
@@ -64,9 +65,11 @@ export default function WorkspaceSettingsPage() {
     if (!id) return;
     setLoading(true);
     setError("");
+    setLoadError(null);
     Promise.all([
       api<Workspace>(`/api/workspaces/${id}`).catch((err) => {
         console.error("[workspace] Failed to load workspace:", err);
+        setLoadError(err instanceof Error ? err.message : "Failed to load workspace");
         return { data: null as Workspace | null };
       }),
       api<Member[]>(`/api/workspaces/${id}/members`).catch((err) => {
@@ -234,8 +237,18 @@ export default function WorkspaceSettingsPage() {
 
   if (!workspace) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-6">
         <p className="text-sm text-muted-foreground">Workspace not found.</p>
+        {loadError && (
+          <p className="text-[10px] text-chart-2/60 font-mono text-center max-w-xs">{loadError}</p>
+        )}
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="px-6 py-2 rounded-xl bg-card text-sm font-bold active:scale-95 transition-all"
+        >
+          Go Back
+        </button>
       </div>
     );
   }

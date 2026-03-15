@@ -26,6 +26,10 @@ export function TransactionModal({
   const [categoryId, setCategoryId] = useState("");
   const [accountId, setAccountId] = useState(initialData?.account_id?.toString() || "");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [categoryConfirmed, setCategoryConfirmed] = useState(false);
+
+  const isDraft = initialData?.status === "draft";
+  const hasSuggestedCategory = isDraft && !!initialData?.category_id;
 
   useEffect(() => {
     if (initialData) {
@@ -35,13 +39,15 @@ export function TransactionModal({
       setCategoryId(initialData.category_id?.toString() || "");
       setAccountId(initialData.account_id?.toString() || "");
       setDate(initialData.date ? new Date(initialData.date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
+      setCategoryConfirmed(false);
     } else {
       setType("expense"); setAmount(""); setDescription("");
       setCategoryId(""); setAccountId(""); setDate(new Date().toISOString().slice(0, 10));
+      setCategoryConfirmed(false);
     }
   }, [initialData, isOpen]);
 
-  const canSave = !saving && !!amount && parseFloat(amount) > 0 && (type === "income" || !!categoryId);
+  const canSave = !saving && !!amount && parseFloat(amount) > 0 && (type === "income" || !!categoryId) && (!hasSuggestedCategory || categoryConfirmed || categoryId !== initialData?.category_id?.toString());
 
   return (
     <Modal
@@ -62,11 +68,11 @@ export function TransactionModal({
             </button>
             <button
               type="button"
-              onClick={() => onSave({ type, amount: parseFloat(amount), description, category_id: Number(categoryId), account_id: Number(accountId), date })}
+              onClick={() => onSave({ type, amount: parseFloat(amount), description, category_id: Number(categoryId), account_id: Number(accountId), date, ...(isDraft ? { status: "confirmed" } : {}) })}
               disabled={!canSave}
               className="flex-[1.4] py-4 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
             >
-              {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving…</> : initialData ? "Save Changes" : "Confirm Entry"}
+              {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving…</> : isDraft ? "Confirm & Save" : initialData ? "Save Changes" : "Confirm Entry"}
             </button>
           </div>
           {initialData && onDelete && (
@@ -139,20 +145,36 @@ export function TransactionModal({
 
           {/* Category — expense only */}
           {type === "expense" && (
-            <div className="flex items-center gap-3 px-4 py-4">
-              <Tag className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Category</p>
-                <select
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm font-semibold text-foreground appearance-none cursor-pointer"
-                >
-                  <option value="">Select a category…</option>
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3 px-4 py-4">
+                <Tag className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">
+                    Category
+                    {hasSuggestedCategory && !categoryConfirmed && categoryId === initialData?.category_id?.toString() && (
+                      <span className="ml-2 text-yellow-400/80 normal-case tracking-normal">— AI suggestion</span>
+                    )}
+                  </p>
+                  <select
+                    value={categoryId}
+                    onChange={(e) => { setCategoryId(e.target.value); setCategoryConfirmed(true); }}
+                    className="w-full bg-transparent outline-none text-sm font-semibold text-foreground appearance-none cursor-pointer"
+                  >
+                    <option value="">Select a category…</option>
+                    {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <ChevronDown className="w-4 h-4 text-muted-foreground/20 shrink-0" />
               </div>
-              <ChevronDown className="w-4 h-4 text-muted-foreground/20 shrink-0" />
+              {hasSuggestedCategory && !categoryConfirmed && categoryId === initialData?.category_id?.toString() && (
+                <button
+                  type="button"
+                  onClick={() => setCategoryConfirmed(true)}
+                  className="mx-4 mb-3 py-2 rounded-xl bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all"
+                >
+                  Confirm Category
+                </button>
+              )}
             </div>
           )}
 
