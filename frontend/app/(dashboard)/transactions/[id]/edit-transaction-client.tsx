@@ -106,6 +106,7 @@ export default function EditTransactionClient() {
     category_id: transaction.category_id,
     account_id: transaction.account_id,
     date: transaction.date,
+    status: transaction.status,
   };
 
   return (

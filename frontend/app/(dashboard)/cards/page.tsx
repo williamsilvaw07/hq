@@ -130,7 +130,16 @@ export default function CardsPage() {
                       {CURRENCY_SYMBOL} {formatBRLocale(card.credit_limit, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </p>
                     <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
-                      Due {card.payment_due_day}th
+                      {(() => {
+                        const dueDay = card.payment_due_day;
+                        const now = new Date();
+                        const thisMonth = new Date(now.getFullYear(), now.getMonth(), dueDay);
+                        const target = thisMonth > now ? thisMonth : new Date(now.getFullYear(), now.getMonth() + 1, dueDay);
+                        const days = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                        return days <= 5
+                          ? <span className="text-yellow-400">Due in {days}d</span>
+                          : <>Due in {days}d</>;
+                      })()}
                     </p>
                   </div>
                 </div>
