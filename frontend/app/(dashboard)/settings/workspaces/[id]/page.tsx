@@ -398,23 +398,49 @@ export default function WorkspaceSettingsPage() {
               <div>
                 <p className="text-sm font-bold">Connect Telegram</p>
                 <p className="text-[10px] font-normal text-muted-foreground">
-                  Log expenses for <span className="text-foreground font-semibold">{workspace.name}</span> via bot
+                  Log expenses &amp; income for <span className="text-foreground font-semibold">{workspace.name}</span> via bot
                 </p>
               </div>
             </div>
-            {!telegramCode ? (
-              <button
-                type="button"
-                onClick={handleGenerateTelegramCode}
-                disabled={telegramLoading}
-                className="w-full py-2.5 bg-blue-500/10 text-blue-400 text-xs font-bold rounded-xl active:scale-[0.98] transition-all disabled:opacity-50"
+            {process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME && (
+              <a
+                href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 mb-4 px-3 py-2.5 bg-blue-500/5 border border-blue-500/10 rounded-xl active:scale-[0.98] transition-all"
               >
-                {telegramLoading ? "Generating…" : "Generate Linking Code"}
-              </button>
+                <Send className="w-4 h-4 text-blue-400 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-blue-400">@{process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}</p>
+                  <p className="text-[10px] text-muted-foreground/60">Tap to open bot in Telegram</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-blue-400/40 shrink-0" />
+              </a>
+            )}
+            {!telegramCode ? (
+              <div className="space-y-3">
+                <div className="bg-white/[0.03] rounded-xl p-3 space-y-2">
+                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">How it works</p>
+                  <ol className="text-[10px] text-muted-foreground/50 space-y-1.5 list-decimal list-inside">
+                    <li>Generate a linking code below</li>
+                    <li>Open the bot in Telegram{process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ? ` (@${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME})` : ""}</li>
+                    <li>Send the code to the bot</li>
+                    <li>Done! Send expenses or income via text, voice, or photo</li>
+                  </ol>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGenerateTelegramCode}
+                  disabled={telegramLoading}
+                  className="w-full py-2.5 bg-blue-500/10 text-blue-400 text-xs font-bold rounded-xl active:scale-[0.98] transition-all disabled:opacity-50"
+                >
+                  {telegramLoading ? "Generating…" : "Generate Linking Code"}
+                </button>
+              </div>
             ) : (
               <div className="space-y-3">
                 <p className="text-[10px] font-normal text-muted-foreground">
-                  Send this code to your Telegram bot. Expires in 15 minutes.
+                  Send this code to the bot{process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ? ` (@${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME})` : ""} in Telegram. Expires in 15 minutes.
                 </p>
                 <div className="flex items-center justify-between bg-background rounded-xl px-4 py-3">
                   <span className="text-xl font-mono font-bold tracking-widest text-foreground">{telegramCode}</span>

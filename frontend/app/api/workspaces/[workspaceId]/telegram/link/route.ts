@@ -9,11 +9,12 @@ import { generateLinkCode } from "@/lib/telegram/link";
  */
 export async function POST(
   req: Request,
-  { params }: { params: { workspaceId: string } },
+  { params }: { params: Promise<{ workspaceId: string }> },
 ) {
   try {
+    const { workspaceId: wid } = await params;
     const authUser = await requireAuth(req);
-    const workspaceId = Number(params.workspaceId);
+    const workspaceId = Number(wid);
     if (!workspaceId) {
       return NextResponse.json({ message: "Invalid workspace." }, { status: 400 });
     }

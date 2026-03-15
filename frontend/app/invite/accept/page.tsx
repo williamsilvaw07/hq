@@ -13,7 +13,7 @@ type InviteInfo = { workspace_name: string; email: string; role: string };
 function AcceptInviteContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, setWorkspaceId } = useAuth();
   const router = useRouter();
   const [info, setInfo] = useState<InviteInfo | null>(null);
   const [loading, setLoading] = useState(!!token);
@@ -54,6 +54,9 @@ function AcceptInviteContent() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || data.errors?.token?.[0] || "Failed to accept");
+      if (data.data?.workspace?.id) {
+        setWorkspaceId(data.data.workspace.id);
+      }
       router.push("/dashboard");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to accept");

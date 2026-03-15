@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
@@ -12,6 +13,8 @@ export default function LoginPage() {
   const [dbHealthy, setDbHealthy] = useState<null | boolean>(null);
   const [dbMessage, setDbMessage] = useState<string>("");
   const { login } = useAuth();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
 
   useEffect(() => {
     let cancelled = false;
@@ -44,7 +47,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email, password, returnTo || undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -108,7 +111,7 @@ export default function LoginPage() {
       </form>
       <p className="mt-4 text-center text-sm text-muted-foreground">
         No account?{" "}
-        <Link href="/register" className="text-primary hover:underline">
+        <Link href={returnTo ? `/register?returnTo=${encodeURIComponent(returnTo)}` : "/register"} className="text-primary hover:underline">
           Register
         </Link>
       </p>

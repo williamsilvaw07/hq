@@ -38,5 +38,8 @@ next-env.d.ts
 *.swp
 *.swo
 
+# Uploads (avatars etc.)
+/uploads
+
 # macOS
 .DS_Store

@@ -31,7 +31,22 @@ export default function DashboardLayout({
   const hasRedirectedToLogin = useRef(false);
 
   const fetchData = useCallback(() => {
-    if (!workspaceId) return;
+    if (!workspaceId) {
+      // Still fetch workspaces so we can auto-select one
+      api<Workspace[]>("/api/workspaces").then((workRes) => {
+        const list = Array.isArray(workRes?.data) ? workRes.data : [];
+        setWorkspaces(list);
+        if (list.length > 0) setWorkspaceId(list[0].id);
+      }).catch((err: unknown) => {
+        const status = (err as { status?: number })?.status;
+        if (status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("workspaceId");
+          router.push("/login");
+        }
+      });
+      return;
+    }
     Promise.all([
       api<Workspace[]>("/api/workspaces"),
       api<any[]>(`/api/workspaces/${workspaceId}/categories`),
@@ -39,7 +54,6 @@ export default function DashboardLayout({
     ]).then(([workRes, catRes, accRes]) => {
       const list = Array.isArray(workRes?.data) ? workRes.data : [];
       setWorkspaces(list);
-      if (list.length > 0 && !workspaceId) setWorkspaceId(list[0].id);
       setCategories(Array.isArray(catRes.data) ? catRes.data : []);
       setAccounts(accRes.data?.accounts || []);
     }).catch((err: unknown) => {

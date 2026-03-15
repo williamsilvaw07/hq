@@ -15,6 +15,7 @@ import { BudgetModal } from "../budgets/BudgetModal";
 import { SkeletonBox } from "@/components/ui/Skeleton";
 
 type DashboardData = {
+  period_income?: number;
   period_expense?: number;
 };
 
@@ -116,12 +117,15 @@ export default function DashboardPage() {
 
   // Global event for bottom nav ADD button
   useEffect(() => {
-    const handleOpenAdd = () => {
-      setTransactionModalOpen(true);
-    };
+    const handleOpenAdd = () => setTransactionModalOpen(true);
+    const handleRefresh = () => fetchData();
     window.addEventListener("open-add-transaction", handleOpenAdd);
-    return () => window.removeEventListener("open-add-transaction", handleOpenAdd);
-  }, []);
+    window.addEventListener("transactions-refresh", handleRefresh);
+    return () => {
+      window.removeEventListener("open-add-transaction", handleOpenAdd);
+      window.removeEventListener("transactions-refresh", handleRefresh);
+    };
+  }, [fetchData]);
 
   async function handleSaveBudget(data: any) {
     if (!workspaceId) return;
@@ -226,8 +230,11 @@ export default function DashboardPage() {
   const variableLimit = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
   const variableSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
   const monthlyFixedTotal = fixedBillsTotal(fixedBills);
-  const projectedMonthlySpending = monthlyFixedTotal + variableLimit;
+  const totalBudget = monthlyFixedTotal + variableLimit;
   const variablePercent = variableLimit > 0 ? Math.min(100, (variableSpent / variableLimit) * 100) : 0;
+  const periodExpense = Number(dashboard?.period_expense ?? 0);
+  const periodIncome = Number(dashboard?.period_income ?? 0);
+  const spentPercent = totalBudget > 0 ? Math.min(100, (periodExpense / totalBudget) * 100) : 0;
 
   const today = new Date();
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -253,23 +260,40 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans tracking-tight">
       <main className="px-6 space-y-8 mt-4">
         <section className="bg-card p-6 rounded-xl relative overflow-hidden group shadow-2xl shadow-black/10">
-          <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Projected Monthly Spending</p>
-          <div className="flex items-baseline gap-2 mb-6 text-foreground">
-            <span className="text-2xl font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
+          <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
+          <div className={`flex items-baseline gap-2 mb-2 ${periodExpense > 0 ? "text-foreground" : "text-muted-foreground/20"}`}>
+            <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
             <h2 className="text-5xl font-black tracking-tighter leading-none">
-              {formatBRLocale(projectedMonthlySpending, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatBRLocale(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h2>
           </div>
+          {totalBudget > 0 && (
+            <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
+              of {CURRENCY_SYMBOL} {formatBRLocale(totalBudget, { minimumFractionDigits: 2 })} budget
+            </p>
+          )}
+          {periodIncome > 0 && (
+            <p className="text-[10px] text-chart-1/60 font-normal uppercase tracking-tighter mb-4">
+              +{CURRENCY_SYMBOL} {formatBRLocale(periodIncome, { minimumFractionDigits: 2 })} income
+            </p>
+          )}
           <div className="space-y-4">
             <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
-              <div style={{ width: `${monthProgressPercent}%` }} className="h-full bg-white rounded-full transition-all duration-1000" />
+              {totalBudget > 0 ? (
+                <div
+                  style={{ width: `${spentPercent}%` }}
+                  className={`h-full rounded-full transition-all duration-1000 ${spentPercent >= 90 ? "bg-chart-2" : spentPercent >= 70 ? "bg-yellow-400" : "bg-white"}`}
+                />
+              ) : (
+                <div style={{ width: `${monthProgressPercent}%` }} className="h-full bg-white/20 rounded-full transition-all duration-1000" />
+              )}
             </div>
             <div className="flex items-center justify-between text-[10px] font-normal text-muted-foreground uppercase tracking-widest opacity-60">
               <span className="flex items-center gap-1.5">
                 <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
                 Ends {monthEnd.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
               </span>
-              <span>{daysLeft} days left • {monthProgressPercent.toFixed(0)}%</span>
+              <span>{daysLeft} days left{totalBudget > 0 ? ` • ${spentPercent.toFixed(0)}% used` : ` • ${monthProgressPercent.toFixed(0)}%`}</span>
             </div>
           </div>
         </section>
@@ -278,29 +302,37 @@ export default function DashboardPage() {
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
               <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Variable</p>
-              <p className="text-2xl font-black tracking-tighter">
+              <p className={`text-2xl font-black tracking-tighter ${variableLimit === 0 ? "text-muted-foreground/30" : ""}`}>
                 {CURRENCY_SYMBOL} {formatBRLocale(variableSpent, { minimumFractionDigits: 2 })}
               </p>
             </div>
             <div className="space-y-2.5">
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
-                <div style={{ width: `${variablePercent}%` }} className="h-full bg-white rounded-full shadow-[0_0_12px_rgba(255,255,255,0.3)]" />
+                {variableLimit > 0 && (
+                  <div style={{ width: `${variablePercent}%` }} className="h-full bg-white rounded-full shadow-[0_0_12px_rgba(255,255,255,0.3)]" />
+                )}
               </div>
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">{variablePercent.toFixed(0)}% of {formatCompact(variableLimit)}</p>
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
+                {variableLimit > 0 ? `${variablePercent.toFixed(0)}% of ${formatCompact(variableLimit)}` : "No budgets set"}
+              </p>
             </div>
           </div>
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
               <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
-              <p className="text-2xl font-black tracking-tighter text-chart-1">
+              <p className={`text-2xl font-black tracking-tighter ${monthlyFixedTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
                 {CURRENCY_SYMBOL} {formatBRLocale(monthlyFixedTotal, { minimumFractionDigits: 2 })}
               </p>
             </div>
             <div className="space-y-2.5">
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
-                <div style={{ width: "100%" }} className="h-full bg-chart-1 rounded-full shadow-[0_0_12px_rgba(var(--chart-1),0.3)]" />
+                {monthlyFixedTotal > 0 && (
+                  <div style={{ width: "100%" }} className="h-full bg-chart-1 rounded-full shadow-[0_0_12px_rgba(var(--chart-1),0.3)]" />
+                )}
               </div>
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">100% committed</p>
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
+                {monthlyFixedTotal > 0 ? "100% committed" : "No bills set"}
+              </p>
             </div>
           </div>
         </section>

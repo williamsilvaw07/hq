@@ -10,8 +10,8 @@ type AuthContextType = {
   user: User;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, password_confirmation: string) => Promise<void>;
+  login: (email: string, password: string, returnTo?: string) => Promise<void>;
+  register: (name: string, email: string, password: string, password_confirmation: string, returnTo?: string) => Promise<void>;
   logout: () => void;
   updateProfile: (data: { name?: string; email?: string; avatar_url?: string | null }) => Promise<void>;
   uploadAvatar: (file: File) => Promise<void>;
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, returnTo?: string) => {
     const data = await apiLogin(email, password);
     if (!data?.token || !data?.user) {
       throw new Error("Invalid login response. Check that the API returns { token, user }.");
@@ -61,11 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(data.token);
     setUser(data.user);
     setLoading(false);
-    router.push("/dashboard");
+    router.push(returnTo || "/dashboard");
   }, [router]);
 
   const register = useCallback(
-    async (name: string, email: string, password: string, password_confirmation: string) => {
+    async (name: string, email: string, password: string, password_confirmation: string, returnTo?: string) => {
       const data = await apiRegister(name, email, password, password_confirmation);
       if (!data?.token || !data?.user) {
         throw new Error("Invalid register response. Check that the API returns { token, user }.");
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(data.token);
       setUser(data.user);
       setLoading(false);
-      router.push("/dashboard");
+      router.push(returnTo || "/dashboard");
     },
     [router]
   );

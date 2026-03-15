@@ -13,7 +13,6 @@ export default function SettingsProfilePage() {
   const { user, updateProfile, uploadAvatar, changePassword } = useAuth();
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -187,23 +186,6 @@ export default function SettingsProfilePage() {
                 className="w-full bg-transparent border-none outline-none text-sm font-bold text-foreground"
               />
             </div>
-          </div>
-          <div className="space-y-2">
-            <label className="label ml-1 block">Phone Number (WhatsApp)</label>
-            <div className="bg-card rounded-lg p-4 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-              <div className="flex items-center gap-2">
-                <span className="text-chart-1 text-lg" aria-hidden>●</span>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-sm font-bold text-foreground"
-                />
-              </div>
-            </div>
-            <p className="text-[10px] text-muted-foreground/60 italic ml-1">
-              Used for syncing WhatsApp transactions
-            </p>
           </div>
         </form>
         <div className="pt-8 space-y-4">

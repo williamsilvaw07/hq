@@ -26,14 +26,14 @@ export async function POST(req: Request) {
     }
 
     const ext = type === "image/jpeg" ? "jpg" : type === "image/png" ? "png" : type === "image/gif" ? "gif" : "webp";
-    const dir = join(process.cwd(), "public", "uploads", "avatars", String(authUser.id));
+    const dir = join(process.cwd(), "uploads", "avatars", String(authUser.id));
     await mkdir(dir, { recursive: true });
     const filename = `avatar-${Date.now()}.${ext}`;
     const path = join(dir, filename);
     const buffer = Buffer.from(await blob.arrayBuffer());
     await writeFile(path, buffer);
 
-    const url = `/uploads/avatars/${authUser.id}/${filename}`;
+    const url = `/api/uploads/avatars/${authUser.id}/${filename}`;
     await updateUserProfile(authUser.id, { avatar_url: url });
     const user = await findUserById(authUser.id);
     return user

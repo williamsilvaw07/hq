@@ -99,7 +99,7 @@ export async function PATCH(
       return NextResponse.json({ data: toResponse(transaction) });
     }
 
-    await updateTransaction(id, data);
+    await updateTransaction(id, wid, data);
     const updated = await findTransactionById(id, wid);
     return NextResponse.json({ data: toResponse(updated!) });
   } catch (e: unknown) {
@@ -126,7 +126,7 @@ export async function DELETE(
     if (!transaction) {
       return NextResponse.json({ message: "Transaction not found." }, { status: 404 });
     }
-    await deleteTransaction(id);
+    await deleteTransaction(id, wid);
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;

@@ -110,8 +110,8 @@ export async function PATCH(
     }
 
     fields.push("updated_at = NOW(3)");
-    paramsArr.push(id);
-    await execute(`UPDATE budgets SET ${fields.join(", ")} WHERE id = ?`, paramsArr);
+    paramsArr.push(id, wid);
+    await execute(`UPDATE budgets SET ${fields.join(", ")} WHERE id = ? AND workspace_id = ?`, paramsArr);
 
     const [updated] = await fetchMany(
       `SELECT b.*, c.id AS cat_id, c.name AS cat_name, c.icon AS cat_icon, c.color AS cat_color
@@ -150,7 +150,7 @@ export async function DELETE(
     if (!budget) {
       return NextResponse.json({ message: "Budget not found." }, { status: 404 });
     }
-    await execute("DELETE FROM budgets WHERE id = ?", [id]);
+    await execute("DELETE FROM budgets WHERE id = ? AND workspace_id = ?", [id, wid]);
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
     const status = (e as { status?: number }).status;

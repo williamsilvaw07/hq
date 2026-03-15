@@ -175,6 +175,7 @@ export async function createTransaction(data: {
 
 export async function updateTransaction(
   id: number,
+  workspaceId: number,
   data: {
     categoryId?: number;
     type?: string;
@@ -228,12 +229,12 @@ export async function updateTransaction(
   }
   if (fields.length === 0) return;
   fields.push("updated_at = NOW(3)");
-  params.push(id);
-  await execute(`UPDATE Transaction SET ${fields.join(", ")} WHERE id = ?`, params);
+  params.push(id, workspaceId);
+  await execute(`UPDATE Transaction SET ${fields.join(", ")} WHERE id = ? AND workspace_id = ?`, params);
 }
 
-export async function deleteTransaction(id: number): Promise<void> {
-  await execute("DELETE FROM Transaction WHERE id = ?", [id]);
+export async function deleteTransaction(id: number, workspaceId: number): Promise<void> {
+  await execute("DELETE FROM Transaction WHERE id = ? AND workspace_id = ?", [id, workspaceId]);
 }
 
 export async function aggregateTransactions(
