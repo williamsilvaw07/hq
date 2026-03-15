@@ -285,9 +285,14 @@ export default function TransactionsPage() {
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-foreground truncate">{t.description || "—"}</p>
                         <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-70">
-                          {t.category?.name ?? "—"} {t.status === "draft" && <span className="text-chart-2 ml-1">• Draft</span>}
+                          {t.category?.name ?? "—"}
                           {timeStr && ` • ${timeStr}`}
                         </p>
+                        {t.status === "draft" && (
+                          <span className="inline-block mt-0.5 text-[8px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
+                            Needs Review
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">

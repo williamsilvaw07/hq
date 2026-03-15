@@ -1,5 +1,5 @@
 import { fetchOne, fetchMany, insertOne } from "@/lib/sql";
-import { parseExpenseMessage } from "./parse";
+import { parseExpenseMessage, suggestCategory } from "./parse";
 import { sendTelegramMessage } from "./send";
 import { validateLinkCode, linkTelegramAccount } from "./link";
 import { transcribeAudio, categorizeExpense, extractExpenseFromImage } from "./groq";
@@ -271,7 +271,7 @@ type BudgetCategoryRow = {
 };
 
 async function resolveCategory(description: string, workspaceId: number): Promise<CategoryResult> {
-  // First try to match against budget categories (what the user actually sees)
+  // 1. Load budget categories (what the user actually uses)
   const budgetCategories = await fetchMany<BudgetCategoryRow>(
     `SELECT b.category_id, b.name AS budget_name, c.name AS category_name
      FROM budgets b
@@ -281,26 +281,35 @@ async function resolveCategory(description: string, workspaceId: number): Promis
     [workspaceId],
   );
 
-  if (budgetCategories.length > 0) {
-    // Use budget names (what user sees) as labels, but return category_id
-    const categoryList = budgetCategories.map((bc) => ({
-      id: bc.category_id,
-      name: bc.budget_name || bc.category_name,
-    }));
+  const categoryList = budgetCategories.map((bc) => ({
+    id: bc.category_id,
+    name: bc.budget_name || bc.category_name,
+  }));
+  // Deduplicate by category_id
+  const unique = categoryList.filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
 
-    // Deduplicate by category_id
-    const unique = categoryList.filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
+  // If only one budget, always use it
+  if (unique.length === 1) return { categoryId: unique[0].id, isDraft: false };
 
-    if (unique.length === 1) return { categoryId: unique[0].id, isDraft: false };
+  // 2. Try keyword-based matching first (fast, no API call)
+  if (unique.length > 0) {
+    const keywordMatch = matchByKeywords(description, unique);
+    if (keywordMatch !== null) {
+      console.log(`[telegram] Keyword matched category ${keywordMatch}`);
+      return { categoryId: keywordMatch, isDraft: false };
+    }
+  }
 
+  // 3. Try AI categorization against budgets
+  if (unique.length > 0) {
     try {
-      const firstPick = await categorizeExpense(description, unique, false);
-      if (firstPick !== null) {
-        console.log(`[telegram] AI picked budget category ${firstPick} on first attempt`);
-        return { categoryId: firstPick, isDraft: false };
+      const aiPick = await categorizeExpense(description, unique, false);
+      if (aiPick !== null) {
+        console.log(`[telegram] AI picked budget category ${aiPick}`);
+        return { categoryId: aiPick, isDraft: false };
       }
 
-      console.log("[telegram] AI first attempt returned null — retrying");
+      // Retry with lenient prompt
       const retryPick = await categorizeExpense(description, unique, true);
       if (retryPick !== null) {
         console.log(`[telegram] AI picked budget category ${retryPick} on retry`);
@@ -311,33 +320,63 @@ async function resolveCategory(description: string, workspaceId: number): Promis
     }
   }
 
-  // Fallback: try all expense categories (even if no budget exists for them)
-  const categories = await fetchMany<CategoryRow>(
-    "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY id ASC",
-    [workspaceId],
-  );
+  // 4. Fallback: try all expense categories
+  const categories = unique.length > 0
+    ? unique
+    : await fetchMany<CategoryRow>(
+        "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY id ASC",
+        [workspaceId],
+      );
 
   if (categories.length === 0) return { categoryId: null, isDraft: true };
   if (categories.length === 1) return { categoryId: categories[0].id, isDraft: false };
 
-  try {
-    const firstPick = await categorizeExpense(description, categories, false);
-    if (firstPick !== null) {
-      console.log(`[telegram] AI picked category ${firstPick} on first attempt`);
-      return { categoryId: firstPick, isDraft: false };
+  // 5. Use keyword suggestion to pick best-guess category for drafts
+  const suggested = suggestCategory(description);
+  if (suggested) {
+    const lower = suggested.toLowerCase();
+    const match = categories.find((c) => c.name.toLowerCase().includes(lower) || lower.includes(c.name.toLowerCase()));
+    if (match) {
+      console.log(`[telegram] Keyword suggested "${suggested}" → draft with category ${match.id}`);
+      return { categoryId: match.id, isDraft: true };
     }
-
-    console.log("[telegram] AI first attempt returned null — retrying (fallback)");
-    const retryPick = await categorizeExpense(description, categories, true);
-    if (retryPick !== null) {
-      console.log(`[telegram] AI picked category ${retryPick} on retry`);
-      return { categoryId: retryPick, isDraft: false };
-    }
-  } catch (err) {
-    console.error("[telegram] AI categorization failed:", err);
   }
 
-  // All attempts failed — save as draft
-  console.log("[telegram] AI could not categorize — saving as draft");
+  // 6. All attempts failed — save as draft without category
+  console.log("[telegram] Could not categorize — saving as draft");
   return { categoryId: null, isDraft: true };
+}
+
+/**
+ * Tries to match the expense description to a category using simple keyword/substring matching.
+ * Returns the category id or null.
+ */
+function matchByKeywords(
+  description: string,
+  categories: { id: number; name: string }[],
+): number | null {
+  const lower = description.toLowerCase();
+
+  // Direct substring match: expense description contains category name or vice versa
+  for (const cat of categories) {
+    const catLower = cat.name.toLowerCase();
+    if (lower.includes(catLower) || catLower.includes(lower)) {
+      return cat.id;
+    }
+  }
+
+  // Word-level overlap: check if any word in the description matches a word in the category
+  const descWords = lower.split(/\s+/).filter((w) => w.length > 2);
+  for (const cat of categories) {
+    const catWords = cat.name.toLowerCase().split(/[\s&]+/).filter((w) => w.length > 2);
+    for (const dw of descWords) {
+      for (const cw of catWords) {
+        if (dw.includes(cw) || cw.includes(dw)) {
+          return cat.id;
+        }
+      }
+    }
+  }
+
+  return null;
 }

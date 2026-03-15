@@ -62,13 +62,21 @@ export default function WorkspaceSettingsPage() {
 
   useEffect(() => {
     if (!id) return;
+    setLoading(true);
+    setError("");
     Promise.all([
-      api<Workspace>(`/api/workspaces/${id}`),
-      api<Member[]>(`/api/workspaces/${id}/members`),
+      api<Workspace>(`/api/workspaces/${id}`).catch((err) => {
+        console.error("[workspace] Failed to load workspace:", err);
+        return { data: null as Workspace | null };
+      }),
+      api<Member[]>(`/api/workspaces/${id}/members`).catch((err) => {
+        console.error("[workspace] Failed to load members:", err);
+        return { data: [] as Member[] };
+      }),
     ])
       .then(([wRes, mRes]) => {
-        setWorkspace(wRes.data ?? null);
-        setMembers(Array.isArray(mRes.data) ? mRes.data : []);
+        setWorkspace((wRes as any).data ?? null);
+        setMembers(Array.isArray((mRes as any).data) ? (mRes as any).data : []);
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -194,8 +202,32 @@ export default function WorkspaceSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+      <div className="min-h-screen bg-background text-foreground pb-32">
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center gap-4">
+          <button type="button" onClick={() => router.back()} className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-foreground active:scale-95 transition-all shrink-0">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="space-y-1.5">
+            <div className="h-2.5 w-16 bg-white/[0.06] rounded animate-pulse" />
+            <div className="h-3.5 w-28 bg-white/[0.06] rounded animate-pulse" />
+          </div>
+        </header>
+        <div className="px-4 space-y-6 pt-4">
+          <div className="space-y-2">
+            <div className="h-3 w-16 bg-white/[0.06] rounded animate-pulse" />
+            <div className="bg-card rounded-2xl p-4 space-y-4">
+              <div className="h-12 bg-white/[0.06] rounded-xl animate-pulse" />
+              <div className="h-12 bg-white/[0.06] rounded-xl animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 w-24 bg-white/[0.06] rounded animate-pulse" />
+            <div className="bg-card rounded-2xl p-4 space-y-3">
+              <div className="h-10 bg-white/[0.06] rounded-xl animate-pulse" />
+              <div className="h-10 bg-white/[0.06] rounded-xl animate-pulse" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

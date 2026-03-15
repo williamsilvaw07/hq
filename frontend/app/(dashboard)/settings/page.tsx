@@ -39,11 +39,11 @@ function WorkspaceSettingsSection() {
       <h3 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1">
         Workspace
       </h3>
-      <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
+      <div className="space-y-2.5">
         {workspaceId && (
           <Link
             href={`/settings/workspaces/${workspaceId}`}
-            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+            className="w-full flex items-center justify-between p-3 sm:p-5 bg-card rounded-lg sm:rounded-xl active:scale-[0.98] transition-all"
           >
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/10 flex items-center justify-center shrink-0">
@@ -61,7 +61,7 @@ function WorkspaceSettingsSection() {
         )}
         <Link
           href="/settings/workspaces"
-          className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between p-3 sm:p-5 bg-card rounded-lg sm:rounded-xl active:scale-[0.98] transition-all"
         >
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-chart-4/10 flex items-center justify-center shrink-0">
@@ -108,10 +108,10 @@ export default function SettingsPage() {
         <h3 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1">
           Financial Setup
         </h3>
-        <div className="bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
+        <div className="space-y-2.5">
           <Link
             href="/budgets"
-            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+            className="w-full flex items-center justify-between p-3 sm:p-5 bg-card rounded-lg sm:rounded-xl active:scale-[0.98] transition-all"
           >
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
@@ -126,7 +126,7 @@ export default function SettingsPage() {
           </Link>
           <Link
             href="/settings/fixed-expenses"
-            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors border-b border-border/50"
+            className="w-full flex items-center justify-between p-3 sm:p-5 bg-card rounded-lg sm:rounded-xl active:scale-[0.98] transition-all"
           >
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -141,7 +141,7 @@ export default function SettingsPage() {
           </Link>
           <Link
             href="/cards"
-            className="w-full flex items-center justify-between p-3 sm:p-5 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between p-3 sm:p-5 bg-card rounded-lg sm:rounded-xl active:scale-[0.98] transition-all"
           >
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">

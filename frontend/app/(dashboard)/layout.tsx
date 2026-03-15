@@ -103,7 +103,6 @@ export default function DashboardLayout({
   const isDashboard = pathname === "/dashboard";
   const isTransactions = pathname === "/transactions";
   const isBudgets = pathname === "/budgets";
-  const isCards = pathname === "/cards";
   const isSetupRoot = pathname === "/settings";
   const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam && !isFixedExpenses && !isWorkspacePage;
 
@@ -125,7 +124,7 @@ export default function DashboardLayout({
         {children}
       </main>
 
-      <div className="fixed bottom-0 left-0 w-full z-40 px-4 pb-6 sm:pb-8 pt-4 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none">
+      <div className="fixed bottom-0 left-0 w-full z-40 px-5 pb-8 sm:pb-10 pt-4 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none">
         <div className="w-full sm:max-w-md sm:mx-auto pointer-events-auto bg-zinc-900/95 border border-zinc-800/50 rounded-xl px-2 py-3 flex items-center justify-between shadow-2xl">
           <Link
             href="/dashboard"
@@ -164,15 +163,6 @@ export default function DashboardLayout({
           >
             <Icon icon="solar:wallet-bold-duotone" className="text-xl sm:text-2xl" />
             <span>BUDGETS</span>
-          </Link>
-          <Link
-            href="/cards"
-            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] font-black uppercase tracking-widest transition-colors ${
-              isCards ? "text-white" : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <Icon icon="solar:card-bold-duotone" className="text-xl sm:text-2xl" />
-            <span>CARDS</span>
           </Link>
           <Link
             href="/settings"

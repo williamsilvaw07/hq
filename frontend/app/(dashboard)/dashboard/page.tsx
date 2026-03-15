@@ -329,8 +329,12 @@ export default function DashboardPage() {
                       <h4 className="text-sm font-bold truncate">{budget.name || budget.category?.name || "Budget"}</h4>
                       <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">
                         {budget.period_type ?? "Monthly"} • {budget.next_reset_date}
-                        {(budget as any).credit_card_name && <> • 💳 {(budget as any).credit_card_name}</>}
                       </p>
+                      {(budget as any).credit_card_name && (
+                        <p className="text-[9px] text-muted-foreground/40 font-normal uppercase tracking-widest mt-0.5">
+                          💳 {(budget as any).credit_card_name}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -391,6 +395,11 @@ export default function DashboardPage() {
                         <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">
                           {tx.category?.name ?? "—"} {timeStr && `• ${timeStr}`}
                         </p>
+                        {tx.status === "draft" && (
+                          <span className="inline-block mt-0.5 text-[7px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
+                            Needs Review
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="text-right shrink-0">
