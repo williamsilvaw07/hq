@@ -68,9 +68,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!workspaceId) return;
     const prev = typeof document !== "undefined" ? document.title : "";
-    if (typeof document !== "undefined") document.title = "Dashboard | Budget Tracker";
+    if (typeof document !== "undefined") document.title = "Dashboard | NorthTrack";
     return () => {
-      if (typeof document !== "undefined") document.title = prev || "Budget Tracker";
+      if (typeof document !== "undefined") document.title = prev || "NorthTrack";
     };
   }, [workspaceId]);
 
@@ -171,7 +171,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-foreground pb-32 font-sans tracking-tight">
-        <main className="px-6 space-y-8 mt-4">
+        <main className="px-5 space-y-8 pt-4">
           {/* Hero spending card */}
           <SkeletonBox className="h-40 w-full" />
 
@@ -255,49 +255,62 @@ export default function DashboardPage() {
   }
 
   const activeBudgets = budgets.slice(0, 3);
+  const hasAnyData = periodExpense > 0 || periodIncome > 0 || totalBudget > 0 || recentTransactions.length > 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans tracking-tight">
       <main className="px-6 space-y-8 mt-4">
         <section className="bg-card p-6 rounded-xl relative overflow-hidden group shadow-2xl shadow-black/10">
-          <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
-          <div className={`flex items-baseline gap-2 mb-2 ${periodExpense > 0 ? "text-foreground" : "text-muted-foreground/20"}`}>
-            <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
-            <h2 className="text-5xl font-black tracking-tighter leading-none">
-              {formatBRLocale(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </h2>
-          </div>
-          {totalBudget > 0 && (
-            <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
-              of {CURRENCY_SYMBOL} {formatBRLocale(totalBudget, { minimumFractionDigits: 2 })} budget
-            </p>
-          )}
-          {periodIncome > 0 && (
-            <p className="text-[10px] text-chart-1/60 font-normal uppercase tracking-tighter mb-4">
-              +{CURRENCY_SYMBOL} {formatBRLocale(periodIncome, { minimumFractionDigits: 2 })} income
-            </p>
-          )}
-          <div className="space-y-4">
-            <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
-              {totalBudget > 0 ? (
-                <div
-                  style={{ width: `${spentPercent}%` }}
-                  className={`h-full rounded-full transition-all duration-1000 ${spentPercent >= 90 ? "bg-chart-2" : spentPercent >= 70 ? "bg-yellow-400" : "bg-white"}`}
-                />
-              ) : (
-                <div style={{ width: `${monthProgressPercent}%` }} className="h-full bg-white/20 rounded-full transition-all duration-1000" />
+          {hasAnyData ? (
+            <>
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
+              <div className={`flex items-baseline gap-2 mb-2 ${periodExpense > 0 ? "text-foreground" : "text-muted-foreground/20"}`}>
+                <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
+                <h2 className="text-5xl font-black tracking-tighter leading-none">
+                  {formatBRLocale(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </h2>
+              </div>
+              {totalBudget > 0 && (
+                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
+                  of {CURRENCY_SYMBOL} {formatBRLocale(totalBudget, { minimumFractionDigits: 2 })} budget
+                </p>
               )}
+              {periodIncome > 0 && (
+                <p className="text-[10px] text-chart-1/60 font-normal uppercase tracking-tighter mb-4">
+                  +{CURRENCY_SYMBOL} {formatBRLocale(periodIncome, { minimumFractionDigits: 2 })} income
+                </p>
+              )}
+              <div className="space-y-4">
+                <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
+                  {totalBudget > 0 && spentPercent > 0 && (
+                    <div
+                      style={{ width: `${spentPercent}%` }}
+                      className={`h-full rounded-full transition-all duration-1000 ${spentPercent >= 90 ? "bg-chart-2" : spentPercent >= 70 ? "bg-yellow-400" : "bg-white"}`}
+                    />
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-[10px] font-normal text-muted-foreground uppercase tracking-widest opacity-60">
+                  <span className="flex items-center gap-1.5">
+                    <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
+                    Ends {monthEnd.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
+                  </span>
+                  <span>{daysLeft} days left{totalBudget > 0 ? ` • ${spentPercent.toFixed(0)}% used` : ""}</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
+              <div className="flex items-baseline justify-center gap-2 mb-4 text-muted-foreground/20">
+                <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
+                <h2 className="text-5xl font-black tracking-tighter leading-none">0,00</h2>
+              </div>
+              <p className="text-xs text-muted-foreground/40">Add a budget or record a transaction to get started</p>
             </div>
-            <div className="flex items-center justify-between text-[10px] font-normal text-muted-foreground uppercase tracking-widest opacity-60">
-              <span className="flex items-center gap-1.5">
-                <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
-                Ends {monthEnd.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
-              </span>
-              <span>{daysLeft} days left{totalBudget > 0 ? ` • ${spentPercent.toFixed(0)}% used` : ` • ${monthProgressPercent.toFixed(0)}%`}</span>
-            </div>
-          </div>
+          )}
         </section>
 
+        {hasAnyData && (
         <section className="grid grid-cols-2 gap-3.5">
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
@@ -336,6 +349,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
+        )}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">

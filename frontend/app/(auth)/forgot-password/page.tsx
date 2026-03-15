@@ -16,9 +16,8 @@ export default function ForgotPasswordPage() {
     setSuccess(false);
     setLoading(true);
     try {
-      const data = await forgotPassword(email);
+      await forgotPassword(email);
       setSuccess(true);
-      if (data.message) setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed");
     } finally {
@@ -28,53 +27,52 @@ export default function ForgotPasswordPage() {
 
   return (
     <>
-      <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">
-        Forgot password
-      </h1>
+      <div className="text-center mb-6">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Reset password</h1>
+        <p className="text-xs text-muted-foreground/50 mt-1">We&apos;ll email you a reset link</p>
+      </div>
       {success ? (
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            If that email is registered, we sent a password reset link. Check your
-            inbox and spam folder.
+          <p className="text-sm text-muted-foreground/60 text-center">
+            If that email is registered, we sent a password reset link. Check your inbox and spam folder.
           </p>
           <Link
             href="/login"
-            className="block w-full text-center rounded-xl sm:rounded-2xl bg-primary text-primary-foreground py-2.5 sm:py-3 font-bold text-sm"
+            className="block w-full text-center rounded-xl bg-white text-black py-3 font-bold text-sm hover:bg-white/90 active:scale-[0.98] transition-all"
           >
             Back to sign in
           </Link>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
+            <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-xl p-3">
               {error}
             </p>
           )}
-          <div>
-            <label htmlFor="email" className="label block mb-2">
-              Email
-            </label>
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Email</label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+              placeholder="you@example.com"
+              className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl sm:rounded-2xl bg-primary text-primary-foreground py-2.5 sm:py-3 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all"
+            className="w-full rounded-xl bg-white text-black py-3 font-bold text-sm hover:bg-white/90 disabled:opacity-50 active:scale-[0.98] transition-all shadow-lg shadow-white/5"
           >
             {loading ? "Sending…" : "Send reset link"}
           </button>
         </form>
       )}
-      <p className="mt-4 text-center text-sm text-muted-foreground">
-        <Link href="/login" className="text-primary hover:underline">
+      <p className="mt-5 text-center text-xs text-muted-foreground/40">
+        <Link href="/login" className="text-foreground font-bold hover:underline">
           Back to sign in
         </Link>
       </p>

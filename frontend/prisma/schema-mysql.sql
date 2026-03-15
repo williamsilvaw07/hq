@@ -1,4 +1,4 @@
--- MySQL schema for Fintech Tracker (matches Prisma schema).
+-- MySQL schema for NorthTrack (matches Prisma schema).
 -- Create an empty database first, then run this script.
 
 -- Users

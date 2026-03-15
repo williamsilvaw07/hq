@@ -85,7 +85,7 @@ export default function SettingsPage() {
   const { user, logout } = useAuth();
 
   return (
-    <div className="space-y-5 sm:space-y-8 pt-2 sm:pt-4 px-4 sm:px-6">
+    <div className="space-y-5 sm:space-y-8 pt-2 sm:pt-4 px-5">
       {/* Profile card */}
       <section className="flex flex-col items-center py-4 sm:py-6 bg-secondary rounded-lg sm:rounded-xl overflow-hidden">
         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary border-2 border-primary/20 flex items-center justify-center text-xl sm:text-2xl font-bold text-foreground">

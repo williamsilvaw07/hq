@@ -94,7 +94,7 @@ export default function SettingsProfilePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-10 font-sans tracking-tight">
-      <header className="z-40 bg-background/80 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+      <header className="z-40 bg-background/80 backdrop-blur-md px-5 py-3 sm:py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -115,7 +115,7 @@ export default function SettingsProfilePage() {
           {saving ? "Saving…" : saved ? "Saved" : "Save"}
         </button>
       </header>
-      <main className="px-4 sm:px-6 space-y-5 sm:space-y-8 pt-4 sm:pt-6">
+      <main className="px-5 space-y-5 sm:space-y-8 pt-4 sm:pt-6">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <input

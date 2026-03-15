@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { requireWorkspaceMember, requireWorkspaceAdmin } from "@/lib/workspace-auth";
 import { ensureFixedBillTable } from "@/lib/fixed-bill-migrate";
 import {
   findFixedBillById,
@@ -47,7 +47,7 @@ export async function PATCH(
 ) {
   try {
     const { workspaceId, billId } = await params;
-    const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    const { workspaceId: wid } = await requireWorkspaceAdmin(req, workspaceId);
     await ensureFixedBillTable();
     const id = parseInt(billId, 10);
     if (Number.isNaN(id)) {
@@ -90,7 +90,7 @@ export async function DELETE(
 ) {
   try {
     const { workspaceId, billId } = await params;
-    const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    const { workspaceId: wid } = await requireWorkspaceAdmin(req, workspaceId);
     await ensureFixedBillTable();
     const id = parseInt(billId, 10);
     if (Number.isNaN(id)) {

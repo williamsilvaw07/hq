@@ -191,13 +191,20 @@ export default function WorkspaceSettingsPage() {
     finally { setSaving(false); }
   }
 
+  const [telegramError, setTelegramError] = useState<string | null>(null);
+
   async function handleGenerateTelegramCode() {
     setTelegramLoading(true);
+    setTelegramError(null);
     try {
       const res = await api<{ code: string }>(`/api/workspaces/${id}/telegram/link`, { method: "POST" });
       if (res.data?.code) setTelegramCode(res.data.code);
-    } catch { /* ignore */ }
-    finally { setTelegramLoading(false); }
+      else setTelegramError("No code returned. Try again.");
+    } catch (err) {
+      setTelegramError(err instanceof Error ? err.message : "Failed to generate code");
+    } finally {
+      setTelegramLoading(false);
+    }
   }
 
   async function handleCopyTelegramCode() {
@@ -211,11 +218,13 @@ export default function WorkspaceSettingsPage() {
   const isActive = Number(id) === activeWorkspaceId;
   const myMember = members.find((m) => m.email === authUser?.email);
   const isOwner = myMember?.role === "owner";
+  const isAdmin = myMember?.role === "admin" || isOwner;
+  const canEdit = isAdmin;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-foreground pb-32">
-        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center gap-4">
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-5 py-3 flex items-center gap-4">
           <button type="button" onClick={() => router.back()} className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-foreground active:scale-95 transition-all shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -224,7 +233,7 @@ export default function WorkspaceSettingsPage() {
             <div className="h-3.5 w-28 bg-white/[0.06] rounded animate-pulse" />
           </div>
         </header>
-        <div className="px-4 space-y-6 pt-4">
+        <div className="px-5 space-y-6 pt-4">
           <div className="space-y-2">
             <div className="h-3 w-16 bg-white/[0.06] rounded animate-pulse" />
             <div className="bg-card rounded-2xl p-4 space-y-4">
@@ -265,7 +274,7 @@ export default function WorkspaceSettingsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center gap-4">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-5 py-3 flex items-center gap-4">
         <button
           type="button"
           onClick={() => router.back()}
@@ -284,42 +293,58 @@ export default function WorkspaceSettingsPage() {
         )}
       </header>
 
-      <div className="px-4 space-y-6 pt-2">
+      <div className="px-5 space-y-6 pt-2">
 
         {/* General */}
         <section className="space-y-2">
           <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1">General</p>
           <div className="bg-card rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
             {/* Name */}
-            <button
-              type="button"
-              onClick={() => openSheet({ type: "edit-name" })}
-              className="w-full flex items-center justify-between px-4 py-4 active:bg-white/5 transition-colors"
-            >
-              <div className="text-left min-w-0">
+            {canEdit ? (
+              <button
+                type="button"
+                onClick={() => openSheet({ type: "edit-name" })}
+                className="w-full flex items-center justify-between px-4 py-4 active:bg-white/5 transition-colors"
+              >
+                <div className="text-left min-w-0">
+                  <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mb-0.5">Workspace Name</p>
+                  <p className="text-sm font-bold text-foreground truncate">{workspace.name}</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-white/[0.07] flex items-center justify-center shrink-0 ml-3">
+                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                </div>
+              </button>
+            ) : (
+              <div className="px-4 py-4">
                 <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mb-0.5">Workspace Name</p>
                 <p className="text-sm font-bold text-foreground truncate">{workspace.name}</p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-white/[0.07] flex items-center justify-center shrink-0 ml-3">
-                <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
-              </div>
-            </button>
+            )}
             {/* Currency */}
-            <button
-              type="button"
-              onClick={() => openSheet({ type: "currency" })}
-              className="w-full flex items-center justify-between px-4 py-4 active:bg-white/5 transition-colors"
-            >
-              <div className="text-left min-w-0">
+            {canEdit ? (
+              <button
+                type="button"
+                onClick={() => openSheet({ type: "currency" })}
+                className="w-full flex items-center justify-between px-4 py-4 active:bg-white/5 transition-colors"
+              >
+                <div className="text-left min-w-0">
+                  <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mb-0.5">Currency</p>
+                  <p className="text-sm font-bold text-foreground">
+                    {currencyInfo.symbol} · {currencyInfo.code} — {currencyInfo.label}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-white/[0.07] flex items-center justify-center shrink-0 ml-3">
+                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                </div>
+              </button>
+            ) : (
+              <div className="px-4 py-4">
                 <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mb-0.5">Currency</p>
                 <p className="text-sm font-bold text-foreground">
                   {currencyInfo.symbol} · {currencyInfo.code} — {currencyInfo.label}
                 </p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-white/[0.07] flex items-center justify-center shrink-0 ml-3">
-                <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
-              </div>
-            </button>
+            )}
           </div>
         </section>
 
@@ -327,13 +352,15 @@ export default function WorkspaceSettingsPage() {
         <section className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em]">Team Members</p>
-            <button
-              type="button"
-              onClick={() => openSheet({ type: "invite" })}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all"
-            >
-              <UserPlus className="w-3 h-3" /> Invite
-            </button>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => openSheet({ type: "invite" })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all"
+              >
+                <UserPlus className="w-3 h-3" /> Invite
+              </button>
+            )}
           </div>
           <div className="bg-card rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
             {members.length === 0 ? (
@@ -341,7 +368,7 @@ export default function WorkspaceSettingsPage() {
             ) : (
               members.map((m) => {
                 const isMe = m.email === authUser?.email;
-                const canManage = isOwner && !isMe && m.role !== "owner";
+                const canManage = canEdit && !isMe && m.role !== "owner" && (isOwner || m.role !== "admin");
                 const role = ROLE_META[m.role] ?? ROLE_META.member;
                 return (
                   <div key={m.id} className="flex items-center justify-between px-4 py-3 gap-3">
@@ -428,6 +455,9 @@ export default function WorkspaceSettingsPage() {
                     <li>Done! Send expenses or income via text, voice, or photo</li>
                   </ol>
                 </div>
+                {telegramError && (
+                  <p className="text-xs text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-xl p-2.5">{telegramError}</p>
+                )}
                 <button
                   type="button"
                   onClick={handleGenerateTelegramCode}

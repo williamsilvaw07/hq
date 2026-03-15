@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { requireWorkspaceMember, requireWorkspaceAdmin } from "@/lib/workspace-auth";
 import { fetchMany, fetchOne, execute } from "@/lib/sql";
 
 export async function PATCH(
@@ -8,7 +8,7 @@ export async function PATCH(
 ) {
   try {
     const { workspaceId, cardId } = await params;
-    const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    const { workspaceId: wid } = await requireWorkspaceAdmin(req, workspaceId);
     const id = parseInt(cardId, 10);
     if (Number.isNaN(id)) return NextResponse.json({ message: "Card not found." }, { status: 404 });
 
@@ -61,7 +61,7 @@ export async function DELETE(
 ) {
   try {
     const { workspaceId, cardId } = await params;
-    const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    const { workspaceId: wid } = await requireWorkspaceAdmin(req, workspaceId);
     const id = parseInt(cardId, 10);
     if (Number.isNaN(id)) return NextResponse.json({ message: "Card not found." }, { status: 404 });
 

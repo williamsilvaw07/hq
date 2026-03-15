@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { requireWorkspaceMember, requireWorkspaceAdmin } from "@/lib/workspace-auth";
 import { fetchOne, execute } from "@/lib/sql";
 
 type Params = { params: Promise<{ workspaceId: string }> };
@@ -29,7 +29,7 @@ export async function GET(req: Request, { params }: Params) {
 export async function PATCH(req: Request, { params }: Params) {
   try {
     const { workspaceId } = await params;
-    await requireWorkspaceMember(req, workspaceId);
+    await requireWorkspaceAdmin(req, workspaceId);
     const workspaceIdNum = parseInt(workspaceId, 10);
     const body = await req.json();
     const name = typeof body.name === "string" ? body.name.trim() : undefined;

@@ -6,8 +6,8 @@ import { AuthProvider } from "@/lib/auth-context";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Fintech Tracker",
-  description: "Mobile-first financial tracking",
+  title: "NorthTrack",
+  description: "Smart financial tracking for teams and individuals",
 };
 
 export default function RootLayout({

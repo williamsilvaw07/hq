@@ -35,76 +35,75 @@ function RegisterContent() {
 
   return (
     <>
-      <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">Create account</h1>
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+      <div className="text-center mb-6">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Create your account</h1>
+        <p className="text-xs text-muted-foreground/50 mt-1">Start tracking your finances</p>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
+          <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-xl p-3">
             {error}
           </p>
         )}
-        <div>
-          <label htmlFor="name" className="label block mb-2">
-            Name
-          </label>
+        <div className="space-y-1.5">
+          <label htmlFor="name" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Name</label>
           <input
             id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            placeholder="Your name"
+            className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
           />
         </div>
-        <div>
-          <label htmlFor="email" className="label block mb-2">
-            Email
-          </label>
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Email</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            placeholder="you@example.com"
+            className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
           />
         </div>
-        <div>
-          <label htmlFor="password" className="label block mb-2">
-            Password
-          </label>
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Password</label>
           <input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            placeholder="••••••••"
+            className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
           />
         </div>
-        <div>
-          <label htmlFor="password_confirmation" className="label block mb-2">
-            Confirm password
-          </label>
+        <div className="space-y-1.5">
+          <label htmlFor="password_confirmation" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Confirm Password</label>
           <input
             id="password_confirmation"
             type="password"
             value={passwordConfirmation}
             onChange={(e) => setPasswordConfirmation(e.target.value)}
             required
-            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            placeholder="••••••••"
+            className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl sm:rounded-2xl bg-primary text-primary-foreground py-2.5 sm:py-3 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all"
+          className="w-full rounded-xl bg-white text-black py-3 font-bold text-sm hover:bg-white/90 disabled:opacity-50 active:scale-[0.98] transition-all shadow-lg shadow-white/5"
         >
-          {loading ? "Creating account…" : "Register"}
+          {loading ? "Creating account…" : "Create account"}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-muted-foreground">
+      <p className="mt-5 text-center text-xs text-muted-foreground/40">
         Already have an account?{" "}
-        <Link href={returnTo ? `/login?returnTo=${encodeURIComponent(returnTo)}` : "/login"} className="text-primary hover:underline">
+        <Link href={returnTo ? `/login?returnTo=${encodeURIComponent(returnTo)}` : "/login"} className="text-foreground font-bold hover:underline">
           Sign in
         </Link>
       </p>

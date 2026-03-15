@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { requireWorkspaceMember, requireWorkspaceAdmin } from "@/lib/workspace-auth";
 import { fetchMany, insertOne } from "@/lib/sql";
 
 export async function GET(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
@@ -26,7 +26,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ workspac
 export async function POST(req: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   try {
     const { workspaceId } = await params;
-    const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    const { workspaceId: wid } = await requireWorkspaceAdmin(req, workspaceId);
     const body = await req.json();
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const type = typeof body.type === "string" ? body.type : "";

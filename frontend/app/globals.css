@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Dark fintech palette – cards clearly elevated above background */
+  /* NorthTrack dark palette – cards clearly elevated above background */
   --background: #0b0b0b;
   --foreground: #ffffff;
   --primary: #ffffff;

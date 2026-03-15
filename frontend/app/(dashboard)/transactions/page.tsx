@@ -128,8 +128,8 @@ export default function TransactionsPage() {
 
   if (!result) {
     return (
-      <div className="space-y-4 sm:space-y-6 pb-24 px-4 sm:px-6">
-        <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md space-y-3 sm:space-y-4">
+      <div className="space-y-4 sm:space-y-6 pb-24 px-5">
+        <header className="z-30 -mx-5 px-5 py-3 sm:py-4 bg-background/80 backdrop-blur-md space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between">
             <SkeletonBox className="h-7 w-36" />
             <div className="flex items-center gap-2">
@@ -177,8 +177,8 @@ export default function TransactionsPage() {
   }, {});
 
   return (
-    <div className="space-y-4 sm:space-y-6 pb-24 px-4 sm:px-6">
-      <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md space-y-3 sm:space-y-4">
+    <div className="space-y-4 sm:space-y-6 pb-24 px-5">
+      <header className="z-30 -mx-5 px-5 py-3 sm:py-4 bg-background/80 backdrop-blur-md space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="page-title">Activity History</h1>
           <div className="flex items-center gap-2">
@@ -223,7 +223,7 @@ export default function TransactionsPage() {
             className="w-full bg-card rounded-xl sm:rounded-lg py-2.5 sm:py-3.5 pl-10 sm:pl-11 pr-3 sm:pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/20 transition-all"
           />
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-4 sm:-mx-6 px-4 sm:px-6">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-5 px-5">
           {filterPills.map(({ id, label }) => (
             <button
               key={id}

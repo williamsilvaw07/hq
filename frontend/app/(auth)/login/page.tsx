@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -10,37 +10,9 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [dbHealthy, setDbHealthy] = useState<null | boolean>(null);
-  const [dbMessage, setDbMessage] = useState<string>("");
   const { login } = useAuth();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo");
-
-  useEffect(() => {
-    let cancelled = false;
-    async function checkDb() {
-      try {
-        const res = await fetch("/api/health/db");
-        const data = await res.json();
-        if (cancelled) return;
-        if (res.ok && data?.ok) {
-          setDbHealthy(true);
-          setDbMessage("Database connection OK");
-        } else {
-          setDbHealthy(false);
-          setDbMessage(data?.error || "Database check failed");
-        }
-      } catch (e) {
-        if (cancelled) return;
-        setDbHealthy(false);
-        setDbMessage("Database check failed");
-      }
-    }
-    checkDb();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -57,39 +29,33 @@ function LoginContent() {
 
   return (
     <>
-      <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">Sign in</h1>
-      {dbHealthy === false && (
-        <p className="mb-4 text-xs rounded-2xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-red-300">
-          Database error: {dbMessage}
-        </p>
-      )}
-      {dbHealthy === true && (
-        <p className="mb-4 text-xs rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-emerald-300">
-          Database connection OK.
-        </p>
-      )}
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+      <div className="text-center mb-6">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Welcome back</h1>
+        <p className="text-xs text-muted-foreground/50 mt-1">Sign in to your account</p>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-2xl p-3">
+          <p className="text-sm text-chart-2 bg-chart-2/10 border border-chart-2/20 rounded-xl p-3">
             {error}
           </p>
         )}
-        <div>
-          <label htmlFor="email" className="label block mb-2">Email</label>
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Email</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            placeholder="you@example.com"
+            className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
           />
         </div>
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="password" className="label block">Password</label>
-            <Link href="/forgot-password" className="text-xs text-primary hover:underline">
-              Forgot password?
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Password</label>
+            <Link href="/forgot-password" className="text-[11px] text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+              Forgot?
             </Link>
           </div>
           <input
@@ -98,21 +64,22 @@ function LoginContent() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-xl sm:rounded-2xl border border-border/50 bg-card px-3 py-2.5 sm:px-4 sm:py-3.5 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20"
+            placeholder="••••••••"
+            className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl sm:rounded-2xl bg-primary text-primary-foreground py-2.5 sm:py-3 font-bold text-sm shadow-lg shadow-white/10 hover:opacity-90 disabled:opacity-50 active:scale-[0.98] transition-all"
+          className="w-full rounded-xl bg-white text-black py-3 font-bold text-sm hover:bg-white/90 disabled:opacity-50 active:scale-[0.98] transition-all shadow-lg shadow-white/5"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-muted-foreground">
-        No account?{" "}
-        <Link href={returnTo ? `/register?returnTo=${encodeURIComponent(returnTo)}` : "/register"} className="text-primary hover:underline">
-          Register
+      <p className="mt-5 text-center text-xs text-muted-foreground/40">
+        Don&apos;t have an account?{" "}
+        <Link href={returnTo ? `/register?returnTo=${encodeURIComponent(returnTo)}` : "/register"} className="text-foreground font-bold hover:underline">
+          Create one
         </Link>
       </p>
     </>

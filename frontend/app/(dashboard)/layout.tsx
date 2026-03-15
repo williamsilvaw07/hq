@@ -123,7 +123,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-28 font-sans transition-colors duration-500">
       {showSettingsHeader && (
-        <header className="z-40 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center gap-4">
+        <header className="z-40 bg-background/80 backdrop-blur-md px-5 py-3 flex items-center gap-4">
           <button
             onClick={() => router.back()}
             className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-foreground active:scale-95 transition-all"

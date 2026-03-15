@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireWorkspaceMember } from "@/lib/workspace-auth";
+import { requireWorkspaceMember, requireWorkspaceAdmin } from "@/lib/workspace-auth";
 import { ensureFixedBillTable } from "@/lib/fixed-bill-migrate";
 import {
   findFixedBillsByWorkspace,
@@ -66,7 +66,7 @@ export async function POST(
 ) {
   try {
     const { workspaceId } = await params;
-    const { workspaceId: wid } = await requireWorkspaceMember(req, workspaceId);
+    const { workspaceId: wid } = await requireWorkspaceAdmin(req, workspaceId);
     await ensureFixedBillTable();
     const body = await req.json();
     const name = typeof body.name === "string" ? body.name.trim() : "New bill";

@@ -122,8 +122,8 @@ export default function BudgetsPage() {
   const totalPct = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans tracking-tight">
-      <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
+    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans tracking-tight px-5">
+      <header className="z-30 -mx-5 px-5 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
         <h1 className="page-title">Budgets</h1>
         <button
           onClick={() => {
@@ -137,7 +137,7 @@ export default function BudgetsPage() {
         </button>
       </header>
 
-      <div className="px-4 sm:px-0">
+      <div>
         {loading ? (
           <SkeletonBox className="h-32 w-full" />
         ) : (
