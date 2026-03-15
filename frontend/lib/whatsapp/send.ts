@@ -27,11 +27,11 @@ export async function sendWhatsAppMessage(to: string, text: string): Promise<voi
       }),
     });
 
+    const body = await res.text();
     if (!res.ok) {
-      const err = await res.text();
-      console.error("[whatsapp] Failed to send message:", res.status, err);
+      console.error("[whatsapp] Failed to send message:", res.status, body);
     } else {
-      console.log("[whatsapp] Message sent to", to);
+      console.log("[whatsapp] Message sent to", to, "response:", body);
     }
   } catch (err) {
     console.error("[whatsapp] Send error:", err);
