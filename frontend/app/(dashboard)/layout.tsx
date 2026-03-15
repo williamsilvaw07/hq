@@ -117,6 +117,7 @@ export default function DashboardLayout({
   const isDashboard = pathname === "/dashboard";
   const isTransactions = pathname === "/transactions";
   const isBudgets = pathname === "/budgets";
+  const isGoals = pathname?.startsWith("/goals");
   const isSetupRoot = pathname === "/settings";
   const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam && !isFixedExpenses && !isWorkspacePage;
 
@@ -170,13 +171,13 @@ export default function DashboardLayout({
           </button>
 
           <Link
-            href="/budgets"
+            href="/goals"
             className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] font-black uppercase tracking-widest transition-colors ${
-              isBudgets ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+              isGoals ? "text-white" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            <Icon icon="solar:wallet-bold-duotone" className="text-xl sm:text-2xl" />
-            <span>BUDGETS</span>
+            <Icon icon="solar:target-bold-duotone" className="text-xl sm:text-2xl" />
+            <span>GOALS</span>
           </Link>
           <Link
             href="/settings"

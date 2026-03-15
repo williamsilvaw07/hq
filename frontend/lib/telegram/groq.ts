@@ -19,7 +19,7 @@ export async function transcribeAudio(audioBuffer: Buffer, filename = "voice.ogg
     file,
     model: "whisper-large-v3-turbo",
     response_format: "text",
-    prompt: "This audio may be in English or Brazilian Portuguese (pt-BR).",
+    prompt: "Expense and income tracking. gastei 20 no uber, comprei comida por 50 reais, paguei 150 de luz, recebi 500 salário, uber 20, income 500, almoço 35, gasolina 200, mercado 180, farmácia 45, internet 100, aluguel 1500, spent 30 on groceries, taxi 25, coffee 8.",
   });
 
   return (transcription as unknown as string).trim();

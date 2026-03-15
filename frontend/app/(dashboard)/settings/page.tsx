@@ -11,6 +11,7 @@ import {
   CreditCard,
   LogOut,
   Users,
+  Target,
 } from "lucide-react";
 
 function WorkspaceSettingsSection() {
@@ -120,6 +121,21 @@ export default function SettingsPage() {
               <div className="text-left">
                 <p className="text-sm font-bold">Monthly Budgets</p>
                 <p className="text-[10px] text-muted-foreground font-normal">Set category limits</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <Link
+            href="/settings/goals"
+            className="w-full flex items-center justify-between p-3 sm:p-5 bg-card rounded-lg sm:rounded-xl active:scale-[0.98] transition-all"
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <Target className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold">Goals</p>
+                <p className="text-[10px] text-muted-foreground font-normal">Goal tracking preferences</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
