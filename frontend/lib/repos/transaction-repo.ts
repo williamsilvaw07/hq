@@ -91,6 +91,9 @@ function buildWhereClause(
   if (where.status) {
     conditions.push(`${p}status = ?`);
     params.push(where.status);
+  } else {
+    // Exclude temporary telegram confirmations from general queries
+    conditions.push(`${p}status != 'pending_confirmation'`);
   }
   if (where.type) {
     conditions.push(`${p}type = ?`);

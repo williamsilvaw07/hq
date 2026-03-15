@@ -1,5 +1,5 @@
-import { fetchOne, fetchMany, insertOne } from "@/lib/sql";
-import { parseExpenseMessage, suggestCategory } from "./parse";
+import { fetchOne, fetchMany, insertOne, execute } from "@/lib/sql";
+import { parseExpenseMessage, suggestCategory, detectReply } from "./parse";
 import { sendTelegramMessage } from "./send";
 import { validateLinkCode, linkTelegramAccount } from "./link";
 import { transcribeAudio, categorizeExpense, extractExpenseFromImage } from "./groq";
@@ -15,9 +15,18 @@ type CategoryRow = {
   name: string;
 };
 
-/**
- * Main orchestrator for text messages. Called from the POST webhook handler.
- */
+type PendingTransaction = {
+  id: number;
+  type: string;
+  amount: number;
+  description: string | null;
+  category_id: number | null;
+};
+
+// ---------------------------------------------------------------------------
+// Entry points (called from webhook)
+// ---------------------------------------------------------------------------
+
 export async function processTelegramMessage(
   telegramMessageId: string,
   chatId: number,
@@ -42,17 +51,22 @@ export async function processTelegramMessage(
     const linkResult = await validateLinkCode(trimmed);
     if (linkResult) {
       await linkTelegramAccount(linkResult.userId, chatId, linkResult.workspaceId);
-      await sendTelegramMessage(chatId, "✅ Account linked! You can now log expenses.\n\nTry sending:\n  20 uber\n  gastei 50 em mercado\n\nOr send a voice message!");
+      await sendTelegramMessage(chatId, "✅ Account linked! You can now log expenses and income.\n\nTry:\n  20 uber\n  income 500 salary\n  recebi 500 salário\n\nOr send a voice message!");
       return;
     }
   }
 
+  // 3. Check if this is a confirmation/cancel reply
+  const reply = detectReply(trimmed);
+  if (reply === "confirm" || reply === "cancel") {
+    await handleConfirmation(chatId, reply);
+    return;
+  }
+
+  // 4. Process as new expense/income
   await processExpenseText(telegramMessageId, chatId, trimmed);
 }
 
-/**
- * Handles voice messages — transcribes then processes as expense text.
- */
 export async function processTelegramVoice(
   telegramMessageId: string,
   chatId: number,
@@ -60,7 +74,7 @@ export async function processTelegramVoice(
 ): Promise<void> {
   console.log(`[telegram] Processing voice message ${telegramMessageId} from chat ${chatId}`);
 
-  // 1. Deduplication
+  // Deduplication
   try {
     await insertOne(
       "INSERT INTO telegram_messages (telegram_message_id) VALUES (?)",
@@ -71,7 +85,6 @@ export async function processTelegramVoice(
     return;
   }
 
-  // 2. Download audio from Telegram
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
     console.error("[telegram] Missing TELEGRAM_BOT_TOKEN");
@@ -80,11 +93,9 @@ export async function processTelegramVoice(
 
   let audioBuffer: Buffer;
   try {
-    // Get file path from Telegram
     const fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`);
     const fileData = await fileRes.json() as { ok: boolean; result: { file_path: string } };
     if (!fileData.ok) throw new Error("Failed to get file path");
-
     const filePath = fileData.result.file_path;
     const audioRes = await fetch(`https://api.telegram.org/file/bot${token}/${filePath}`);
     const arrayBuffer = await audioRes.arrayBuffer();
@@ -95,7 +106,6 @@ export async function processTelegramVoice(
     return;
   }
 
-  // 3. Transcribe with Groq Whisper
   let transcribed: string;
   try {
     transcribed = await transcribeAudio(audioBuffer);
@@ -114,9 +124,6 @@ export async function processTelegramVoice(
   await processExpenseText(telegramMessageId, chatId, transcribed);
 }
 
-/**
- * Handles photo messages — uses vision AI to extract expense then processes it.
- */
 export async function processTelegramPhoto(
   telegramMessageId: string,
   chatId: number,
@@ -124,7 +131,7 @@ export async function processTelegramPhoto(
 ): Promise<void> {
   console.log(`[telegram] Processing photo ${telegramMessageId} from chat ${chatId}`);
 
-  // 1. Deduplication
+  // Deduplication
   try {
     await insertOne(
       "INSERT INTO telegram_messages (telegram_message_id) VALUES (?)",
@@ -135,7 +142,6 @@ export async function processTelegramPhoto(
     return;
   }
 
-  // 2. Download image from Telegram
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) return;
 
@@ -144,7 +150,6 @@ export async function processTelegramPhoto(
     const fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`);
     const fileData = await fileRes.json() as { ok: boolean; result: { file_path: string } };
     if (!fileData.ok) throw new Error("Failed to get file path");
-
     const filePath = fileData.result.file_path;
     const imgRes = await fetch(`https://api.telegram.org/file/bot${token}/${filePath}`);
     const arrayBuffer = await imgRes.arrayBuffer();
@@ -155,7 +160,6 @@ export async function processTelegramPhoto(
     return;
   }
 
-  // 3. Extract expense with Groq Vision
   let extracted: string | null;
   try {
     extracted = await extractExpenseFromImage(imageBuffer);
@@ -175,7 +179,7 @@ export async function processTelegramPhoto(
 }
 
 // ---------------------------------------------------------------------------
-// Shared expense processing logic
+// Core: parse → draft → ask confirmation
 // ---------------------------------------------------------------------------
 
 async function processExpenseText(
@@ -206,31 +210,49 @@ async function processExpenseText(
     return;
   }
 
-  // Parse amount + description
+  // Parse amount + description + type
   const parsed = parseExpenseMessage(text);
   if (!parsed) {
     await sendTelegramMessage(
       chatId,
-      `❓ Couldn't understand: "${text}"\n\nTry:\n  20 uber\n  uber 20\n  spent 20 on food\n  gastei 20 em mercado`,
+      `❓ Couldn't understand: "${text}"\n\nTry:\n  20 uber\n  uber 20\n  income 500 salary\n  recebi 500 salário`,
     );
     return;
   }
 
-  const { amount, description } = parsed;
+  const { amount, description, type } = parsed;
 
-  // AI category resolution (with retry)
-  const { categoryId, isDraft } = await resolveCategory(description, workspaceId);
+  // Cancel any existing pending draft from this user (replace with new one)
+  await execute(
+    `DELETE FROM Transaction
+     WHERE workspace_id = ? AND created_by_user_id = ? AND status = 'pending_confirmation' AND source = 'telegram'`,
+    [workspaceId, user.id],
+  );
 
-  const status = isDraft ? "draft" : "confirmed";
+  // For expenses: resolve category
+  let categoryId: number | null = null;
+  let categoryName: string | null = null;
 
-  // Insert transaction
+  if (type === "expense") {
+    const resolved = await resolveCategory(description, workspaceId);
+    categoryId = resolved.categoryId;
+    if (categoryId) {
+      const cat = await fetchOne<CategoryRow>(
+        "SELECT id, name FROM Category WHERE id = ? LIMIT 1",
+        [categoryId],
+      );
+      categoryName = cat?.name ?? null;
+    }
+  }
+
+  // Save as pending_confirmation draft
   const today = new Date().toISOString().slice(0, 10);
-  await insertOne(
+  const txId = await insertOne(
     `INSERT INTO Transaction
        (workspace_id, category_id, created_by_user_id, type, amount, currency,
         exchange_rate, base_amount, date, description, source, status, created_at, updated_at)
-     VALUES (?, ?, ?, 'expense', ?, 'BRL', 1, ?, ?, ?, 'telegram', ?, NOW(3), NOW(3))`,
-    [workspaceId, categoryId, user.id, amount, amount, today, description, status],
+     VALUES (?, ?, ?, ?, ?, 'BRL', 1, ?, ?, ?, 'telegram', 'pending_confirmation', NOW(3), NOW(3))`,
+    [workspaceId, categoryId, user.id, type, amount, amount, today, description],
   );
 
   const amountFormatted = new Intl.NumberFormat("pt-BR", {
@@ -238,31 +260,100 @@ async function processExpenseText(
     currency: "BRL",
   }).format(amount);
 
-  if (isDraft) {
-    await sendTelegramMessage(
-      chatId,
-      `⏳ Expense saved for review!\n\nAmount: ${amountFormatted}\nDescription: ${description}\nDate: ${today}\n\nCouldn't match a budget — open the app to assign one.`,
-    );
-  } else {
-    const categories = await fetchMany<CategoryRow>(
-      "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense'",
-      [workspaceId],
-    );
-    const categoryName = categories.find((c) => c.id === categoryId)?.name ?? "Uncategorized";
-    await sendTelegramMessage(
-      chatId,
-      `✅ Expense recorded!\n\nAmount: ${amountFormatted}\nDescription: ${description}\nCategory: ${categoryName}\nDate: ${today}`,
-    );
-  }
+  // Build confirmation message
+  const typeEmoji = type === "income" ? "💰" : "🛒";
+  const typeLabel = type === "income" ? "Income" : "Expense";
 
-  console.log(`[telegram] Transaction created for user ${user.id} — ${amountFormatted} ${description} [${status}]`);
+  let msg = `${typeEmoji} ${typeLabel} detected!\n\n`;
+  msg += `Amount: ${amountFormatted}\n`;
+  msg += `Description: ${description}\n`;
+  if (type === "expense") {
+    msg += `Category: ${categoryName ?? "None (will need review)"}\n`;
+  }
+  msg += `Date: ${today}\n\n`;
+  msg += `Reply:\n`;
+  msg += `  ✅ or "yes" — Confirm\n`;
+  msg += `  ❌ or "no" — Cancel\n`;
+  msg += `  Or send a new message to replace this one`;
+
+  await sendTelegramMessage(chatId, msg);
+
+  console.log(`[telegram] Pending transaction #${txId} for user ${user.id} — ${amountFormatted} ${description} [${type}]`);
 }
 
 // ---------------------------------------------------------------------------
-// AI-powered category resolution
+// Handle confirmation / cancellation
 // ---------------------------------------------------------------------------
 
-type CategoryResult = { categoryId: number | null; isDraft: boolean };
+async function handleConfirmation(chatId: number, action: "confirm" | "cancel"): Promise<void> {
+  const user = await fetchOne<UserRow>(
+    "SELECT id, name, default_workspace_id FROM User WHERE telegram_chat_id = ? LIMIT 1",
+    [chatId],
+  );
+  if (!user || !user.default_workspace_id) return;
+
+  // Find the latest pending_confirmation transaction
+  const pending = await fetchOne<PendingTransaction>(
+    `SELECT id, type, amount, description, category_id
+     FROM Transaction
+     WHERE workspace_id = ? AND created_by_user_id = ? AND status = 'pending_confirmation' AND source = 'telegram'
+     ORDER BY created_at DESC LIMIT 1`,
+    [user.default_workspace_id, user.id],
+  );
+
+  if (!pending) {
+    await sendTelegramMessage(chatId, "❓ Nothing to confirm. Send a new expense or income first.");
+    return;
+  }
+
+  const amountFormatted = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(pending.amount);
+
+  if (action === "cancel") {
+    await execute("DELETE FROM Transaction WHERE id = ?", [pending.id]);
+    await sendTelegramMessage(chatId, `❌ Cancelled: ${amountFormatted} — ${pending.description ?? "—"}`);
+    console.log(`[telegram] User ${user.id} cancelled transaction #${pending.id}`);
+    return;
+  }
+
+  // Confirm: set status based on whether expense has a category
+  const isExpense = pending.type === "expense";
+  const needsReview = isExpense && !pending.category_id;
+  const newStatus = needsReview ? "draft" : "confirmed";
+
+  await execute(
+    `UPDATE Transaction SET status = ?, confirmed_at = NOW(3), confirmed_by_user_id = ?, updated_at = NOW(3) WHERE id = ?`,
+    [newStatus, user.id, pending.id],
+  );
+
+  if (needsReview) {
+    await sendTelegramMessage(
+      chatId,
+      `⏳ Saved for review!\n\n${amountFormatted} — ${pending.description ?? "—"}\n\nNo category matched — open the app to assign one.`,
+    );
+  } else {
+    const typeEmoji = pending.type === "income" ? "💰" : "✅";
+    let categoryInfo = "";
+    if (isExpense && pending.category_id) {
+      const cat = await fetchOne<CategoryRow>("SELECT name FROM Category WHERE id = ? LIMIT 1", [pending.category_id]);
+      categoryInfo = `\nCategory: ${cat?.name ?? "—"}`;
+    }
+    await sendTelegramMessage(
+      chatId,
+      `${typeEmoji} Confirmed!\n\n${amountFormatted} — ${pending.description ?? "—"}${categoryInfo}`,
+    );
+  }
+
+  console.log(`[telegram] User ${user.id} confirmed transaction #${pending.id} as ${newStatus}`);
+}
+
+// ---------------------------------------------------------------------------
+// AI-powered category resolution (expenses only)
+// ---------------------------------------------------------------------------
+
+type CategoryResult = { categoryId: number | null };
 
 type BudgetCategoryRow = {
   category_id: number;
@@ -271,7 +362,6 @@ type BudgetCategoryRow = {
 };
 
 async function resolveCategory(description: string, workspaceId: number): Promise<CategoryResult> {
-  // 1. Load budget categories (what the user actually uses)
   const budgetCategories = await fetchMany<BudgetCategoryRow>(
     `SELECT b.category_id, b.name AS budget_name, c.name AS category_name
      FROM budgets b
@@ -285,79 +375,62 @@ async function resolveCategory(description: string, workspaceId: number): Promis
     id: bc.category_id,
     name: bc.budget_name || bc.category_name,
   }));
-  // Deduplicate by category_id
   const unique = categoryList.filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
 
-  // If only one budget, always use it
-  if (unique.length === 1) return { categoryId: unique[0].id, isDraft: false };
+  if (unique.length === 1) return { categoryId: unique[0].id };
 
-  // 2. Try keyword-based matching first (fast, no API call)
+  // Keyword matching
   if (unique.length > 0) {
     const keywordMatch = matchByKeywords(description, unique);
     if (keywordMatch !== null) {
       console.log(`[telegram] Keyword matched category ${keywordMatch}`);
-      return { categoryId: keywordMatch, isDraft: false };
+      return { categoryId: keywordMatch };
     }
   }
 
-  // 3. Try AI categorization against budgets
+  // AI categorization
   if (unique.length > 0) {
     try {
       const aiPick = await categorizeExpense(description, unique, false);
       if (aiPick !== null) {
-        console.log(`[telegram] AI picked budget category ${aiPick}`);
-        return { categoryId: aiPick, isDraft: false };
+        console.log(`[telegram] AI picked category ${aiPick}`);
+        return { categoryId: aiPick };
       }
-
-      // Retry with lenient prompt
       const retryPick = await categorizeExpense(description, unique, true);
       if (retryPick !== null) {
-        console.log(`[telegram] AI picked budget category ${retryPick} on retry`);
-        return { categoryId: retryPick, isDraft: false };
+        console.log(`[telegram] AI picked category ${retryPick} on retry`);
+        return { categoryId: retryPick };
       }
     } catch (err) {
-      console.error("[telegram] AI categorization (budgets) failed:", err);
+      console.error("[telegram] AI categorization failed:", err);
     }
   }
 
-  // 4. Fallback: try all expense categories
-  const categories = unique.length > 0
-    ? unique
-    : await fetchMany<CategoryRow>(
-        "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY id ASC",
-        [workspaceId],
-      );
+  // Keyword suggestion fallback
+  const categories = unique.length > 0 ? unique : await fetchMany<CategoryRow>(
+    "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY id ASC",
+    [workspaceId],
+  );
 
-  if (categories.length === 0) return { categoryId: null, isDraft: true };
-  if (categories.length === 1) return { categoryId: categories[0].id, isDraft: false };
+  if (categories.length === 0) return { categoryId: null };
+  if (categories.length === 1) return { categoryId: categories[0].id };
 
-  // 5. Use keyword suggestion to pick best-guess category for drafts
   const suggested = suggestCategory(description);
   if (suggested) {
     const lower = suggested.toLowerCase();
     const match = categories.find((c) => c.name.toLowerCase().includes(lower) || lower.includes(c.name.toLowerCase()));
-    if (match) {
-      console.log(`[telegram] Keyword suggested "${suggested}" → draft with category ${match.id}`);
-      return { categoryId: match.id, isDraft: true };
-    }
+    if (match) return { categoryId: match.id };
   }
 
-  // 6. All attempts failed — save as draft without category
-  console.log("[telegram] Could not categorize — saving as draft");
-  return { categoryId: null, isDraft: true };
+  return { categoryId: null };
 }
 
-/**
- * Tries to match the expense description to a category using simple keyword/substring matching.
- * Returns the category id or null.
- */
 function matchByKeywords(
   description: string,
   categories: { id: number; name: string }[],
 ): number | null {
   const lower = description.toLowerCase();
 
-  // Direct substring match: expense description contains category name or vice versa
   for (const cat of categories) {
     const catLower = cat.name.toLowerCase();
     if (lower.includes(catLower) || catLower.includes(lower)) {
@@ -365,7 +438,6 @@ function matchByKeywords(
     }
   }
 
-  // Word-level overlap: check if any word in the description matches a word in the category
   const descWords = lower.split(/\s+/).filter((w) => w.length > 2);
   for (const cat of categories) {
     const catWords = cat.name.toLowerCase().split(/[\s&]+/).filter((w) => w.length > 2);

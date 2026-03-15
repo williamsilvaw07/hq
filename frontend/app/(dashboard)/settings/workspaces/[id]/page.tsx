@@ -55,6 +55,8 @@ export default function WorkspaceSettingsPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
   const [selectedRole, setSelectedRole] = useState("member");
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   // Telegram
   const [telegramCode, setTelegramCode] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export default function WorkspaceSettingsPage() {
     setError("");
     if (s.type === "edit-name") setName(workspace?.name ?? "");
     if (s.type === "currency") setSelectedCurrency(workspace?.currency ?? "BRL");
-    if (s.type === "invite") { setInviteEmail(""); setInviteRole("member"); }
+    if (s.type === "invite") { setInviteEmail(""); setInviteRole("member"); setInviteLink(null); setInviteCopied(false); }
     if (s.type === "change-role") setSelectedRole(s.member.role);
     setSheet(s);
   }
@@ -131,13 +133,20 @@ export default function WorkspaceSettingsPage() {
     if (!inviteEmail.trim() || saving) return;
     setSaving(true); setError("");
     try {
-      await api(`/api/workspaces/${id}/members/invite`, {
+      const res = await api<{ invite_link: string }>(`/api/workspaces/${id}/members/invite`, {
         method: "POST",
         body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole }),
       });
-      closeSheet();
-    } catch { setError("Failed to send invite."); }
+      setInviteLink(res.data?.invite_link ?? null);
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to create invite."); }
     finally { setSaving(false); }
+  }
+
+  async function handleCopyInviteLink() {
+    if (!inviteLink) return;
+    await navigator.clipboard.writeText(inviteLink);
+    setInviteCopied(true);
+    setTimeout(() => setInviteCopied(false), 2000);
   }
 
   async function handleChangeRole(e: FormEvent) {
@@ -531,7 +540,7 @@ export default function WorkspaceSettingsPage() {
             )}
 
             {/* Invite */}
-            {sheet.type === "invite" && (
+            {sheet.type === "invite" && !inviteLink && (
               <form onSubmit={handleInvite} className="space-y-4">
                 <input
                   type="email"
@@ -541,40 +550,86 @@ export default function WorkspaceSettingsPage() {
                   className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm font-semibold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-white/20"
                   autoFocus
                 />
-                <div className="grid grid-cols-3 bg-black/30 p-1 rounded-full gap-1">
-                  {(["member", "admin", "viewer"] as const).map((r) => (
+                <div className="space-y-1">
+                  {([
+                    { id: "member" as const, desc: "Can add and edit their own transactions" },
+                    { id: "admin" as const, desc: "Full access — manage budgets, cards & members" },
+                    { id: "viewer" as const, desc: "Read-only access to all workspace data" },
+                  ]).map(({ id, desc }) => (
                     <button
-                      key={r}
+                      key={id}
                       type="button"
-                      onClick={() => setInviteRole(r)}
-                      className={`py-2.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all ${inviteRole === r ? "bg-white text-black shadow-sm" : "text-muted-foreground/60"}`}
+                      onClick={() => setInviteRole(id)}
+                      className={`w-full text-left px-4 py-3 rounded-xl transition-all ${inviteRole === id ? "bg-white/10 text-foreground" : "bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06]"}`}
                     >
-                      {r}
+                      <p className="text-xs font-bold uppercase tracking-wide">{id}</p>
+                      <p className="text-[10px] font-normal text-muted-foreground/60 mt-0.5">{desc}</p>
                     </button>
                   ))}
                 </div>
                 <div className="flex gap-3">
                   <button type="button" onClick={closeSheet} className="flex-1 py-3.5 rounded-full bg-white/[0.07] text-sm font-bold uppercase tracking-widest text-muted-foreground active:scale-95 transition-all">Cancel</button>
                   <button type="submit" disabled={saving || !inviteEmail.trim()} className="flex-[1.4] py-3.5 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest disabled:opacity-40 active:scale-95 transition-all flex items-center justify-center gap-2">
-                    {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Sending…</> : "Send Invite"}
+                    {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Creating…</> : "Generate Link"}
                   </button>
                 </div>
               </form>
+            )}
+
+            {/* Invite Link Generated */}
+            {sheet.type === "invite" && inviteLink && (
+              <div className="space-y-4">
+                <div className="bg-emerald-400/10 border border-emerald-400/20 rounded-xl p-3">
+                  <p className="text-xs text-emerald-400 font-bold">Invite link created!</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Share this link with <span className="text-foreground font-semibold">{inviteEmail}</span>. They can sign up or log in to join as <span className="text-foreground font-semibold">{inviteRole}</span>.
+                  </p>
+                </div>
+                <div className="flex items-center justify-between bg-background rounded-xl px-4 py-3 gap-3">
+                  <span className="text-xs font-mono text-foreground truncate flex-1">{inviteLink}</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyInviteLink}
+                    className="text-muted-foreground active:scale-90 transition-all shrink-0"
+                    aria-label="Copy link"
+                  >
+                    {inviteCopied
+                      ? <CheckCheck className="w-5 h-5 text-emerald-400" />
+                      : <Copy className="w-5 h-5" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted-foreground/50 text-center">Link expires in 7 days</p>
+                <div className="flex gap-3">
+                  <button type="button" onClick={closeSheet} className="flex-1 py-3.5 rounded-full bg-white/[0.07] text-sm font-bold uppercase tracking-widest text-muted-foreground active:scale-95 transition-all">Done</button>
+                  <button
+                    type="button"
+                    onClick={() => { setInviteLink(null); setInviteEmail(""); setInviteCopied(false); }}
+                    className="flex-1 py-3.5 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest active:scale-95 transition-all"
+                  >
+                    Invite Another
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Change Role */}
             {sheet.type === "change-role" && (
               <form onSubmit={handleChangeRole} className="space-y-4">
                 <p className="text-sm text-muted-foreground">Changing role for <span className="font-bold text-foreground">{sheet.member.name}</span></p>
-                <div className="grid grid-cols-3 bg-black/30 p-1 rounded-full gap-1">
-                  {(["admin", "member", "viewer"] as const).map((r) => (
+                <div className="space-y-1">
+                  {([
+                    { id: "admin" as const, desc: "Full access — manage budgets, cards & members" },
+                    { id: "member" as const, desc: "Can add and edit their own transactions" },
+                    { id: "viewer" as const, desc: "Read-only access to all workspace data" },
+                  ]).map(({ id, desc }) => (
                     <button
-                      key={r}
+                      key={id}
                       type="button"
-                      onClick={() => setSelectedRole(r)}
-                      className={`py-2.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all ${selectedRole === r ? "bg-white text-black shadow-sm" : "text-muted-foreground/60"}`}
+                      onClick={() => setSelectedRole(id)}
+                      className={`w-full text-left px-4 py-3 rounded-xl transition-all ${selectedRole === id ? "bg-white/10 text-foreground" : "bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06]"}`}
                     >
-                      {r}
+                      <p className="text-xs font-bold uppercase tracking-wide">{id}</p>
+                      <p className="text-[10px] font-normal text-muted-foreground/60 mt-0.5">{desc}</p>
                     </button>
                   ))}
                 </div>

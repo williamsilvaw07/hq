@@ -1,7 +1,11 @@
 export type ParsedExpense = {
   amount: number;
   description: string;
+  type: "expense" | "income";
 };
+
+const INCOME_PREFIXES = /^(income|received|recebi|recebido|entrada|earned|\+)\s*/i;
+const EXPENSE_PREFIXES = /^(spent|gastei|paguei|comprei|expense|gasto)\s*/i;
 
 /**
  * Rule-based parser. Supports:
@@ -11,14 +15,28 @@ export type ParsedExpense = {
  *   "20 on uber"
  *   "gastei 20 em uber"
  *   "20 no uber"
+ *   "income 500 salary"
+ *   "recebi 500 salário"
+ *   "+500 freelance"
  */
 export function parseExpenseMessage(text: string): ParsedExpense | null {
   const raw = text.trim();
 
-  // Strip common leading phrases (EN + PT-BR)
-  const stripped = raw
-    .replace(/^(spent|gastei|paguei|comprei)\s+/i, "")
-    .replace(/\s+(on|em|no|na|para)\s+/i, " ")
+  // Detect type
+  let type: "expense" | "income" = "expense";
+  let cleaned = raw;
+
+  if (INCOME_PREFIXES.test(cleaned)) {
+    type = "income";
+    cleaned = cleaned.replace(INCOME_PREFIXES, "").trim();
+  } else if (EXPENSE_PREFIXES.test(cleaned)) {
+    type = "expense";
+    cleaned = cleaned.replace(EXPENSE_PREFIXES, "").trim();
+  }
+
+  // Strip connector words (EN + PT-BR)
+  const stripped = cleaned
+    .replace(/\s+(on|em|no|na|para|from|de|do|da)\s+/i, " ")
     .trim();
 
   const amountPattern = /(\d+(?:[.,]\d{1,2})?)/;
@@ -28,7 +46,7 @@ export function parseExpenseMessage(text: string): ParsedExpense | null {
   if (amountFirst) {
     const amount = parseAmount(amountFirst[1]);
     const description = amountFirst[2].trim();
-    if (amount > 0 && description) return { amount, description };
+    if (amount > 0 && description) return { amount, description, type };
   }
 
   // Description first: "uber 20"
@@ -36,7 +54,14 @@ export function parseExpenseMessage(text: string): ParsedExpense | null {
   if (descFirst) {
     const description = descFirst[1].trim();
     const amount = parseAmount(descFirst[2]);
-    if (amount > 0 && description) return { amount, description };
+    if (amount > 0 && description) return { amount, description, type };
+  }
+
+  // Amount only: "20" (no description)
+  const amountOnly = stripped.match(new RegExp(`^${amountPattern.source}$`));
+  if (amountOnly) {
+    const amount = parseAmount(amountOnly[1]);
+    if (amount > 0) return { amount, description: type === "income" ? "Income" : "Expense", type };
   }
 
   return null;
@@ -46,6 +71,22 @@ function parseAmount(raw: string): number {
   const normalised = raw.replace(",", ".");
   const n = parseFloat(normalised);
   return isFinite(n) && n > 0 ? n : 0;
+}
+
+// ---------------------------------------------------------------------------
+// Confirmation detection
+// ---------------------------------------------------------------------------
+
+const CONFIRM_WORDS = ["yes", "ok", "confirm", "sim", "s", "y", "✅", "👍", "confirma", "confirmar"];
+const CANCEL_WORDS = ["no", "cancel", "não", "nao", "n", "❌", "cancelar", "delete", "apagar"];
+
+export type UserReply = "confirm" | "cancel" | "other";
+
+export function detectReply(text: string): UserReply {
+  const lower = text.trim().toLowerCase();
+  if (CONFIRM_WORDS.includes(lower)) return "confirm";
+  if (CANCEL_WORDS.includes(lower)) return "cancel";
+  return "other";
 }
 
 // ---------------------------------------------------------------------------

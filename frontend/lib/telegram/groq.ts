@@ -18,8 +18,8 @@ export async function transcribeAudio(audioBuffer: Buffer, filename = "voice.ogg
   const transcription = await groq.audio.transcriptions.create({
     file,
     model: "whisper-large-v3-turbo",
-    language: "pt", // supports PT-BR and EN automatically
     response_format: "text",
+    prompt: "This audio may be in English or Brazilian Portuguese (pt-BR).",
   });
 
   return (transcription as unknown as string).trim();
