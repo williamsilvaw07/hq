@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import { CURRENCY_SYMBOL, formatBRLocale } from "@/lib/format";
+import { CURRENCY_SYMBOL, formatBRL } from "@/lib/format";
 import { Plus } from "lucide-react";
 import { CardModal, type CreditCard } from "./CardModal";
 import { SkeletonBox } from "@/components/ui/Skeleton";
@@ -71,8 +71,8 @@ export default function CardsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans tracking-tight">
-      <header className="z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
+    <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-32 font-sans tracking-tight px-5">
+      <header className="z-30 -mx-5 px-5 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
         <h1 className="page-title">My Cards</h1>
         <button
           onClick={() => { setEditingCard(null); setModalOpen(true); }}
@@ -83,7 +83,7 @@ export default function CardsPage() {
         </button>
       </header>
 
-      <main className="px-4 sm:px-0 py-4 space-y-4">
+      <main className="py-4 space-y-4">
         {loading ? (
           <div className="space-y-3.5">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -127,7 +127,7 @@ export default function CardsPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-black tracking-tighter">
-                      {CURRENCY_SYMBOL} {formatBRLocale(card.credit_limit, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      {CURRENCY_SYMBOL} {formatBRL(card.credit_limit, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </p>
                     <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
                       {(() => {
@@ -152,7 +152,7 @@ export default function CardsPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
-                      {CURRENCY_SYMBOL} {formatBRLocale(card.current_balance, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} used
+                      {CURRENCY_SYMBOL} {formatBRL(card.current_balance, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} used
                     </p>
                     <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
                       {usedPct.toFixed(0)}%

@@ -178,7 +178,7 @@ export default function BudgetsPage() {
         )}
       </div>
 
-      <main className="px-4 sm:px-0 py-6 sm:py-8 space-y-6 sm:space-y-10">
+      <main className="py-6 sm:py-8 space-y-6 sm:space-y-10">
         <section className="space-y-4">
           {!loading && (
             <h3 className="text-[10px] font-normal text-muted-foreground ml-1 uppercase tracking-[0.2em] opacity-60">

@@ -29,7 +29,7 @@ export default function DashboardSettingsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-10 font-sans tracking-tight">
-      <main className="px-6 pt-6 space-y-8">
+      <main className="px-5 pt-6 space-y-8">
         <section className="space-y-2">
           <h1 className="text-lg font-bold">Dashboard Mode</h1>
           <p className="text-xs text-muted-foreground max-w-sm">

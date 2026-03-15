@@ -79,13 +79,15 @@ function parseAmount(raw: string): number {
 
 const CONFIRM_WORDS = ["yes", "ok", "confirm", "sim", "s", "y", "✅", "👍", "confirma", "confirmar"];
 const CANCEL_WORDS = ["no", "cancel", "não", "nao", "n", "❌", "cancelar", "delete", "apagar"];
+const CATEGORY_WORDS = ["category", "categories", "cat", "budget", "budgets", "categoria", "categorias"];
 
-export type UserReply = "confirm" | "cancel" | "other";
+export type UserReply = "confirm" | "cancel" | "category" | "other";
 
 export function detectReply(text: string): UserReply {
   const lower = text.trim().toLowerCase();
   if (CONFIRM_WORDS.includes(lower)) return "confirm";
   if (CANCEL_WORDS.includes(lower)) return "cancel";
+  if (CATEGORY_WORDS.includes(lower)) return "category";
   return "other";
 }
 

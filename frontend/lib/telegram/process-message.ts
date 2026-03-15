@@ -1,4 +1,5 @@
 import { fetchOne, fetchMany, insertOne, execute } from "@/lib/sql";
+import { formatMoney } from "@/lib/format";
 import { parseExpenseMessage, suggestCategory, detectReply } from "./parse";
 import { sendTelegramMessage } from "./send";
 import { validateLinkCode, linkTelegramAccount } from "./link";
@@ -8,6 +9,11 @@ type UserRow = {
   id: number;
   name: string;
   default_workspace_id: number | null;
+};
+
+type WorkspaceRow = {
+  id: number;
+  name: string;
 };
 
 type CategoryRow = {
@@ -45,25 +51,62 @@ export async function processTelegramMessage(
     return;
   }
 
-  // 2. Check if this is a linking code (6 alphanumeric chars)
+  // 2. Handle bot commands
   const trimmed = text.trim();
+  if (trimmed.startsWith("/")) {
+    await handleBotCommand(chatId, trimmed);
+    return;
+  }
+
+  // 3. Check if this is a linking code (6 alphanumeric chars)
   if (/^[A-Z0-9]{6}$/i.test(trimmed)) {
     const linkResult = await validateLinkCode(trimmed);
     if (linkResult) {
       await linkTelegramAccount(linkResult.userId, chatId, linkResult.workspaceId);
-      await sendTelegramMessage(chatId, "✅ Account linked! You can now log expenses and income.\n\nTry:\n  20 uber\n  income 500 salary\n  recebi 500 salário\n\nOr send a voice message!");
+      const welcomeWorkspace = linkResult.workspaceId
+        ? await fetchOne<WorkspaceRow>("SELECT id, name FROM Workspace WHERE id = ? LIMIT 1", [linkResult.workspaceId])
+        : null;
+
+      let welcome = "✅ Account linked successfully!\n\n";
+      if (welcomeWorkspace) {
+        welcome += `📂 Active workspace: ${welcomeWorkspace.name}\n\n`;
+      }
+      welcome += "— How it works —\n";
+      welcome += "Send a message and I'll log it as a transaction. You can type, send a voice message, or snap a photo of a receipt.\n\n";
+      welcome += "Examples:\n";
+      welcome += "  20 uber → R$ 20 expense\n";
+      welcome += "  income 500 salary → R$ 500 income\n";
+      welcome += "  recebi 500 salário → R$ 500 income\n\n";
+      welcome += "After each entry I'll ask you to confirm (yes/no) before saving.\n\n";
+      welcome += "— Commands —\n";
+      welcome += "  /workspace — View & switch workspaces\n";
+      welcome += "  /status — Show active workspace\n";
+      welcome += "  /help — Show this guide";
+
+      await sendTelegramMessage(chatId, welcome);
       return;
     }
   }
 
-  // 3. Check if this is a confirmation/cancel reply
+  // 4. Check if this is a confirmation/cancel/category reply
   const reply = detectReply(trimmed);
   if (reply === "confirm" || reply === "cancel") {
     await handleConfirmation(chatId, reply);
     return;
   }
+  if (reply === "category") {
+    await handleCategoryList(chatId);
+    return;
+  }
 
-  // 4. Process as new expense/income
+  // 4b. Check if this is a category number pick (e.g. "3" while a pending tx exists)
+  const pickNum = parseInt(trimmed, 10);
+  if (!isNaN(pickNum) && pickNum >= 1 && trimmed === String(pickNum)) {
+    const handled = await handleCategoryPick(chatId, pickNum);
+    if (handled) return;
+  }
+
+  // 5. Process as new expense/income
   await processExpenseText(telegramMessageId, chatId, trimmed);
 }
 
@@ -179,6 +222,118 @@ export async function processTelegramPhoto(
 }
 
 // ---------------------------------------------------------------------------
+// Bot commands (/start, /help, /workspace)
+// ---------------------------------------------------------------------------
+
+async function handleBotCommand(chatId: number, text: string): Promise<void> {
+  const [cmd, ...args] = text.split(/\s+/);
+  const command = cmd.toLowerCase().replace(/@\w+$/, ""); // strip @botname
+
+  if (command === "/start" || command === "/help") {
+    let msg = "👋 Welcome to NorthTrack!\n\n";
+    msg += "— How it works —\n";
+    msg += "Send a message and I'll log it as a transaction. You can type, send a voice message, or snap a photo of a receipt.\n\n";
+    msg += "Examples:\n";
+    msg += "  20 uber → R$ 20 expense\n";
+    msg += "  income 500 salary → R$ 500 income\n";
+    msg += "  recebi 500 salário → R$ 500 income\n\n";
+    msg += "After each entry I'll ask you to confirm (yes/no) before saving.\n\n";
+    msg += "— Commands —\n";
+    msg += "  /workspace — View & switch workspaces\n";
+    msg += "  /status — Show active workspace\n";
+    msg += "  /help — Show this guide";
+    await sendTelegramMessage(chatId, msg);
+    return;
+  }
+
+  if (command === "/status") {
+    const user = await fetchOne<UserRow>(
+      "SELECT id, name, default_workspace_id FROM User WHERE telegram_chat_id = ? LIMIT 1",
+      [chatId],
+    );
+    if (!user) {
+      await sendTelegramMessage(chatId, "👋 Your Telegram is not linked yet.\n\nOpen the app → Settings → Connect Telegram to get started.");
+      return;
+    }
+    if (!user.default_workspace_id) {
+      await sendTelegramMessage(chatId, "⚠️ No active workspace. Use /workspace to pick one.");
+      return;
+    }
+    const ws = await fetchOne<WorkspaceRow>("SELECT id, name FROM Workspace WHERE id = ? LIMIT 1", [user.default_workspace_id]);
+    await sendTelegramMessage(chatId, `📂 Active workspace: ${ws?.name ?? "Unknown"}\n\nAll transactions are logged here. Use /workspace to switch.`);
+    return;
+  }
+
+  if (command === "/workspace") {
+    const user = await fetchOne<UserRow>(
+      "SELECT id, name, default_workspace_id FROM User WHERE telegram_chat_id = ? LIMIT 1",
+      [chatId],
+    );
+
+    if (!user) {
+      await sendTelegramMessage(chatId, "👋 Your Telegram is not linked yet.\n\nOpen the app → Settings → Connect Telegram to get started.");
+      return;
+    }
+
+    // Get all workspaces for this user
+    const workspaces = await fetchMany<WorkspaceRow>(
+      `SELECT w.id, w.name FROM Workspace w
+       JOIN workspace_users wu ON wu.workspace_id = w.id
+       WHERE wu.user_id = ?
+       ORDER BY w.name ASC`,
+      [user.id],
+    );
+
+    if (workspaces.length === 0) {
+      await sendTelegramMessage(chatId, "⚠️ You don't belong to any workspaces yet.");
+      return;
+    }
+
+    // If an argument was provided, switch directly
+    const pick = args[0];
+    if (pick) {
+      const pickNum = parseInt(pick, 10);
+      let target: WorkspaceRow | undefined;
+
+      if (!isNaN(pickNum) && pickNum >= 1 && pickNum <= workspaces.length) {
+        target = workspaces[pickNum - 1];
+      } else {
+        // Try matching by name
+        const lower = pick.toLowerCase();
+        target = workspaces.find((w) => w.name.toLowerCase().includes(lower));
+      }
+
+      if (target) {
+        await execute("UPDATE User SET default_workspace_id = ? WHERE id = ?", [target.id, user.id]);
+        await sendTelegramMessage(chatId, `✅ Switched to workspace: ${target.name}\n\nAll new transactions will be logged here.`);
+      } else {
+        await sendTelegramMessage(chatId, `❌ Workspace not found. Use /workspace to see your list.`);
+      }
+      return;
+    }
+
+    // List workspaces with numbers
+    const current = user.default_workspace_id;
+    let msg = "📂 Your workspaces:\n\n";
+    workspaces.forEach((w, i) => {
+      const active = w.id === current ? " ← active" : "";
+      msg += `  ${i + 1}. ${w.name}${active}\n`;
+    });
+    msg += `\nTo switch, send:\n  /workspace 1\n  /workspace ${workspaces.length > 1 ? "2" : "1"}`;
+    msg += `\n  /workspace ${workspaces[0].name}`;
+
+    await sendTelegramMessage(chatId, msg);
+    return;
+  }
+
+  // Unknown command
+  await sendTelegramMessage(
+    chatId,
+    `❓ Unknown command: ${cmd}\n\nAvailable:\n  /workspace — Switch workspace\n  /help — Show help`,
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Core: parse → draft → ask confirmation
 // ---------------------------------------------------------------------------
 
@@ -205,10 +360,17 @@ async function processExpenseText(
   if (!workspaceId) {
     await sendTelegramMessage(
       chatId,
-      "⚠️ No default workspace set. Open the app and set a default workspace in Settings.",
+      "⚠️ No default workspace set. Use /workspace to pick one.",
     );
     return;
   }
+
+  // Get workspace name for confirmation message
+  const workspace = await fetchOne<WorkspaceRow>(
+    "SELECT id, name FROM Workspace WHERE id = ? LIMIT 1",
+    [workspaceId],
+  );
+  const workspaceName = workspace?.name ?? "Unknown";
 
   // Parse amount + description + type
   const parsed = parseExpenseMessage(text);
@@ -255,16 +417,14 @@ async function processExpenseText(
     [workspaceId, categoryId, user.id, type, amount, amount, today, description],
   );
 
-  const amountFormatted = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(amount);
+  const amountFormatted = formatMoney(amount, { minimumFractionDigits: 2 });
 
   // Build confirmation message
   const typeEmoji = type === "income" ? "💰" : "🛒";
   const typeLabel = type === "income" ? "Income" : "Expense";
 
   let msg = `${typeEmoji} ${typeLabel} detected!\n\n`;
+  msg += `Workspace: ${workspaceName}\n`;
   msg += `Amount: ${amountFormatted}\n`;
   msg += `Description: ${description}\n`;
   if (type === "expense") {
@@ -274,6 +434,9 @@ async function processExpenseText(
   msg += `Reply:\n`;
   msg += `  ✅ or "yes" — Confirm\n`;
   msg += `  ❌ or "no" — Cancel\n`;
+  if (type === "expense") {
+    msg += `  "category" — Change category\n`;
+  }
   msg += `  Or send a new message to replace this one`;
 
   await sendTelegramMessage(chatId, msg);
@@ -306,10 +469,7 @@ async function handleConfirmation(chatId: number, action: "confirm" | "cancel"):
     return;
   }
 
-  const amountFormatted = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(pending.amount);
+  const amountFormatted = formatMoney(pending.amount, { minimumFractionDigits: 2 });
 
   if (action === "cancel") {
     await execute("DELETE FROM Transaction WHERE id = ?", [pending.id]);
@@ -347,6 +507,102 @@ async function handleConfirmation(chatId: number, action: "confirm" | "cancel"):
   }
 
   console.log(`[telegram] User ${user.id} confirmed transaction #${pending.id} as ${newStatus}`);
+}
+
+// ---------------------------------------------------------------------------
+// Handle "category" command — list categories for pending transaction
+// ---------------------------------------------------------------------------
+
+async function handleCategoryList(chatId: number): Promise<void> {
+  const user = await fetchOne<UserRow>(
+    "SELECT id, name, default_workspace_id FROM User WHERE telegram_chat_id = ? LIMIT 1",
+    [chatId],
+  );
+  if (!user || !user.default_workspace_id) return;
+
+  const pending = await fetchOne<PendingTransaction>(
+    `SELECT id, type, amount, description, category_id
+     FROM Transaction
+     WHERE workspace_id = ? AND created_by_user_id = ? AND status = 'pending_confirmation' AND source = 'telegram'
+     ORDER BY created_at DESC LIMIT 1`,
+    [user.default_workspace_id, user.id],
+  );
+
+  if (!pending) {
+    await sendTelegramMessage(chatId, "❓ No pending transaction. Send an expense first.");
+    return;
+  }
+
+  if (pending.type !== "expense") {
+    await sendTelegramMessage(chatId, "ℹ️ Income transactions don't need a category. Reply yes to confirm.");
+    return;
+  }
+
+  const categories = await fetchMany<CategoryRow>(
+    "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY name ASC",
+    [user.default_workspace_id],
+  );
+
+  if (categories.length === 0) {
+    await sendTelegramMessage(chatId, "⚠️ No categories found in this workspace. Create some in the app first.");
+    return;
+  }
+
+  let msg = "📋 Pick a category:\n\n";
+  categories.forEach((c, i) => {
+    const current = c.id === pending.category_id ? " ← current" : "";
+    msg += `  ${i + 1}. ${c.name}${current}\n`;
+  });
+  msg += `\nReply with a number (1-${categories.length}) to change and confirm.`;
+
+  await sendTelegramMessage(chatId, msg);
+}
+
+// ---------------------------------------------------------------------------
+// Handle numeric category pick — change category and confirm
+// ---------------------------------------------------------------------------
+
+async function handleCategoryPick(chatId: number, pick: number): Promise<boolean> {
+  const user = await fetchOne<UserRow>(
+    "SELECT id, name, default_workspace_id FROM User WHERE telegram_chat_id = ? LIMIT 1",
+    [chatId],
+  );
+  if (!user || !user.default_workspace_id) return false;
+
+  const pending = await fetchOne<PendingTransaction>(
+    `SELECT id, type, amount, description, category_id
+     FROM Transaction
+     WHERE workspace_id = ? AND created_by_user_id = ? AND status = 'pending_confirmation' AND source = 'telegram'
+     ORDER BY created_at DESC LIMIT 1`,
+    [user.default_workspace_id, user.id],
+  );
+
+  if (!pending || pending.type !== "expense") return false;
+
+  const categories = await fetchMany<CategoryRow>(
+    "SELECT id, name FROM Category WHERE workspace_id = ? AND type = 'expense' ORDER BY name ASC",
+    [user.default_workspace_id],
+  );
+
+  if (pick < 1 || pick > categories.length) return false;
+
+  const chosen = categories[pick - 1];
+
+  // Update category and confirm
+  await execute(
+    `UPDATE Transaction SET category_id = ?, status = 'confirmed', confirmed_at = NOW(3), confirmed_by_user_id = ?, updated_at = NOW(3) WHERE id = ?`,
+    [chosen.id, user.id, pending.id],
+  );
+
+  const amountFormatted = formatMoney(pending.amount, { minimumFractionDigits: 2 });
+
+  await sendTelegramMessage(
+    chatId,
+    `✅ Confirmed!\n\n${amountFormatted} — ${pending.description ?? "—"}\nCategory: ${chosen.name}`,
+  );
+
+  console.log(`[telegram] User ${user.id} changed category to ${chosen.name} and confirmed transaction #${pending.id}`);
+  return true;
 }
 
 // ---------------------------------------------------------------------------

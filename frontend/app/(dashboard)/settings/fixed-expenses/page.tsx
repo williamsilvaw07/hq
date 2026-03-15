@@ -109,7 +109,7 @@ export default function FixedExpensesPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Custom header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-5 py-3 flex items-center justify-between gap-4">
         <button
           onClick={() => router.back()}
           className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-foreground active:scale-95 transition-all"
@@ -127,7 +127,7 @@ export default function FixedExpensesPage() {
         </button>
       </header>
 
-      <div className="px-4 space-y-5 pt-2 pb-10">
+      <div className="px-5 space-y-5 pt-2 pb-10">
         {/* Summary card */}
         <div className="bg-card rounded-2xl p-6 text-center">
           <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-[0.2em] mb-3">

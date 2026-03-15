@@ -121,7 +121,7 @@ export default function NewTransactionPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-12 font-sans tracking-tight">
-      <header className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex items-center justify-between">
+      <header className="px-5 pt-4 sm:pt-6 pb-3 sm:pb-4 flex items-center justify-between">
         <Link
           href="/dashboard"
           className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-card text-muted-foreground hover:text-foreground transition-colors active:scale-95"
@@ -146,7 +146,7 @@ export default function NewTransactionPage() {
         </button>
       </header>
 
-      <main className="px-4 sm:px-6 space-y-4 sm:space-y-6">
+      <main className="px-5 space-y-4 sm:space-y-6">
         <div className="flex p-1.5 bg-card rounded-full">
           <button
             type="button"

@@ -9,7 +9,7 @@ import {
   fixedBillsTotal,
   type FixedBill,
 } from "@/lib/fixed-expenses";
-import { CURRENCY_SYMBOL, formatBRLocale, formatCompact } from "@/lib/format";
+import { CURRENCY_SYMBOL, formatBRL, formatCompact } from "@/lib/format";
 import { TransactionModal } from "../transactions/TransactionModal";
 import { BudgetModal } from "../budgets/BudgetModal";
 import { SkeletonBox } from "@/components/ui/Skeleton";
@@ -259,7 +259,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans tracking-tight">
-      <main className="px-6 space-y-8 mt-4">
+      <main className="px-5 space-y-8 mt-4">
         <section className="bg-card p-6 rounded-xl relative overflow-hidden group shadow-2xl shadow-black/10">
           {hasAnyData ? (
             <>
@@ -267,17 +267,17 @@ export default function DashboardPage() {
               <div className={`flex items-baseline gap-2 mb-2 ${periodExpense > 0 ? "text-foreground" : "text-muted-foreground/20"}`}>
                 <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
                 <h2 className="text-5xl font-black tracking-tighter leading-none">
-                  {formatBRLocale(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatBRL(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </h2>
               </div>
               {totalBudget > 0 && (
                 <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
-                  of {CURRENCY_SYMBOL} {formatBRLocale(totalBudget, { minimumFractionDigits: 2 })} budget
+                  of {CURRENCY_SYMBOL} {formatBRL(totalBudget, { minimumFractionDigits: 2 })} budget
                 </p>
               )}
               {periodIncome > 0 && (
                 <p className="text-[10px] text-chart-1/60 font-normal uppercase tracking-tighter mb-4">
-                  +{CURRENCY_SYMBOL} {formatBRLocale(periodIncome, { minimumFractionDigits: 2 })} income
+                  +{CURRENCY_SYMBOL} {formatBRL(periodIncome, { minimumFractionDigits: 2 })} income
                 </p>
               )}
               <div className="space-y-4">
@@ -303,7 +303,7 @@ export default function DashboardPage() {
               <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
               <div className="flex items-baseline justify-center gap-2 mb-4 text-muted-foreground/20">
                 <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
-                <h2 className="text-5xl font-black tracking-tighter leading-none">0,00</h2>
+                <h2 className="text-5xl font-black tracking-tighter leading-none">0.00</h2>
               </div>
               <p className="text-xs text-muted-foreground/40">Add a budget or record a transaction to get started</p>
             </div>
@@ -316,7 +316,7 @@ export default function DashboardPage() {
             <div>
               <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Variable</p>
               <p className={`text-2xl font-black tracking-tighter ${variableLimit === 0 ? "text-muted-foreground/30" : ""}`}>
-                {CURRENCY_SYMBOL} {formatBRLocale(variableSpent, { minimumFractionDigits: 2 })}
+                {CURRENCY_SYMBOL} {formatBRL(variableSpent, { minimumFractionDigits: 2 })}
               </p>
             </div>
             <div className="space-y-2.5">
@@ -334,7 +334,7 @@ export default function DashboardPage() {
             <div>
               <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
               <p className={`text-2xl font-black tracking-tighter ${monthlyFixedTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
-                {CURRENCY_SYMBOL} {formatBRLocale(monthlyFixedTotal, { minimumFractionDigits: 2 })}
+                {CURRENCY_SYMBOL} {formatBRL(monthlyFixedTotal, { minimumFractionDigits: 2 })}
               </p>
             </div>
             <div className="space-y-2.5">
@@ -392,7 +392,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold">{CURRENCY_SYMBOL} {formatBRLocale(budget.remaining, { minimumFractionDigits: 2 })}</p>
+                    <p className="text-sm font-bold">{CURRENCY_SYMBOL} {formatBRL(budget.remaining, { minimumFractionDigits: 2 })}</p>
                     <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">left of {formatCompact(budget.amount)}</p>
                   </div>
                 </div>
@@ -404,7 +404,7 @@ export default function DashboardPage() {
                     />
                   </div>
                   <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
-                    {budget.spent_percentage.toFixed(0)}% used • {CURRENCY_SYMBOL} {formatBRLocale(budget.spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
+                    {budget.spent_percentage.toFixed(0)}% used • {CURRENCY_SYMBOL} {formatBRL(budget.spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
                   </p>
                 </div>
               </div>
@@ -458,7 +458,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className={`text-xs font-black tracking-tight ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
-                        {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRLocale(tx.amount, { minimumFractionDigits: 2 })}
+                        {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRL(tx.amount, { minimumFractionDigits: 2 })}
                       </p>
                       <p className="text-[9px] text-muted-foreground font-normal opacity-50 mt-0.5">{tx.account?.name ?? "—"}</p>
                     </div>

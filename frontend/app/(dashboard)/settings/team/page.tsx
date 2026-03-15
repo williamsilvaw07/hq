@@ -143,7 +143,7 @@ export default function TeamPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-10 font-sans tracking-tight">
-      <header className="z-40 bg-background/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+      <header className="z-40 bg-background/80 backdrop-blur-md px-5 py-4 flex items-center justify-between">
         <button
           type="button"
           onClick={() => router.push("/settings")}
@@ -155,7 +155,7 @@ export default function TeamPage() {
         <h1 className="text-lg font-bold">Workspace team</h1>
         <div className="w-10" />
       </header>
-      <main className="px-6 space-y-8 pt-6">
+      <main className="px-5 space-y-8 pt-6">
         {canManage && (
           <section className="space-y-4">
             <h2 className="section-title px-1">Invite by email</h2>

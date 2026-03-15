@@ -127,15 +127,15 @@ export function CardModal({ isOpen, onClose, onSave, onDelete, initialData, savi
         </div>
 
         {/* Card Limit */}
-        <div className="text-center py-4">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-5">Card Limit</p>
-          <div className="flex items-baseline justify-center gap-3">
-            <span className="text-2xl font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
+        <div className="text-center py-2">
+          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-3">Card Limit</p>
+          <div className="flex items-baseline justify-center gap-2">
+            <span className="text-lg font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
             <input
               type="number"
               value={limit}
               onChange={(e) => setLimit(e.target.value)}
-              className="text-7xl font-black bg-transparent outline-none text-center w-auto min-w-[80px] max-w-[220px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
+              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
               placeholder="0"
             />
           </div>

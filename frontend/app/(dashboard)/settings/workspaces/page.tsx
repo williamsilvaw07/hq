@@ -69,7 +69,7 @@ export default function WorkspacesPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans tracking-tight">
-      <header className="z-40 bg-background/80 backdrop-blur-xl px-6 py-5 flex items-center justify-between">
+      <header className="z-40 bg-background/80 backdrop-blur-xl px-5 py-5 flex items-center justify-between">
         <button
           type="button"
           onClick={() => router.back()}
@@ -90,7 +90,7 @@ export default function WorkspacesPage() {
         </button>
       </header>
 
-      <main className="px-6 py-4 space-y-3">
+      <main className="px-5 py-4 space-y-3">
         {loading ? (
           <p className="text-xs text-muted-foreground px-1">Loading…</p>
         ) : (

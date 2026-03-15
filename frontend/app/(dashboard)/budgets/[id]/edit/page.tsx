@@ -152,7 +152,7 @@ export default function EditBudgetPage({
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans tracking-tight selection:bg-primary/10 flex flex-col">
-      <header className="z-40 bg-background/80 backdrop-blur-md px-6 py-6 flex items-center justify-between">
+      <header className="z-40 bg-background/80 backdrop-blur-md px-5 py-6 flex items-center justify-between">
         <button
           type="button"
           onClick={() => router.back()}
@@ -173,7 +173,7 @@ export default function EditBudgetPage({
         </button>
       </header>
 
-      <main className="flex-1 px-8 pt-2 space-y-12">
+      <main className="flex-1 px-5 pt-2 space-y-12">
         {loading ? (
           <p className="text-sm text-muted-foreground px-2">Loading…</p>
         ) : (

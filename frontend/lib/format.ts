@@ -40,7 +40,7 @@ export function formatNumberUK(value: number, options?: MoneyFormatOptions): str
 }
 
 export function formatMoney(value: number, options?: MoneyFormatOptions): string {
-  return `${CURRENCY_SYMBOL}${formatNumberUK(value, options)}`;
+  return `${CURRENCY_SYMBOL} ${formatNumberUK(value, options)}`;
 }
 
 /** Compact format for large numbers: 3200 → "3.2K", 1800 → "1.8K" */
