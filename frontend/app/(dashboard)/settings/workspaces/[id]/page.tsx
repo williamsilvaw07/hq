@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import {
-  ArrowLeft, Pencil, Trash2, UserPlus, X, Check, Crown, Shield, Eye, User, Loader2, Send, Copy, CheckCheck,
+  ArrowLeft, Pencil, Trash2, UserPlus, X, Check, Crown, Shield, Eye, User, Loader2, Send, Copy, CheckCheck, ChevronRight,
 } from "lucide-react";
 
 type Workspace = { id: number; name: string; slug: string; currency: string };
