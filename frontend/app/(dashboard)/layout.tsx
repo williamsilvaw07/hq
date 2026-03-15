@@ -171,13 +171,13 @@ export default function DashboardLayout({
           </button>
 
           <Link
-            href="/goals"
+            href="/budgets"
             className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] font-black uppercase tracking-widest transition-colors ${
-              isGoals ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+              isBudgets ? "text-white" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            <Icon icon="solar:target-bold-duotone" className="text-xl sm:text-2xl" />
-            <span>GOALS</span>
+            <Icon icon="solar:wallet-bold-duotone" className="text-xl sm:text-2xl" />
+            <span>BUDGETS</span>
           </Link>
           <Link
             href="/settings"

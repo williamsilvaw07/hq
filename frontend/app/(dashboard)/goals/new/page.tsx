@@ -118,8 +118,19 @@ export default function NewGoalPage() {
 
         {/* Icon + Name */}
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-xl bg-card flex items-center justify-center text-3xl shadow-xl shadow-black/20 shrink-0">
-            {icon}
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 rounded-xl bg-card flex flex-col items-center justify-center gap-0.5 shadow-xl shadow-black/20">
+              <span className="text-3xl leading-none">{icon}</span>
+              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-wider">Emoji</span>
+            </div>
+            <select
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+              aria-label="Pick icon"
+            >
+              {ICON_OPTIONS.map((e) => <option key={e} value={e}>{e}</option>)}
+            </select>
           </div>
           <div className="flex-1 space-y-1">
             <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
@@ -135,27 +146,19 @@ export default function NewGoalPage() {
           </div>
         </div>
 
-        {/* Icon Picker */}
-        <div className="space-y-3">
-          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">
-            Choose Icon
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {ICON_OPTIONS.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                onClick={() => setIcon(emoji)}
-                className={`w-9 h-9 rounded-lg border flex items-center justify-center text-lg transition-all active:scale-95 ${
-                  icon === emoji
-                    ? "bg-primary/10 border-primary"
-                    : "bg-card border-border"
-                }`}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
+        {/* Custom Icon */}
+        <div className="flex items-center gap-2 px-1">
+          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+            Or custom
+          </span>
+          <input
+            type="text"
+            maxLength={2}
+            value={icon}
+            onChange={(e) => setIcon(e.target.value || "🎯")}
+            placeholder="🙂"
+            className="flex-1 bg-card rounded-lg border border-border px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground/60"
+          />
         </div>
 
         {/* Financial Fields */}

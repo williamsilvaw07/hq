@@ -13,6 +13,9 @@ type GoalSettings = {
   show_completed: boolean;
   allow_notes: boolean;
   allow_milestones: boolean;
+  goals_view_role: string;
+  goals_add_role: string;
+  goals_edit_role: string;
 };
 
 const DEFAULTS: Omit<GoalSettings, "id" | "workspace_id"> = {
@@ -24,6 +27,9 @@ const DEFAULTS: Omit<GoalSettings, "id" | "workspace_id"> = {
   show_completed: true,
   allow_notes: true,
   allow_milestones: true,
+  goals_view_role: "viewer",
+  goals_add_role: "member",
+  goals_edit_role: "member",
 };
 
 export async function GET(
@@ -69,16 +75,19 @@ export async function PUT(
     const show_completed = body.show_completed ?? DEFAULTS.show_completed;
     const allow_notes = body.allow_notes ?? DEFAULTS.allow_notes;
     const allow_milestones = body.allow_milestones ?? DEFAULTS.allow_milestones;
+    const goals_view_role = body.goals_view_role ?? DEFAULTS.goals_view_role;
+    const goals_add_role = body.goals_add_role ?? DEFAULTS.goals_add_role;
+    const goals_edit_role = body.goals_edit_role ?? DEFAULTS.goals_edit_role;
 
     if (existing) {
       await execute(
-        `UPDATE goal_settings SET enabled = ?, default_goal_type = ?, ai_suggestions = ?, reminders_enabled = ?, reminder_frequency = ?, show_completed = ?, allow_notes = ?, allow_milestones = ?, updated_at = NOW(3) WHERE workspace_id = ?`,
-        [enabled, default_goal_type, ai_suggestions, reminders_enabled, reminder_frequency, show_completed, allow_notes, allow_milestones, workspaceId],
+        `UPDATE goal_settings SET enabled = ?, default_goal_type = ?, ai_suggestions = ?, reminders_enabled = ?, reminder_frequency = ?, show_completed = ?, allow_notes = ?, allow_milestones = ?, goals_view_role = ?, goals_add_role = ?, goals_edit_role = ?, updated_at = NOW(3) WHERE workspace_id = ?`,
+        [enabled, default_goal_type, ai_suggestions, reminders_enabled, reminder_frequency, show_completed, allow_notes, allow_milestones, goals_view_role, goals_add_role, goals_edit_role, workspaceId],
       );
     } else {
       await insertOne(
-        `INSERT INTO goal_settings (workspace_id, enabled, default_goal_type, ai_suggestions, reminders_enabled, reminder_frequency, show_completed, allow_notes, allow_milestones, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(3), NOW(3))`,
-        [workspaceId, enabled, default_goal_type, ai_suggestions, reminders_enabled, reminder_frequency, show_completed, allow_notes, allow_milestones],
+        `INSERT INTO goal_settings (workspace_id, enabled, default_goal_type, ai_suggestions, reminders_enabled, reminder_frequency, show_completed, allow_notes, allow_milestones, goals_view_role, goals_add_role, goals_edit_role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(3), NOW(3))`,
+        [workspaceId, enabled, default_goal_type, ai_suggestions, reminders_enabled, reminder_frequency, show_completed, allow_notes, allow_milestones, goals_view_role, goals_add_role, goals_edit_role],
       );
     }
 

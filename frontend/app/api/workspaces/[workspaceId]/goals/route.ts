@@ -1,6 +1,25 @@
 import { NextResponse } from "next/server";
-import { requireWorkspaceMember, requireWorkspaceAdmin } from "@/lib/workspace-auth";
-import { fetchMany, insertOne } from "@/lib/sql";
+import { requireWorkspaceMember, type WorkspaceMemberRole } from "@/lib/workspace-auth";
+import { fetchMany, fetchOne, insertOne } from "@/lib/sql";
+
+const ROLE_ORDER: WorkspaceMemberRole[] = ["viewer", "member", "admin", "owner"];
+
+function hasRole(userRole: string, minRole: string): boolean {
+  const userIdx = ROLE_ORDER.indexOf(userRole as WorkspaceMemberRole);
+  const minIdx = ROLE_ORDER.indexOf(minRole as WorkspaceMemberRole);
+  if (userIdx === -1 || minIdx === -1) return false;
+  return userIdx >= minIdx;
+}
+
+type GoalPerms = { goals_view_role: string; goals_add_role: string; goals_edit_role: string };
+
+async function getGoalPerms(workspaceId: number): Promise<GoalPerms> {
+  const row = await fetchOne<GoalPerms>(
+    "SELECT goals_view_role, goals_add_role, goals_edit_role FROM goal_settings WHERE workspace_id = ? LIMIT 1",
+    [workspaceId],
+  );
+  return row || { goals_view_role: "viewer", goals_add_role: "member", goals_edit_role: "member" };
+}
 
 export async function GET(
   req: Request,
@@ -8,7 +27,12 @@ export async function GET(
 ) {
   try {
     const { workspaceId: wid } = await params;
-    const { workspaceId } = await requireWorkspaceMember(req, wid);
+    const { workspaceId, role } = await requireWorkspaceMember(req, wid);
+
+    const perms = await getGoalPerms(workspaceId);
+    if (!hasRole(role, perms.goals_view_role)) {
+      return NextResponse.json({ message: "You don't have permission to view goals." }, { status: 403 });
+    }
 
     const url = new URL(req.url);
     const status = url.searchParams.get("status") || "active";
@@ -36,6 +60,7 @@ export async function GET(
     return NextResponse.json({ data: goals });
   } catch (e: any) {
     if (e.status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
+    if (e.status === 403) return NextResponse.json({ message: "Forbidden." }, { status: 403 });
     if (e.status === 404) return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
     console.error("GET /api/workspaces/[workspaceId]/goals error:", e);
     return NextResponse.json({ message: "Server error." }, { status: 500 });
@@ -48,7 +73,12 @@ export async function POST(
 ) {
   try {
     const { workspaceId: wid } = await params;
-    const { user, workspaceId } = await requireWorkspaceMember(req, wid);
+    const { user, workspaceId, role } = await requireWorkspaceMember(req, wid);
+
+    const perms = await getGoalPerms(workspaceId);
+    if (!hasRole(role, perms.goals_add_role)) {
+      return NextResponse.json({ message: "You don't have permission to create goals." }, { status: 403 });
+    }
 
     const body = await req.json();
     const {
@@ -75,7 +105,6 @@ export async function POST(
       [workspaceId, user.id, type, name.trim(), icon || null, color || null, target_amount || null, currency, deadline || null, contribution_frequency || null, contribution_amount || null],
     );
 
-    // Create initial milestones if provided
     if (Array.isArray(milestones) && milestones.length > 0) {
       for (let i = 0; i < milestones.length; i++) {
         const m = milestones[i];
@@ -89,7 +118,6 @@ export async function POST(
       }
     }
 
-    // Create initial note if provided
     if (notes?.trim()) {
       await insertOne(
         `INSERT INTO goal_notes (goal_id, user_id, content, created_at, updated_at) VALUES (?, ?, ?, NOW(3), NOW(3))`,
@@ -100,6 +128,7 @@ export async function POST(
     return NextResponse.json({ data: { id: goalId } }, { status: 201 });
   } catch (e: any) {
     if (e.status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
+    if (e.status === 403) return NextResponse.json({ message: "Forbidden." }, { status: 403 });
     if (e.status === 404) return NextResponse.json({ message: "Workspace not found." }, { status: 404 });
     console.error("POST /api/workspaces/[workspaceId]/goals error:", e);
     return NextResponse.json({ message: "Server error." }, { status: 500 });

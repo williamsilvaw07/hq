@@ -15,7 +15,17 @@ type GoalSettings = {
   show_completed: boolean;
   allow_notes: boolean;
   allow_milestones: boolean;
+  goals_view_role: string;
+  goals_add_role: string;
+  goals_edit_role: string;
 };
+
+const ROLES = [
+  { value: "viewer", label: "Viewer" },
+  { value: "member", label: "Member" },
+  { value: "admin", label: "Admin" },
+  { value: "owner", label: "Owner" },
+];
 
 export default function GoalSettingsPage() {
   const router = useRouter();
@@ -103,6 +113,31 @@ export default function GoalSettingsPage() {
           </div>
         </section>
 
+        {/* Permissions */}
+        <section className="space-y-3">
+          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Permissions</p>
+          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-border/20">
+            <RoleSelect
+              label="Who can view goals"
+              value={settings.goals_view_role}
+              onChange={(v) => setSettings({ ...settings, goals_view_role: v })}
+            />
+            <RoleSelect
+              label="Who can add goals"
+              value={settings.goals_add_role}
+              onChange={(v) => setSettings({ ...settings, goals_add_role: v })}
+            />
+            <RoleSelect
+              label="Who can edit goals"
+              value={settings.goals_edit_role}
+              onChange={(v) => setSettings({ ...settings, goals_edit_role: v })}
+            />
+          </div>
+          <p className="text-[9px] text-muted-foreground/40 px-1">
+            Users with the selected role or higher will have access. Delete is always admin-only.
+          </p>
+        </section>
+
         {/* Features */}
         <section className="space-y-3">
           <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Features</p>
@@ -175,6 +210,31 @@ function ToggleRow({
           }`}
         />
       </button>
+    </div>
+  );
+}
+
+function RoleSelect({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="px-4 py-3 flex items-center justify-between">
+      <span className="text-sm font-bold">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-card rounded-lg border border-border px-3 py-1.5 text-xs"
+      >
+        {ROLES.map((r) => (
+          <option key={r.value} value={r.value}>{r.label}+</option>
+        ))}
+      </select>
     </div>
   );
 }

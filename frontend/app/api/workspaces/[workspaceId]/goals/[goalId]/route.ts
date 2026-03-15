@@ -1,6 +1,25 @@
 import { NextResponse } from "next/server";
-import { requireWorkspaceMember, requireWorkspaceAdmin } from "@/lib/workspace-auth";
+import { requireWorkspaceMember, requireWorkspaceAdmin, type WorkspaceMemberRole } from "@/lib/workspace-auth";
 import { fetchOne, fetchMany, execute } from "@/lib/sql";
+
+const ROLE_ORDER: WorkspaceMemberRole[] = ["viewer", "member", "admin", "owner"];
+
+function hasRole(userRole: string, minRole: string): boolean {
+  const userIdx = ROLE_ORDER.indexOf(userRole as WorkspaceMemberRole);
+  const minIdx = ROLE_ORDER.indexOf(minRole as WorkspaceMemberRole);
+  if (userIdx === -1 || minIdx === -1) return false;
+  return userIdx >= minIdx;
+}
+
+type GoalPerms = { goals_view_role: string; goals_add_role: string; goals_edit_role: string };
+
+async function getGoalPerms(workspaceId: number): Promise<GoalPerms> {
+  const row = await fetchOne<GoalPerms>(
+    "SELECT goals_view_role, goals_add_role, goals_edit_role FROM goal_settings WHERE workspace_id = ? LIMIT 1",
+    [workspaceId],
+  );
+  return row || { goals_view_role: "viewer", goals_add_role: "member", goals_edit_role: "member" };
+}
 
 export async function GET(
   req: Request,
@@ -8,9 +27,14 @@ export async function GET(
 ) {
   try {
     const { workspaceId: wid, goalId: gid } = await params;
-    const { workspaceId } = await requireWorkspaceMember(req, wid);
-    const goalId = parseInt(gid, 10);
+    const { workspaceId, role } = await requireWorkspaceMember(req, wid);
 
+    const perms = await getGoalPerms(workspaceId);
+    if (!hasRole(role, perms.goals_view_role)) {
+      return NextResponse.json({ message: "You don't have permission to view goals." }, { status: 403 });
+    }
+
+    const goalId = parseInt(gid, 10);
     const goal = await fetchOne(
       "SELECT * FROM goals WHERE id = ? AND workspace_id = ? LIMIT 1",
       [goalId, workspaceId],
@@ -33,6 +57,7 @@ export async function GET(
     return NextResponse.json({ data: { ...goal, milestones, notes, contributions } });
   } catch (e: any) {
     if (e.status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
+    if (e.status === 403) return NextResponse.json({ message: "Forbidden." }, { status: 403 });
     if (e.status === 404) return NextResponse.json({ message: "Not found." }, { status: 404 });
     console.error("GET goal error:", e);
     return NextResponse.json({ message: "Server error." }, { status: 500 });
@@ -45,9 +70,14 @@ export async function PATCH(
 ) {
   try {
     const { workspaceId: wid, goalId: gid } = await params;
-    const { workspaceId } = await requireWorkspaceMember(req, wid);
-    const goalId = parseInt(gid, 10);
+    const { workspaceId, role } = await requireWorkspaceMember(req, wid);
 
+    const perms = await getGoalPerms(workspaceId);
+    if (!hasRole(role, perms.goals_edit_role)) {
+      return NextResponse.json({ message: "You don't have permission to edit goals." }, { status: 403 });
+    }
+
+    const goalId = parseInt(gid, 10);
     const body = await req.json();
     const fields: string[] = [];
     const values: any[] = [];
@@ -79,6 +109,7 @@ export async function PATCH(
     return NextResponse.json({ message: "Updated." });
   } catch (e: any) {
     if (e.status === 401) return NextResponse.json({ message: "Unauthenticated." }, { status: 401 });
+    if (e.status === 403) return NextResponse.json({ message: "Forbidden." }, { status: 403 });
     console.error("PATCH goal error:", e);
     return NextResponse.json({ message: "Server error." }, { status: 500 });
   }
