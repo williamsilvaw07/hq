@@ -119,7 +119,9 @@ export default function DashboardLayout({
   const isBudgets = pathname === "/budgets";
   const isGoals = pathname?.startsWith("/goals");
   const isSetupRoot = pathname === "/settings";
+  const isGoalSettings = pathname === "/settings/goals";
   const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam && !isFixedExpenses && !isWorkspacePage;
+  const settingsTitle = isGoalSettings ? "Goal Settings" : "Settings";
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-28 font-sans transition-colors duration-500">
@@ -131,7 +133,7 @@ export default function DashboardLayout({
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-base font-bold">Settings</h1>
+          <h1 className="text-base font-bold">{settingsTitle}</h1>
         </header>
       )}
 

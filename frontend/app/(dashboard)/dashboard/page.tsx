@@ -237,6 +237,7 @@ export default function DashboardPage() {
     .reduce((sum, b) => sum + b.amount, 0);
   const totalBudget = monthlyFixedTotal + variableLimit;
   const variablePercent = variableLimit > 0 ? Math.min(100, (variableSpent / variableLimit) * 100) : 0;
+  const unbudgeted = Math.max(0, Number(dashboard?.period_expense ?? 0) - variableSpent);
   const periodExpense = Number(dashboard?.period_expense ?? 0);
   const periodIncome = Number(dashboard?.period_income ?? 0);
   const spentPercent = totalBudget > 0 ? Math.min(100, (periodExpense / totalBudget) * 100) : 0;
@@ -277,7 +278,7 @@ export default function DashboardPage() {
               </div>
               {totalBudget > 0 && (
                 <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
-                  of {CURRENCY_SYMBOL} {formatBRL(totalBudget, { minimumFractionDigits: 2 })} estimated spend this month
+                  of {CURRENCY_SYMBOL} {formatBRL(totalBudget, { minimumFractionDigits: 2 })} est. budget
                 </p>
               )}
               {periodIncome > 0 && (
@@ -316,45 +317,91 @@ export default function DashboardPage() {
         </section>
 
         {hasAnyData && (
-        <section className="grid grid-cols-2 gap-3.5">
-          <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
+        <section className="grid grid-cols-3 gap-3">
+          <div className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[140px]">
             <div>
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Variable{variableLimit > 0 ? ` · ${CURRENCY_SYMBOL} ${formatCompact(variableLimit)}` : ""}</p>
-              <p className={`text-2xl font-black tracking-tighter ${variableLimit === 0 ? "text-muted-foreground/30" : ""}`}>
-                {CURRENCY_SYMBOL} {formatBRL(variableSpent, { minimumFractionDigits: 2 })}
+              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Budgets</p>
+              <p className={`text-xl font-black tracking-tighter ${variableLimit === 0 ? "text-muted-foreground/30" : ""}`}>
+                {CURRENCY_SYMBOL} {formatBRL(variableSpent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
                 {variableLimit > 0 && (
                   <div style={{ width: `${variablePercent}%` }} className="h-full bg-white rounded-full shadow-[0_0_12px_rgba(255,255,255,0.3)]" />
                 )}
               </div>
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
-                {variableLimit > 0 ? `${variablePercent.toFixed(0)}% of ${formatCompact(variableLimit)}` : "No budgets set"}
+              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
+                {variableLimit > 0 ? `${variablePercent.toFixed(0)}% of ${formatCompact(variableLimit)}` : "No budgets"}
               </p>
             </div>
           </div>
-          <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
+          <div className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[140px]">
             <div>
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
-              <p className={`text-2xl font-black tracking-tighter ${fixedBillsDueTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
-                {CURRENCY_SYMBOL} {formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 2 })}
+              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
+              <p className={`text-xl font-black tracking-tighter ${fixedBillsDueTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
+                {CURRENCY_SYMBOL} {formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
                 {monthlyFixedTotal > 0 && (
                   <div style={{ width: `${Math.min(100, (fixedBillsDueTotal / monthlyFixedTotal) * 100)}%` }} className="h-full bg-chart-1 rounded-full shadow-[0_0_12px_rgba(var(--chart-1),0.3)]" />
                 )}
               </div>
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
-                {monthlyFixedTotal > 0 ? `${CURRENCY_SYMBOL} ${formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} of ${formatCompact(monthlyFixedTotal)} due` : "No bills set"}
+              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
+                {monthlyFixedTotal > 0 ? `${formatCompact(fixedBillsDueTotal)} of ${formatCompact(monthlyFixedTotal)}` : "No bills"}
+              </p>
+            </div>
+          </div>
+          <div className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[140px]">
+            <div>
+              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Unbudgeted</p>
+              <p className={`text-xl font-black tracking-tighter ${unbudgeted > 0 ? "text-orange-400" : "text-muted-foreground/30"}`}>
+                {CURRENCY_SYMBOL} {formatBRL(unbudgeted, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
+                {unbudgeted > 0 && periodExpense > 0 && (
+                  <div style={{ width: `${Math.min(100, (unbudgeted / periodExpense) * 100)}%` }} className="h-full bg-orange-400 rounded-full shadow-[0_0_12px_rgba(251,146,60,0.3)]" />
+                )}
+              </div>
+              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
+                {periodExpense > 0 ? `${((unbudgeted / periodExpense) * 100).toFixed(0)}% of spend` : "None"}
               </p>
             </div>
           </div>
         </section>
         )}
+
+        {/* Quick Links */}
+        <section className="grid grid-cols-2 gap-3">
+          <Link
+            href="/goals"
+            className="flex items-center gap-3 p-3.5 bg-card rounded-xl active:scale-[0.98] transition-all"
+          >
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <span className="text-lg">🎯</span>
+            </div>
+            <div>
+              <p className="text-xs font-bold">Goals</p>
+              <p className="text-[9px] text-muted-foreground/40">Track progress</p>
+            </div>
+          </Link>
+          <Link
+            href="/pending"
+            className="flex items-center gap-3 p-3.5 bg-card rounded-xl active:scale-[0.98] transition-all"
+          >
+            <div className="w-9 h-9 rounded-xl bg-yellow-500/10 flex items-center justify-center shrink-0">
+              <span className="text-lg">⏳</span>
+            </div>
+            <div>
+              <p className="text-xs font-bold">Pending</p>
+              <p className="text-[9px] text-muted-foreground/40">Review drafts</p>
+            </div>
+          </Link>
+        </section>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">

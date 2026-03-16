@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import { ArrowLeft, ChevronRight, Target } from "lucide-react";
+import { ChevronRight, Target } from "lucide-react";
 import Link from "next/link";
 
 type GoalSettings = {
@@ -83,17 +83,7 @@ export default function GoalSettingsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans tracking-tight px-5">
-      <header className="z-30 -mx-5 px-5 py-3 bg-background/80 backdrop-blur-md flex items-center gap-4">
-        <button
-          onClick={() => router.back()}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-foreground active:scale-95 transition-all"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-sm font-bold">Goal Settings</h1>
-      </header>
-
-      <div className="mt-4 space-y-6">
+      <div className="mt-2 space-y-6">
         {/* View Goals */}
         <Link
           href="/goals"
@@ -114,7 +104,7 @@ export default function GoalSettingsPage() {
         {/* General */}
         <section className="space-y-3">
           <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">General</p>
-          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-border/20">
+          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-white/[0.04]">
             <ToggleRow label="Goals Enabled" value={settings.enabled} onToggle={() => toggle("enabled")} />
             <ToggleRow label="Show Completed Goals" value={settings.show_completed} onToggle={() => toggle("show_completed")} />
             <div className="px-4 py-3 flex items-center justify-between">
@@ -134,7 +124,7 @@ export default function GoalSettingsPage() {
         {/* Permissions */}
         <section className="space-y-3">
           <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Permissions</p>
-          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-border/20">
+          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-white/[0.04]">
             <RoleSelect
               label="Who can view goals"
               value={settings.goals_view_role}
@@ -159,7 +149,7 @@ export default function GoalSettingsPage() {
         {/* Features */}
         <section className="space-y-3">
           <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Features</p>
-          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-border/20">
+          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-white/[0.04]">
             <ToggleRow label="Allow Milestones" value={settings.allow_milestones} onToggle={() => toggle("allow_milestones")} />
             <ToggleRow label="Allow Notes" value={settings.allow_notes} onToggle={() => toggle("allow_notes")} />
             <ToggleRow label="AI Suggestions" value={settings.ai_suggestions} onToggle={() => toggle("ai_suggestions")} />
@@ -169,7 +159,7 @@ export default function GoalSettingsPage() {
         {/* Reminders */}
         <section className="space-y-3">
           <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Reminders</p>
-          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-border/20">
+          <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-white/[0.04]">
             <ToggleRow label="Reminders Enabled" value={settings.reminders_enabled} onToggle={() => toggle("reminders_enabled")} />
             {settings.reminders_enabled && (
               <div className="px-4 py-3 flex items-center justify-between">

@@ -126,7 +126,7 @@ export default function SettingsPage() {
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </Link>
           <Link
-            href="/settings/goals"
+            href="/goals"
             className="w-full flex items-center justify-between p-3 sm:p-5 bg-card rounded-lg sm:rounded-xl active:scale-[0.98] transition-all"
           >
             <div className="flex items-center gap-3 sm:gap-4">
@@ -135,7 +135,7 @@ export default function SettingsPage() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold">Goals</p>
-                <p className="text-[10px] text-muted-foreground font-normal">Goal tracking preferences</p>
+                <p className="text-[10px] text-muted-foreground font-normal">Track and manage your goals</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />

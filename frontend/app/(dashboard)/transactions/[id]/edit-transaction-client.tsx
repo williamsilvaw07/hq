@@ -209,7 +209,7 @@ export default function EditTransactionClient() {
       </div>
 
       {/* Details */}
-      <div className="mt-6 space-y-1">
+      <div className="mt-4 bg-card/30 rounded-2xl overflow-hidden divide-y divide-white/[0.04]">
         <DetailRow label="Description" value={transaction.description || "—"} />
         <DetailRow label="Category" value={transaction.category?.name || "—"} />
         <DetailRow label="Account" value={transaction.account?.name || "—"} />
@@ -250,9 +250,9 @@ export default function EditTransactionClient() {
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between px-1 py-3 border-b border-border/10">
-      <span className="text-xs text-muted-foreground/60 uppercase tracking-widest font-bold">{label}</span>
-      <span className="text-sm font-bold">{value}</span>
+    <div className="flex items-center justify-between px-4 py-3.5">
+      <span className="text-[10px] text-muted-foreground/40 uppercase tracking-widest font-bold">{label}</span>
+      <span className="text-sm font-semibold">{value}</span>
     </div>
   );
 }
