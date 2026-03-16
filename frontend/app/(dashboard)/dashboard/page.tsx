@@ -375,7 +375,7 @@ export default function DashboardPage() {
         )}
 
         {/* Quick Links */}
-        <section className="grid grid-cols-2 gap-3">
+        <section className="grid grid-cols-3 gap-3">
           <Link
             href="/goals"
             className="flex items-center gap-3 p-3.5 bg-card rounded-xl active:scale-[0.98] transition-all"
@@ -398,6 +398,18 @@ export default function DashboardPage() {
             <div>
               <p className="text-xs font-bold">Pending</p>
               <p className="text-[9px] text-muted-foreground/40">Review drafts</p>
+            </div>
+          </Link>
+          <Link
+            href="/history"
+            className="flex items-center gap-3 p-3.5 bg-card rounded-xl active:scale-[0.98] transition-all"
+          >
+            <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <span className="text-lg">📊</span>
+            </div>
+            <div>
+              <p className="text-xs font-bold">History</p>
+              <p className="text-[9px] text-muted-foreground/40">By month</p>
             </div>
           </Link>
         </section>
