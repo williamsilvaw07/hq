@@ -160,7 +160,7 @@ export default function DashboardLayout({
             }`}
           >
             <Icon icon="solar:history-bold-duotone" className="text-xl sm:text-2xl" />
-            <span>HISTORY</span>
+            <span>TRANSACTIONS</span>
           </Link>
           
           <button
