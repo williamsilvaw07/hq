@@ -325,10 +325,13 @@ export default function DashboardPage() {
                 {CURRENCY_SYMBOL} {formatBRL(variableSpent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
             </div>
-            <div className="space-y-2">
-              <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
+            <div className="space-y-1.5">
+              <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                 {variableLimit > 0 && (
-                  <div style={{ width: `${variablePercent}%` }} className="h-full bg-white rounded-full shadow-[0_0_12px_rgba(255,255,255,0.3)]" />
+                  <div
+                    style={{ width: `${Math.max(variablePercent, 2)}%` }}
+                    className={`h-full rounded-full transition-all duration-700 ${variablePercent >= 90 ? "bg-chart-2" : variablePercent >= 70 ? "bg-yellow-400" : "bg-white"}`}
+                  />
                 )}
               </div>
               <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
@@ -343,10 +346,13 @@ export default function DashboardPage() {
                 {CURRENCY_SYMBOL} {formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
             </div>
-            <div className="space-y-2">
-              <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
+            <div className="space-y-1.5">
+              <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                 {monthlyFixedTotal > 0 && (
-                  <div style={{ width: `${Math.min(100, (fixedBillsDueTotal / monthlyFixedTotal) * 100)}%` }} className="h-full bg-chart-1 rounded-full shadow-[0_0_12px_rgba(var(--chart-1),0.3)]" />
+                  <div
+                    style={{ width: `${Math.max(Math.min(100, (fixedBillsDueTotal / monthlyFixedTotal) * 100), 2)}%` }}
+                    className={`h-full rounded-full transition-all duration-700 ${(fixedBillsDueTotal / monthlyFixedTotal) * 100 >= 90 ? "bg-chart-2" : (fixedBillsDueTotal / monthlyFixedTotal) * 100 >= 70 ? "bg-yellow-400" : "bg-chart-1"}`}
+                  />
                 )}
               </div>
               <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
