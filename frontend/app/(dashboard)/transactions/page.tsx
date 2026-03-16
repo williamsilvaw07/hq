@@ -210,6 +210,12 @@ export default function TransactionsPage() {
         <div className="flex items-center justify-between">
           <h1 className="page-title">Activity History</h1>
           <div className="flex items-center gap-2">
+            <Link
+              href="/pending"
+              className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 hover:text-foreground px-2.5 py-1.5 rounded-lg bg-card/50 transition-colors"
+            >
+              Pending
+            </Link>
             <button
               type="button"
               onClick={() => {

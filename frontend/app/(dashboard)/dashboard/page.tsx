@@ -266,59 +266,87 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-sans tracking-tight">
       <main className="px-5 space-y-8 mt-4">
-        <section className="bg-card p-6 rounded-xl relative overflow-hidden group shadow-2xl shadow-black/10">
-          {hasAnyData ? (
-            <>
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
-              <div className={`flex items-baseline gap-2 mb-2 ${periodExpense > 0 ? "text-foreground" : "text-muted-foreground/20"}`}>
-                <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
-                <h2 className="text-5xl font-black tracking-tighter leading-none">
-                  {formatBRL(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </h2>
+        <section className="flex gap-3">
+          {/* Spent This Month — main card */}
+          <div className="flex-1 bg-card p-6 rounded-xl relative overflow-hidden shadow-2xl shadow-black/10">
+            {hasAnyData ? (
+              <>
+                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
+                <div className={`flex items-baseline gap-2 mb-2 ${periodExpense > 0 ? "text-foreground" : "text-muted-foreground/20"}`}>
+                  <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
+                  <h2 className="text-5xl font-black tracking-tighter leading-none">
+                    {formatBRL(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </h2>
+                </div>
+                {totalBudget > 0 && (
+                  <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
+                    of {CURRENCY_SYMBOL} {formatBRL(totalBudget, { minimumFractionDigits: 2 })} est. budget
+                  </p>
+                )}
+                {periodIncome > 0 && (
+                  <p className="text-[10px] text-chart-1/60 font-normal uppercase tracking-tighter mb-4">
+                    +{CURRENCY_SYMBOL} {formatBRL(periodIncome, { minimumFractionDigits: 2 })} income
+                  </p>
+                )}
+                <div className="space-y-4">
+                  <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
+                    {totalBudget > 0 && spentPercent > 0 && (
+                      <div
+                        style={{ width: `${spentPercent}%` }}
+                        className={`h-full rounded-full transition-all duration-1000 ${spentPercent >= 90 ? "bg-chart-2" : spentPercent >= 70 ? "bg-yellow-400" : "bg-white"}`}
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] font-normal text-muted-foreground uppercase tracking-widest opacity-60">
+                    <span className="flex items-center gap-1.5">
+                      <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
+                      Ends {String(monthEnd.getDate()).padStart(2, "0")}/{String(monthEnd.getMonth() + 1).padStart(2, "0")}/{String(monthEnd.getFullYear()).slice(-2)}
+                    </span>
+                    <span>{daysLeft}d{totalBudget > 0 ? ` • ${spentPercent.toFixed(0)}%` : ""}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
+                <div className="flex items-baseline justify-center gap-2 mb-4 text-muted-foreground/20">
+                  <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
+                  <h2 className="text-5xl font-black tracking-tighter leading-none">0.00</h2>
+                </div>
+                <p className="text-xs text-muted-foreground/40">Add a budget or record a transaction to get started</p>
               </div>
-              {totalBudget > 0 && (
-                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
-                  of {CURRENCY_SYMBOL} {formatBRL(totalBudget, { minimumFractionDigits: 2 })} est. budget
+            )}
+          </div>
+
+          {/* Fixed Bills — narrow side card */}
+          {hasAnyData && (
+            <div className="w-[110px] shrink-0 bg-card p-3.5 rounded-xl flex flex-col justify-between">
+              <div>
+                <p className="text-[8px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
+                <p className={`text-base font-black tracking-tighter leading-tight ${fixedBillsDueTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
+                  {CURRENCY_SYMBOL} {formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </p>
-              )}
-              {periodIncome > 0 && (
-                <p className="text-[10px] text-chart-1/60 font-normal uppercase tracking-tighter mb-4">
-                  +{CURRENCY_SYMBOL} {formatBRL(periodIncome, { minimumFractionDigits: 2 })} income
-                </p>
-              )}
-              <div className="space-y-4">
-                <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
-                  {totalBudget > 0 && spentPercent > 0 && (
+              </div>
+              <div className="space-y-1.5 mt-auto">
+                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                  {monthlyFixedTotal > 0 && (
                     <div
-                      style={{ width: `${spentPercent}%` }}
-                      className={`h-full rounded-full transition-all duration-1000 ${spentPercent >= 90 ? "bg-chart-2" : spentPercent >= 70 ? "bg-yellow-400" : "bg-white"}`}
+                      style={{ width: `${Math.max(Math.min(100, (fixedBillsDueTotal / monthlyFixedTotal) * 100), 2)}%` }}
+                      className={`h-full rounded-full transition-all duration-700 ${(fixedBillsDueTotal / monthlyFixedTotal) * 100 >= 90 ? "bg-chart-2" : (fixedBillsDueTotal / monthlyFixedTotal) * 100 >= 70 ? "bg-yellow-400" : "bg-chart-1"}`}
                     />
                   )}
                 </div>
-                <div className="flex items-center justify-between text-[10px] font-normal text-muted-foreground uppercase tracking-widest opacity-60">
-                  <span className="flex items-center gap-1.5">
-                    <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
-                    Ends {String(monthEnd.getDate()).padStart(2, "0")}/{String(monthEnd.getMonth() + 1).padStart(2, "0")}/{String(monthEnd.getFullYear()).slice(-2)}
-                  </span>
-                  <span>{daysLeft} days left{totalBudget > 0 ? ` • ${spentPercent.toFixed(0)}% used` : ""}</span>
-                </div>
+                <p className="text-[8px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
+                  {monthlyFixedTotal > 0 ? `of ${formatCompact(monthlyFixedTotal)}` : "No bills"}
+                </p>
               </div>
-            </>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
-              <div className="flex items-baseline justify-center gap-2 mb-4 text-muted-foreground/20">
-                <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
-                <h2 className="text-5xl font-black tracking-tighter leading-none">0.00</h2>
-              </div>
-              <p className="text-xs text-muted-foreground/40">Add a budget or record a transaction to get started</p>
             </div>
           )}
         </section>
 
         {hasAnyData && (
-        <section className="grid grid-cols-3 gap-3">
-          <div className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[140px]">
+        <section className="grid grid-cols-2 gap-3">
+          <div className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[130px]">
             <div>
               <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Budgets</p>
               <p className={`text-xl font-black tracking-tighter ${variableLimit === 0 ? "text-muted-foreground/30" : ""}`}>
@@ -339,28 +367,7 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[140px]">
-            <div>
-              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
-              <p className={`text-xl font-black tracking-tighter ${fixedBillsDueTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
-                {CURRENCY_SYMBOL} {formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </p>
-            </div>
-            <div className="space-y-1.5">
-              <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                {monthlyFixedTotal > 0 && (
-                  <div
-                    style={{ width: `${Math.max(Math.min(100, (fixedBillsDueTotal / monthlyFixedTotal) * 100), 2)}%` }}
-                    className={`h-full rounded-full transition-all duration-700 ${(fixedBillsDueTotal / monthlyFixedTotal) * 100 >= 90 ? "bg-chart-2" : (fixedBillsDueTotal / monthlyFixedTotal) * 100 >= 70 ? "bg-yellow-400" : "bg-chart-1"}`}
-                  />
-                )}
-              </div>
-              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
-                {monthlyFixedTotal > 0 ? `${formatCompact(fixedBillsDueTotal)} of ${formatCompact(monthlyFixedTotal)}` : "No bills"}
-              </p>
-            </div>
-          </div>
-          <Link href="/transactions?budget=unbudgeted" className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[140px] active:scale-[0.98] transition-all">
+          <Link href="/transactions?budget=unbudgeted" className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[130px] active:scale-[0.98] transition-all">
             <div>
               <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Unbudgeted</p>
               <p className={`text-xl font-black tracking-tighter ${unbudgeted > 0 ? "text-orange-400" : "text-muted-foreground/30"}`}>
@@ -386,18 +393,6 @@ export default function DashboardPage() {
             <div>
               <p className="text-xs font-bold">Goals</p>
               <p className="text-[9px] text-muted-foreground/40">Track progress</p>
-            </div>
-          </Link>
-          <Link
-            href="/pending"
-            className="flex items-center gap-3 p-3.5 bg-card rounded-xl active:scale-[0.98] transition-all"
-          >
-            <div className="w-9 h-9 rounded-xl bg-yellow-500/10 flex items-center justify-center shrink-0">
-              <span className="text-lg">⏳</span>
-            </div>
-            <div>
-              <p className="text-xs font-bold">Pending</p>
-              <p className="text-[9px] text-muted-foreground/40">Review drafts</p>
             </div>
           </Link>
           <Link
