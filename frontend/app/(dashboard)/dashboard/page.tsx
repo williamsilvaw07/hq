@@ -375,7 +375,7 @@ export default function DashboardPage() {
         )}
 
         {/* Quick Links */}
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 gap-3">
           <Link
             href="/goals"
             className="flex items-center gap-3 p-3.5 bg-card rounded-xl active:scale-[0.98] transition-all"

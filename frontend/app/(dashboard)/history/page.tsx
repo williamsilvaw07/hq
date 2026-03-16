@@ -107,8 +107,45 @@ export default function HistoryPage() {
     } else {
       // Year overview
       api<any>(`/api/workspaces/${workspaceId}/history?year=${selectedYear}`)
-        .then((r) => { setMonths(r.data?.months ?? []); })
-        .catch(() => setMonths([]))
+        .then((r) => {
+          const fetched = r.data?.months ?? [];
+          // Ensure we always have 12 months even if API returns partial/empty
+          if (fetched.length === 12) {
+            setMonths(fetched);
+          } else {
+            const fallback = Array.from({ length: 12 }, (_, i) => ({
+              year: selectedYear,
+              month: i + 1,
+              label: `${MONTH_SHORT[i]} ${selectedYear}`,
+              totalIncome: 0,
+              totalExpenses: 0,
+              netResult: 0,
+              fixedBillsTotal: 0,
+              transactionCount: 0,
+              topCategories: [],
+            }));
+            // Merge fetched data into fallback
+            for (const m of fetched) {
+              const idx = m.month - 1;
+              if (idx >= 0 && idx < 12) fallback[idx] = m;
+            }
+            setMonths(fallback);
+          }
+        })
+        .catch(() => {
+          // Show empty month grid on error
+          setMonths(Array.from({ length: 12 }, (_, i) => ({
+            year: selectedYear,
+            month: i + 1,
+            label: `${MONTH_SHORT[i]} ${selectedYear}`,
+            totalIncome: 0,
+            totalExpenses: 0,
+            netResult: 0,
+            fixedBillsTotal: 0,
+            transactionCount: 0,
+            topCategories: [],
+          })));
+        })
         .finally(() => setLoading(false));
     }
   }, [workspaceId, selectedYear, selectedMonth]);
@@ -137,7 +174,7 @@ export default function HistoryPage() {
   // Year + Month Cards View
   // ---------------------------------------------------------------------------
   return (
-    <div className="space-y-6 pb-32">
+    <div className="px-5 pt-6 space-y-6 pb-32">
       {/* Header */}
       <header className="flex items-center gap-3">
         <button onClick={goBack} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -253,7 +290,7 @@ export default function HistoryPage() {
 function MonthDetailView({ detail, onBack }: { detail: MonthDetail | null; onBack: () => void }) {
   if (!detail) {
     return (
-      <div className="space-y-6 pb-32">
+      <div className="px-5 pt-6 space-y-6 pb-32">
         <header className="flex items-center gap-3">
           <button onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft size={20} />
@@ -279,7 +316,7 @@ function MonthDetailView({ detail, onBack }: { detail: MonthDetail | null; onBac
   const dateGroups = Object.entries(txByDate).sort(([a], [b]) => b.localeCompare(a));
 
   return (
-    <div className="space-y-6 pb-32">
+    <div className="px-5 pt-6 space-y-6 pb-32">
       {/* Header */}
       <header className="flex items-center gap-3">
         <button onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors">
