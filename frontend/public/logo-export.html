@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>NorthTrack Logo Export</title>
+<style>
+  body { background: #111; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 32px; font-family: system-ui, sans-serif; color: #fff; }
+  canvas { border: 1px dashed #333; border-radius: 12px; }
+  button { background: #fff; color: #000; border: none; padding: 12px 32px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+  button:hover { opacity: 0.9; }
+  .row { display: flex; gap: 24px; align-items: end; }
+  p { color: #666; font-size: 12px; }
+</style>
+</head>
+<body>
+  <h2>NorthTrack Logo Export</h2>
+  <div class="row">
+    <div style="text-align:center">
+      <p>Icon Only (512x512)</p>
+      <canvas id="icon" width="512" height="512"></canvas><br><br>
+      <button onclick="download('icon','northtrack-icon-512.png')">Download Icon</button>
+    </div>
+    <div style="text-align:center">
+      <p>Full Logo (1200x400)</p>
+      <canvas id="full" width="1200" height="400"></canvas><br><br>
+      <button onclick="download('full','northtrack-logo-1200.png')">Download Full Logo</button>
+    </div>
+  </div>
+  <div class="row" style="margin-top:16px">
+    <div style="text-align:center">
+      <p>Icon Transparent (512x512)</p>
+      <canvas id="icon-transparent" width="512" height="512"></canvas><br><br>
+      <button onclick="download('icon-transparent','northtrack-icon-transparent-512.png')">Download Transparent Icon</button>
+    </div>
+  </div>
+
+  <hr style="width:100%;border-color:#333;margin:24px 0">
+  <h2>WhatsApp Profile Picture</h2>
+
+  <div class="row">
+    <div style="text-align:center">
+      <p>WhatsApp (640x640) White BG</p>
+      <canvas id="wa-white" width="640" height="640"></canvas><br><br>
+      <button onclick="download('wa-white','northtrack-whatsapp-white-640.png')">Download</button>
+    </div>
+    <div style="text-align:center">
+      <p>WhatsApp (640x640) Black BG</p>
+      <canvas id="wa-black" width="640" height="640"></canvas><br><br>
+      <button onclick="download('wa-black','northtrack-whatsapp-black-640.png')">Download</button>
+    </div>
+    <div style="text-align:center">
+      <p>WhatsApp (640x640) Dark + Text</p>
+      <canvas id="wa-text" width="640" height="640"></canvas><br><br>
+      <button onclick="download('wa-text','northtrack-whatsapp-text-640.png')">Download</button>
+    </div>
+  </div>
+
+  <hr style="width:100%;border-color:#333;margin:24px 0">
+  <h2>Black Background Versions</h2>
+
+  <div class="row">
+    <div style="text-align:center">
+      <p>Icon Black BG (512x512)</p>
+      <canvas id="icon-black" width="512" height="512"></canvas><br><br>
+      <button onclick="download('icon-black','northtrack-icon-black-512.png')">Download Icon (Black)</button>
+    </div>
+    <div style="text-align:center">
+      <p>Full Logo Black BG (1200x400)</p>
+      <canvas id="full-black" width="1200" height="400"></canvas><br><br>
+      <button onclick="download('full-black','northtrack-logo-black-1200.png')">Download Full Logo (Black)</button>
+    </div>
+  </div>
+
+<script>
+function drawLogoSVG(ctx, x, y, size, color) {
+  const c = color || '#0b0b0b';
+  const s = size / 24;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+
+  // Filled top shape
+  ctx.fillStyle = c;
+  ctx.beginPath();
+  ctx.moveTo(12, 2);
+  ctx.lineTo(2, 7);
+  ctx.lineTo(12, 12);
+  ctx.lineTo(22, 7);
+  ctx.closePath();
+  ctx.fill();
+
+  // Bottom stroke
+  ctx.strokeStyle = c;
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(2, 17);
+  ctx.lineTo(12, 22);
+  ctx.lineTo(22, 17);
+  ctx.stroke();
+
+  // Middle stroke
+  ctx.beginPath();
+  ctx.moveTo(2, 12);
+  ctx.lineTo(12, 17);
+  ctx.lineTo(22, 12);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawRoundedRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// Icon with white background
+(function() {
+  const c = document.getElementById('icon');
+  const ctx = c.getContext('2d');
+  // White rounded square background
+  ctx.fillStyle = '#ffffff';
+  drawRoundedRect(ctx, 32, 32, 448, 448, 80);
+  ctx.fill();
+  // Shadow
+  ctx.shadowColor = 'rgba(255,255,255,0.1)';
+  ctx.shadowBlur = 20;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  // Draw logo centered
+  const logoSize = 280;
+  drawLogoSVG(ctx, (512 - logoSize) / 2, (512 - logoSize) / 2, logoSize);
+})();
+
+// Transparent icon (white logo, no background)
+(function() {
+  const c = document.getElementById('icon-transparent');
+  const ctx = c.getContext('2d');
+  const logoSize = 380;
+  drawLogoSVG(ctx, (512 - logoSize) / 2, (512 - logoSize) / 2, logoSize, '#ffffff');
+})();
+
+// Full logo with text
+(function() {
+  const c = document.getElementById('full');
+  const ctx = c.getContext('2d');
+
+  // Icon background
+  const iconSize = 280;
+  const iconBoxX = 60;
+  const iconBoxY = (400 - iconSize) / 2;
+  ctx.fillStyle = '#ffffff';
+  drawRoundedRect(ctx, iconBoxX, iconBoxY, iconSize, iconSize, 48);
+  ctx.fill();
+  // Draw logo in icon box
+  const svgSize = iconSize * 0.6;
+  drawLogoSVG(ctx, iconBoxX + (iconSize - svgSize) / 2, iconBoxY + (iconSize - svgSize) / 2, svgSize);
+
+  // Text
+  ctx.textBaseline = 'middle';
+  const textX = iconBoxX + iconSize + 32;
+  const textY = 200;
+  ctx.font = '900 96px system-ui, -apple-system, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('North', textX, textY);
+  const northWidth = ctx.measureText('North').width;
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText('Track', textX + northWidth, textY);
+})();
+
+// WhatsApp profile - white background with dark logo (no box)
+(function() {
+  const c = document.getElementById('wa-white');
+  const ctx = c.getContext('2d');
+  // Solid white background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 640, 640);
+  // Draw dark logo centered, large
+  const logoSize = 360;
+  drawLogoSVG(ctx, (640 - logoSize) / 2, (640 - logoSize) / 2, logoSize, '#0b0b0b');
+})();
+
+// WhatsApp profile - black background with white logo (no box)
+(function() {
+  const c = document.getElementById('wa-black');
+  const ctx = c.getContext('2d');
+  // Solid black background
+  ctx.fillStyle = '#0b0b0b';
+  ctx.fillRect(0, 0, 640, 640);
+  // Draw white logo centered, large
+  const logoSize = 360;
+  drawLogoSVG(ctx, (640 - logoSize) / 2, (640 - logoSize) / 2, logoSize, '#ffffff');
+})();
+
+// WhatsApp profile - dark with icon box + text
+(function() {
+  const c = document.getElementById('wa-text');
+  const ctx = c.getContext('2d');
+  // Dark background
+  ctx.fillStyle = '#0b0b0b';
+  ctx.fillRect(0, 0, 640, 640);
+  // White icon box
+  const boxSize = 260;
+  const boxX = (640 - boxSize) / 2;
+  const boxY = 110;
+  drawRoundedRect(ctx, boxX, boxY, boxSize, boxSize, 44);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  // Draw dark logo in white box
+  const logoSize = boxSize * 0.6;
+  drawLogoSVG(ctx, (640 - logoSize) / 2, boxY + (boxSize - logoSize) / 2, logoSize, '#0b0b0b');
+  // Text below - measure total width to center
+  ctx.textBaseline = 'middle';
+  ctx.font = '900 56px system-ui, -apple-system, sans-serif';
+  const textY = boxY + boxSize + 75;
+  const northW = ctx.measureText('North').width;
+  const trackW = ctx.measureText('Track').width;
+  const totalW = northW + trackW;
+  const startX = (640 - totalW) / 2;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('North', startX, textY);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText('Track', startX + northW, textY);
+})();
+
+// Icon with black background, white logo
+(function() {
+  const c = document.getElementById('icon-black');
+  const ctx = c.getContext('2d');
+  // Black rounded square background
+  ctx.fillStyle = '#0b0b0b';
+  drawRoundedRect(ctx, 0, 0, 512, 512, 80);
+  ctx.fill();
+  // White logo icon box
+  ctx.fillStyle = '#ffffff';
+  drawRoundedRect(ctx, 32, 32, 448, 448, 64);
+  ctx.fill();
+  // Draw dark logo centered
+  const logoSize = 280;
+  drawLogoSVG(ctx, (512 - logoSize) / 2, (512 - logoSize) / 2, logoSize);
+})();
+
+// Full logo with black background
+(function() {
+  const c = document.getElementById('full-black');
+  const ctx = c.getContext('2d');
+  // Black background
+  ctx.fillStyle = '#0b0b0b';
+  drawRoundedRect(ctx, 0, 0, 1200, 400, 48);
+  ctx.fill();
+
+  // White icon box
+  const iconSize = 280;
+  const iconBoxX = 60;
+  const iconBoxY = (400 - iconSize) / 2;
+  ctx.fillStyle = '#ffffff';
+  drawRoundedRect(ctx, iconBoxX, iconBoxY, iconSize, iconSize, 48);
+  ctx.fill();
+  // Draw dark logo in icon box
+  const svgSize = iconSize * 0.6;
+  drawLogoSVG(ctx, iconBoxX + (iconSize - svgSize) / 2, iconBoxY + (iconSize - svgSize) / 2, svgSize);
+
+  // Text
+  ctx.textBaseline = 'middle';
+  const textX = iconBoxX + iconSize + 32;
+  const textY = 200;
+  ctx.font = '900 96px system-ui, -apple-system, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('North', textX, textY);
+  const northWidth = ctx.measureText('North').width;
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText('Track', textX + northWidth, textY);
+})();
+
+function download(id, filename) {
+  const c = document.getElementById(id);
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = c.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>
