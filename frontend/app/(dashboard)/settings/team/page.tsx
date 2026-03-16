@@ -282,7 +282,7 @@ export default function TeamPage() {
                 >
                   <div>
                     <p className="text-sm font-bold text-foreground">{inv.email}</p>
-                    <p className="text-[10px] text-muted-foreground">{ROLE_LABELS[inv.role]} · Expires {new Date(inv.expires_at).toLocaleDateString()}</p>
+                    <p className="text-[10px] text-muted-foreground">{ROLE_LABELS[inv.role]} · Expires {(() => { const d = new Date(inv.expires_at); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getFullYear()).slice(-2)}`; })()}</p>
                   </div>
                   <button
                     type="button"

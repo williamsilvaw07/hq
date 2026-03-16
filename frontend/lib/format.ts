@@ -53,6 +53,23 @@ export function formatCompact(value: number): string {
   return k % 1 === 0 ? `${k}K` : `${k.toFixed(1)}K`;
 }
 
+/** Format a date as dd/mm/yy */
+export function formatDate(value: string | Date): string {
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (!d || isNaN(d.getTime())) return "";
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2);
+  return `${day}/${month}/${year}`;
+}
+
+/** Format a date as dd/mm/yy with short month name (e.g. "16 Mar") */
+export function formatDateShort(value: string | Date): string {
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (!d || isNaN(d.getTime())) return "";
+  return `${d.getDate()} ${d.toLocaleDateString("en-GB", { month: "short" })}`;
+}
+
 /** Brazilian locale format (3.240,50) - period for thousands, comma for decimals */
 export function formatBRLocale(value: number, options?: MoneyFormatOptions): string {
   const num = Number(value);

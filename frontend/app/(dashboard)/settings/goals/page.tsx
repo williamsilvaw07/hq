@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight, Target } from "lucide-react";
+import Link from "next/link";
 
 type GoalSettings = {
   enabled: boolean;
@@ -93,6 +94,23 @@ export default function GoalSettingsPage() {
       </header>
 
       <div className="mt-4 space-y-6">
+        {/* View Goals */}
+        <Link
+          href="/goals"
+          className="w-full flex items-center justify-between p-4 bg-card/30 rounded-xl active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Target className="w-5 h-5 text-emerald-500" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-bold">View Goals</p>
+              <p className="text-[10px] text-muted-foreground/40">Manage and track all your goals</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
+        </Link>
+
         {/* General */}
         <section className="space-y-3">
           <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">General</p>

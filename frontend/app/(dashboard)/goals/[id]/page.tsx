@@ -4,8 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import { CURRENCY_SYMBOL, formatBRL, formatMoney } from "@/lib/format";
-import { ArrowLeft, Plus, Check, Trash2, MessageSquare, X } from "lucide-react";
+import { CURRENCY_SYMBOL, formatBRL, formatMoney, formatDate } from "@/lib/format";
+import { ArrowLeft, Plus, Check, Trash2, MessageSquare, X, Pencil, MoreVertical } from "lucide-react";
 
 type Milestone = {
   id: number;
@@ -53,6 +53,187 @@ type GoalDetail = {
   notes: Note[];
   contributions: Contribution[];
 };
+
+function EditGoalModal({
+  isOpen,
+  onClose,
+  onSave,
+  saving,
+  goal,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: Record<string, any>) => void;
+  saving: boolean;
+  goal: GoalDetail;
+}) {
+  const [name, setName] = useState(goal.name);
+  const [icon, setIcon] = useState(goal.icon || "");
+  const [targetAmount, setTargetAmount] = useState(goal.target_amount?.toString() || "");
+  const [deadline, setDeadline] = useState(goal.deadline ? goal.deadline.slice(0, 10) : "");
+  const [contributionFrequency, setContributionFrequency] = useState(goal.contribution_frequency || "");
+  const [contributionAmount, setContributionAmount] = useState(goal.contribution_amount?.toString() || "");
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(goal.name);
+      setIcon(goal.icon || "");
+      setTargetAmount(goal.target_amount?.toString() || "");
+      setDeadline(goal.deadline ? goal.deadline.slice(0, 10) : "");
+      setContributionFrequency(goal.contribution_frequency || "");
+      setContributionAmount(goal.contribution_amount?.toString() || "");
+    }
+  }, [isOpen, goal]);
+
+  if (!isOpen) return null;
+
+  const isFinancial = goal.type === "financial";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl p-6 space-y-5 animate-in slide-in-from-bottom max-h-[85vh] overflow-y-auto">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-black uppercase tracking-[0.2em]">Edit Goal</h3>
+          <button onClick={onClose} className="text-muted-foreground"><X className="w-5 h-5" /></button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-background rounded-xl px-4 py-3 text-sm border border-border"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Icon (emoji)</label>
+            <input
+              type="text"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="🎯"
+              className="w-full bg-background rounded-xl px-4 py-3 text-sm border border-border"
+            />
+          </div>
+          {isFinancial && (
+            <>
+              <div>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Target Amount</label>
+                <input
+                  type="number"
+                  value={targetAmount}
+                  onChange={(e) => setTargetAmount(e.target.value)}
+                  className="w-full bg-background rounded-xl px-4 py-3 text-sm border border-border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Contribution Frequency</label>
+                <select
+                  value={contributionFrequency}
+                  onChange={(e) => setContributionFrequency(e.target.value)}
+                  className="w-full bg-background rounded-xl px-4 py-3 text-sm border border-border"
+                >
+                  <option value="">None</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              {contributionFrequency && (
+                <div>
+                  <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Contribution Amount</label>
+                  <input
+                    type="number"
+                    value={contributionAmount}
+                    onChange={(e) => setContributionAmount(e.target.value)}
+                    className="w-full bg-background rounded-xl px-4 py-3 text-sm border border-border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              )}
+            </>
+          )}
+          <div>
+            <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Deadline</label>
+            <input
+              type="date"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              className="w-full bg-background rounded-xl px-4 py-3 text-sm border border-border"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const data: Record<string, any> = { name };
+            if (icon) data.icon = icon;
+            if (isFinancial && targetAmount) data.target_amount = parseFloat(targetAmount);
+            if (deadline) data.deadline = deadline;
+            if (isFinancial) {
+              data.contribution_frequency = contributionFrequency || null;
+              data.contribution_amount = contributionAmount ? parseFloat(contributionAmount) : null;
+            }
+            onSave(data);
+          }}
+          disabled={saving || !name.trim()}
+          className="w-full py-3 rounded-xl bg-white text-black font-black text-sm uppercase tracking-widest active:scale-[0.98] transition-all disabled:opacity-40"
+        >
+          {saving ? "Saving…" : "Save Changes"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DeleteConfirmModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  deleting,
+  goalName,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  deleting: boolean;
+  goalName: string;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl p-6 space-y-5 animate-in slide-in-from-bottom">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-red-400">Delete Goal</h3>
+          <button onClick={onClose} className="text-muted-foreground"><X className="w-5 h-5" /></button>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Are you sure you want to delete <span className="font-bold text-foreground">{goalName}</span>? This will also remove all milestones, notes, and contributions. This action cannot be undone.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 rounded-xl bg-card border border-border text-sm font-bold uppercase tracking-widest active:scale-[0.98] transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={deleting}
+            className="flex-1 py-3 rounded-xl bg-red-500 text-white font-black text-sm uppercase tracking-widest active:scale-[0.98] transition-all disabled:opacity-40"
+          >
+            {deleting ? "Deleting…" : "Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ContributionModal({
   isOpen,
@@ -141,6 +322,11 @@ export default function GoalDetailPage() {
   const [newMilestone, setNewMilestone] = useState("");
   const [savingMilestone, setSavingMilestone] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "milestones" | "notes">("overview");
+  const [editOpen, setEditOpen] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const fetchGoal = useCallback(() => {
     if (!workspaceId || !goalId) return;
@@ -154,6 +340,35 @@ export default function GoalDetailPage() {
   useEffect(() => {
     fetchGoal();
   }, [fetchGoal]);
+
+  async function handleEditGoal(data: Record<string, any>) {
+    if (!workspaceId) return;
+    setSavingEdit(true);
+    try {
+      await api(`/api/workspaces/${workspaceId}/goals/${goalId}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+      setEditOpen(false);
+      fetchGoal();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function handleDeleteGoal() {
+    if (!workspaceId) return;
+    setDeleting(true);
+    try {
+      await api(`/api/workspaces/${workspaceId}/goals/${goalId}`, { method: "DELETE" });
+      router.push("/goals");
+    } catch (err) {
+      console.error(err);
+      setDeleting(false);
+    }
+  }
 
   async function handleAddContribution(amount: number, note: string, date: string) {
     if (!workspaceId) return;
@@ -284,7 +499,33 @@ export default function GoalDetailPage() {
             {isFinancial ? "Financial Goal" : "Life Goal"}
           </p>
         </div>
-        <span className="text-2xl">{goal.icon || (isFinancial ? "🎯" : "🏁")}</span>
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-card text-foreground active:scale-95 transition-all"
+          >
+            <MoreVertical className="w-5 h-5" />
+          </button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 top-11 z-50 bg-card border border-border rounded-xl shadow-2xl overflow-hidden min-w-[160px]">
+                <button
+                  onClick={() => { setMenuOpen(false); setEditOpen(true); }}
+                  className="w-full px-4 py-3 text-left text-sm font-bold flex items-center gap-3 hover:bg-white/5 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" /> Edit Goal
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); setDeleteOpen(true); }}
+                  className="w-full px-4 py-3 text-left text-sm font-bold flex items-center gap-3 text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" /> Delete Goal
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </header>
 
       {/* Progress Card */}
@@ -314,7 +555,7 @@ export default function GoalDetailPage() {
             )}
             {goal.deadline && (
               <p className="text-center text-[10px] text-muted-foreground/40 font-bold uppercase">
-                Target: {new Date(goal.deadline).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                Target: {formatDate(goal.deadline)}
               </p>
             )}
             {goal.contribution_frequency && goal.contribution_amount && (
@@ -345,7 +586,7 @@ export default function GoalDetailPage() {
             )}
             {goal.deadline && (
               <p className="text-center text-[10px] text-muted-foreground/40 font-bold uppercase">
-                Target: {new Date(goal.deadline).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                Target: {formatDate(goal.deadline)}
               </p>
             )}
           </>
@@ -413,7 +654,7 @@ export default function GoalDetailPage() {
                         + {formatMoney(c.amount)}
                       </p>
                       <p className="text-[10px] text-muted-foreground/50">
-                        {c.user_name} · {new Date(c.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                        {c.user_name} · {formatDate(c.date)}
                       </p>
                       {c.note && <p className="text-[10px] text-muted-foreground/40 mt-0.5">{c.note}</p>}
                     </div>
@@ -468,7 +709,7 @@ export default function GoalDetailPage() {
                   <div key={n.id} className="bg-card rounded-xl px-4 py-3">
                     <p className="text-sm">{n.content}</p>
                     <p className="text-[10px] text-muted-foreground/40 mt-1">
-                      {n.user_name} · {new Date(n.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      {n.user_name} · {formatDate(n.created_at)}
                     </p>
                   </div>
                 ))}
@@ -504,7 +745,7 @@ export default function GoalDetailPage() {
                 </span>
                 {m.target_date && (
                   <p className="text-[9px] text-muted-foreground/40">
-                    {new Date(m.target_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    {formatDate(m.target_date)}
                   </p>
                 )}
               </div>
@@ -564,7 +805,7 @@ export default function GoalDetailPage() {
                 <div className="flex-1">
                   <p className="text-sm">{n.content}</p>
                   <p className="text-[10px] text-muted-foreground/40 mt-1">
-                    {n.user_name} · {new Date(n.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    {n.user_name} · {formatDate(n.created_at)}
                   </p>
                 </div>
                 <button
@@ -588,6 +829,22 @@ export default function GoalDetailPage() {
         onClose={() => setContributionOpen(false)}
         onSave={handleAddContribution}
         saving={savingContribution}
+      />
+
+      <EditGoalModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        onSave={handleEditGoal}
+        saving={savingEdit}
+        goal={goal}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDeleteGoal}
+        deleting={deleting}
+        goalName={goal.name}
       />
     </div>
   );

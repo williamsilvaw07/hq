@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import { CURRENCY_SYMBOL, formatBRL } from "@/lib/format";
+import { CURRENCY_SYMBOL, formatBRL, formatDate } from "@/lib/format";
 import { Plus, Target, Flag } from "lucide-react";
 
 type Goal = {
@@ -167,7 +167,7 @@ export default function GoalsPage() {
                         </div>
                         {goal.deadline && (
                           <p className="text-[10px] text-muted-foreground/50 font-bold uppercase">
-                            {new Date(goal.deadline).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                            {formatDate(goal.deadline)}
                           </p>
                         )}
                       </div>
@@ -217,7 +217,7 @@ export default function GoalsPage() {
                         </div>
                         {goal.deadline && (
                           <p className="text-[10px] text-muted-foreground/50 font-bold uppercase">
-                            {new Date(goal.deadline).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                            {formatDate(goal.deadline)}
                           </p>
                         )}
                       </div>

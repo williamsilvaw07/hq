@@ -230,6 +230,11 @@ export default function DashboardPage() {
   const variableLimit = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
   const variableSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
   const monthlyFixedTotal = fixedBillsTotal(fixedBills);
+  // Only count fixed bills whose due day has passed or is today
+  const todayDay = new Date().getDate();
+  const fixedBillsDueTotal = fixedBills
+    .filter((b) => (b.dayOfMonth ?? 1) <= todayDay)
+    .reduce((sum, b) => sum + b.amount, 0);
   const totalBudget = monthlyFixedTotal + variableLimit;
   const variablePercent = variableLimit > 0 ? Math.min(100, (variableSpent / variableLimit) * 100) : 0;
   const periodExpense = Number(dashboard?.period_expense ?? 0);
@@ -272,7 +277,7 @@ export default function DashboardPage() {
               </div>
               {totalBudget > 0 && (
                 <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
-                  of {CURRENCY_SYMBOL} {formatBRL(totalBudget, { minimumFractionDigits: 2 })} budget
+                  of {CURRENCY_SYMBOL} {formatBRL(totalBudget, { minimumFractionDigits: 2 })} estimated spend this month
                 </p>
               )}
               {periodIncome > 0 && (
@@ -292,7 +297,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between text-[10px] font-normal text-muted-foreground uppercase tracking-widest opacity-60">
                   <span className="flex items-center gap-1.5">
                     <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
-                    Ends {monthEnd.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
+                    Ends {String(monthEnd.getDate()).padStart(2, "0")}/{String(monthEnd.getMonth() + 1).padStart(2, "0")}/{String(monthEnd.getFullYear()).slice(-2)}
                   </span>
                   <span>{daysLeft} days left{totalBudget > 0 ? ` • ${spentPercent.toFixed(0)}% used` : ""}</span>
                 </div>
@@ -314,7 +319,7 @@ export default function DashboardPage() {
         <section className="grid grid-cols-2 gap-3.5">
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
-              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Variable</p>
+              <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Variable{variableLimit > 0 ? ` · ${CURRENCY_SYMBOL} ${formatCompact(variableLimit)}` : ""}</p>
               <p className={`text-2xl font-black tracking-tighter ${variableLimit === 0 ? "text-muted-foreground/30" : ""}`}>
                 {CURRENCY_SYMBOL} {formatBRL(variableSpent, { minimumFractionDigits: 2 })}
               </p>
@@ -333,18 +338,18 @@ export default function DashboardPage() {
           <div className="bg-card p-4 rounded-xl flex flex-col justify-between min-h-[150px]">
             <div>
               <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Fixed Bills</p>
-              <p className={`text-2xl font-black tracking-tighter ${monthlyFixedTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
-                {CURRENCY_SYMBOL} {formatBRL(monthlyFixedTotal, { minimumFractionDigits: 2 })}
+              <p className={`text-2xl font-black tracking-tighter ${fixedBillsDueTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
+                {CURRENCY_SYMBOL} {formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 2 })}
               </p>
             </div>
             <div className="space-y-2.5">
               <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
                 {monthlyFixedTotal > 0 && (
-                  <div style={{ width: "100%" }} className="h-full bg-chart-1 rounded-full shadow-[0_0_12px_rgba(var(--chart-1),0.3)]" />
+                  <div style={{ width: `${Math.min(100, (fixedBillsDueTotal / monthlyFixedTotal) * 100)}%` }} className="h-full bg-chart-1 rounded-full shadow-[0_0_12px_rgba(var(--chart-1),0.3)]" />
                 )}
               </div>
               <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
-                {monthlyFixedTotal > 0 ? "100% committed" : "No bills set"}
+                {monthlyFixedTotal > 0 ? `${CURRENCY_SYMBOL} ${formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} of ${formatCompact(monthlyFixedTotal)} due` : "No bills set"}
               </p>
             </div>
           </div>

@@ -496,7 +496,7 @@ export default function WorkspaceSettingsPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 bg-blue-500/5 border border-blue-500/10 rounded-xl px-3 py-2.5">
                   <CheckCheck className="w-4 h-4 text-blue-400 shrink-0" />
-                  <p className="text-[10px] text-muted-foreground">Your Telegram is connected. Send expenses like <span className="text-foreground font-semibold">20 uber</span> to log them.</p>
+                  <p className="text-[10px] text-muted-foreground">Telegram is linked.</p>
                 </div>
                 <button
                   type="button"
@@ -588,7 +588,7 @@ export default function WorkspaceSettingsPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 bg-emerald-400/5 border border-emerald-400/10 rounded-xl px-3 py-2.5">
                   <CheckCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <p className="text-[10px] text-muted-foreground">Your WhatsApp is connected. Send expenses like <span className="text-foreground font-semibold">20 uber</span> to log them.</p>
+                  <p className="text-[10px] text-muted-foreground">WhatsApp is linked.</p>
                 </div>
                 <button
                   type="button"

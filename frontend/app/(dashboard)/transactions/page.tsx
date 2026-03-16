@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
-import { formatNumberUK } from "@/lib/format";
+import { formatNumberUK, formatDate } from "@/lib/format";
 import { Filter, Search, ShoppingBag, ArrowUpRight, X, PenLine } from "lucide-react";
 
 type Transaction = {
@@ -262,7 +262,7 @@ export default function TransactionsPage() {
 
         {Object.entries(byDate).sort(([a], [b]) => b.localeCompare(a)).map(([date, items]) => (
           <div key={date} className="space-y-3 sm:space-y-4">
-            <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1 opacity-60">{date}</p>
+            <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1 opacity-60">{formatDate(date)}</p>
             <div className="space-y-2.5 sm:space-y-3.5">
               {items.map((t) => {
                 const createdDate = t.created_at ? new Date(t.created_at) : null;
@@ -270,12 +270,9 @@ export default function TransactionsPage() {
                   ? createdDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })
                   : null;
                 return (
-                  <div
+                  <Link
                     key={t.id}
-                    onClick={() => {
-                      setEditingTransaction(t);
-                      setModalOpen(true);
-                    }}
+                    href={`/transactions/${t.id}`}
                     className="flex items-center justify-between bg-card p-3 sm:p-5 rounded-lg sm:rounded-xl active:scale-[0.98] transition-all cursor-pointer group hover:border-border/80"
                   >
                     <div className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0">
@@ -304,7 +301,7 @@ export default function TransactionsPage() {
                         <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">{t.account?.name ?? "—"}</p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
