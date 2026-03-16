@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { formatNumberUK, formatDate } from "@/lib/format";
@@ -29,6 +30,7 @@ import { SkeletonBox } from "@/components/ui/Skeleton";
 
 export default function TransactionsPage() {
   const { workspaceId } = useAuth();
+  const searchParams = useSearchParams();
   const [result, setResult] = useState<Paginated | null>(null);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
@@ -44,6 +46,11 @@ export default function TransactionsPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
+  const [budgetCategoryIds, setBudgetCategoryIds] = useState<Set<number>>(new Set());
+  const [budgetFilter, setBudgetFilter] = useState<"all" | "unbudgeted" | number>(
+    searchParams?.get("budget") === "unbudgeted" ? "unbudgeted" : "all"
+  );
+  const [budgetPills, setBudgetPills] = useState<{ id: number; name: string }[]>([]);
 
   const fetchList = useCallback(() => {
     if (!workspaceId) return;
@@ -61,6 +68,21 @@ export default function TransactionsPage() {
   useEffect(() => {
     fetchList();
   }, [fetchList]);
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    api<any[]>(`/api/workspaces/${workspaceId}/budgets?with_summaries=true`)
+      .then((r) => {
+        const budgets = Array.isArray(r.data) ? r.data : [];
+        const ids = budgets.map((b: any) => b.category?.id ?? b.categoryId).filter(Boolean);
+        setBudgetCategoryIds(new Set(ids));
+        setBudgetPills(budgets.map((b: any) => ({
+          id: b.category?.id ?? b.categoryId,
+          name: b.name || b.category?.name || "Budget",
+        })).filter((p: any) => p.id));
+      })
+      .catch(() => {});
+  }, [workspaceId]);
 
   useEffect(() => {
     if (!workspaceId || !modalOpen) return;
@@ -168,7 +190,13 @@ export default function TransactionsPage() {
     { id: "expense" as const, label: "Expenses" },
   ];
 
-  const list = Array.isArray(result.data) ? result.data : [];
+  const rawList = Array.isArray(result.data) ? result.data : [];
+  // Client-side budget filter
+  const list = budgetFilter === "all"
+    ? rawList
+    : budgetFilter === "unbudgeted"
+      ? rawList.filter((t) => t.type === "expense" && (!t.category?.id || !budgetCategoryIds.has(t.category.id)))
+      : rawList.filter((t) => t.category?.id === budgetFilter);
   const byDate = list.reduce<Record<string, Transaction[]>>((acc, t) => {
     const d = t.date;
     if (!acc[d]) acc[d] = [];
@@ -239,6 +267,46 @@ export default function TransactionsPage() {
             </button>
           ))}
         </div>
+        {budgetPills.length > 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-5 px-5">
+            <button
+              type="button"
+              onClick={() => setBudgetFilter("all")}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+                budgetFilter === "all"
+                  ? "bg-muted text-foreground border-border"
+                  : "bg-card text-muted-foreground border-border/50"
+              }`}
+            >
+              All Budgets
+            </button>
+            {budgetPills.map((bp) => (
+              <button
+                key={bp.id}
+                type="button"
+                onClick={() => setBudgetFilter(bp.id)}
+                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+                  budgetFilter === bp.id
+                    ? "bg-muted text-foreground border-border"
+                    : "bg-card text-muted-foreground border-border/50"
+                }`}
+              >
+                {bp.name}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setBudgetFilter("unbudgeted")}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+                budgetFilter === "unbudgeted"
+                  ? "bg-orange-400/20 text-orange-400 border-orange-400/30"
+                  : "bg-card text-muted-foreground border-border/50"
+              }`}
+            >
+              Unbudgeted
+            </button>
+          </div>
+        )}
       </header>
 
       <div className="space-y-5 sm:space-y-8">
@@ -285,11 +353,18 @@ export default function TransactionsPage() {
                           {t.category?.name ?? "—"}
                           {timeStr && ` • ${timeStr}`}
                         </p>
-                        {t.status === "draft" && (
-                          <span className="inline-block mt-0.5 text-[8px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
-                            Needs Review
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {t.status === "draft" && (
+                            <span className="inline-block text-[8px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
+                              Needs Review
+                            </span>
+                          )}
+                          {t.type === "expense" && t.category?.id && !budgetCategoryIds.has(t.category.id) && (
+                            <span className="inline-block text-[8px] font-bold text-orange-400 bg-orange-400/10 border border-orange-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
+                              Unbudgeted
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">

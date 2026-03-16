@@ -2,10 +2,12 @@ export type ParsedExpense = {
   amount: number;
   description: string;
   type: "expense" | "income";
+  unbudgeted?: boolean;
 };
 
 const INCOME_PREFIXES = /^(income|received|recebi|recebido|entrada|earned|\+)\s*/i;
 const EXPENSE_PREFIXES = /^(spent|gastei|paguei|comprei|expense|gasto)\s*/i;
+const UNBUDGETED_PREFIXES = /^(nb|unbudgeted|nobudget|sem\s*orcamento)\s+/i;
 
 /**
  * Rule-based parser. Supports:
@@ -22,9 +24,17 @@ const EXPENSE_PREFIXES = /^(spent|gastei|paguei|comprei|expense|gasto)\s*/i;
 export function parseExpenseMessage(text: string): ParsedExpense | null {
   const raw = text.trim();
 
+  // Detect unbudgeted prefix
+  let unbudgeted = false;
+  let preCleaned = raw;
+  if (UNBUDGETED_PREFIXES.test(preCleaned)) {
+    unbudgeted = true;
+    preCleaned = preCleaned.replace(UNBUDGETED_PREFIXES, "").trim();
+  }
+
   // Detect type
   let type: "expense" | "income" = "expense";
-  let cleaned = raw;
+  let cleaned = preCleaned;
 
   if (INCOME_PREFIXES.test(cleaned)) {
     type = "income";
@@ -46,7 +56,7 @@ export function parseExpenseMessage(text: string): ParsedExpense | null {
   if (amountFirst) {
     const amount = parseAmount(amountFirst[1]);
     const description = amountFirst[2].trim();
-    if (amount > 0 && description) return { amount, description, type };
+    if (amount > 0 && description) return { amount, description, type, unbudgeted };
   }
 
   // Description first: "uber 20"
@@ -54,14 +64,14 @@ export function parseExpenseMessage(text: string): ParsedExpense | null {
   if (descFirst) {
     const description = descFirst[1].trim();
     const amount = parseAmount(descFirst[2]);
-    if (amount > 0 && description) return { amount, description, type };
+    if (amount > 0 && description) return { amount, description, type, unbudgeted };
   }
 
   // Amount only: "20" (no description)
   const amountOnly = stripped.match(new RegExp(`^${amountPattern.source}$`));
   if (amountOnly) {
     const amount = parseAmount(amountOnly[1]);
-    if (amount > 0) return { amount, description: type === "income" ? "Income" : "Expense", type };
+    if (amount > 0) return { amount, description: type === "income" ? "Income" : "Expense", type, unbudgeted };
   }
 
   return null;

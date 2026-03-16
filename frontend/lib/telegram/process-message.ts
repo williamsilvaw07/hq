@@ -388,7 +388,7 @@ async function processExpenseText(
     return;
   }
 
-  const { amount, description, type } = parsed;
+  const { amount, description, type, unbudgeted } = parsed;
 
   // Cancel any existing pending draft from this user (replace with new one)
   await execute(
@@ -397,11 +397,11 @@ async function processExpenseText(
     [workspaceId, user.id],
   );
 
-  // For expenses: resolve category
+  // For expenses: resolve category (skip if explicitly unbudgeted)
   let categoryId: number | null = null;
   let categoryName: string | null = null;
 
-  if (type === "expense") {
+  if (type === "expense" && !unbudgeted) {
     const resolved = await resolveCategory(description, workspaceId);
     categoryId = resolved.categoryId;
     if (categoryId) {
@@ -434,7 +434,9 @@ async function processExpenseText(
   msg += `Amount: ${amountFormatted}\n`;
   msg += `Description: ${description}\n`;
   if (type === "expense") {
-    msg += `Category: ${categoryName ?? "None (will need review)"}\n`;
+    msg += unbudgeted
+      ? `Category: Unbudgeted\n`
+      : `Category: ${categoryName ?? "None (will need review)"}\n`;
   }
   msg += `Date: ${today}\n\n`;
   if (type === "expense") {

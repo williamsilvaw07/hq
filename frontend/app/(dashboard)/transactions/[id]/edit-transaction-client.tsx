@@ -84,6 +84,7 @@ export default function EditTransactionClient() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [budgetCategoryIds, setBudgetCategoryIds] = useState<Set<number>>(new Set());
 
   const fetchTransaction = useCallback(() => {
     if (!workspaceId || !Number.isFinite(id)) return;
@@ -98,6 +99,16 @@ export default function EditTransactionClient() {
   useEffect(() => {
     fetchTransaction();
   }, [fetchTransaction]);
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    api<any[]>(`/api/workspaces/${workspaceId}/budgets?with_summaries=true`)
+      .then((r) => {
+        const budgets = Array.isArray(r.data) ? r.data : [];
+        setBudgetCategoryIds(new Set(budgets.map((b: any) => b.category?.id ?? b.categoryId).filter(Boolean)));
+      })
+      .catch(() => {});
+  }, [workspaceId]);
 
   useEffect(() => {
     if (!workspaceId || !editOpen) return;
@@ -201,11 +212,18 @@ export default function EditTransactionClient() {
         <p className="text-xs text-muted-foreground/60 uppercase tracking-widest font-bold">
           {isExpense ? "Expense" : "Income"}
         </p>
-        {transaction.status === "draft" && (
-          <span className="inline-block text-[8px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-2 py-0.5 uppercase tracking-widest">
-            Needs Review
-          </span>
-        )}
+        <div className="flex items-center justify-center gap-2 mt-1">
+          {transaction.status === "draft" && (
+            <span className="inline-block text-[8px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-2 py-0.5 uppercase tracking-widest">
+              Needs Review
+            </span>
+          )}
+          {isExpense && transaction.category_id && !budgetCategoryIds.has(transaction.category_id) && (
+            <span className="inline-block text-[8px] font-bold text-orange-400 bg-orange-400/10 border border-orange-400/20 rounded-full px-2 py-0.5 uppercase tracking-widest">
+              Unbudgeted
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Details */}

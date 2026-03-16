@@ -120,7 +120,8 @@ export default function DashboardLayout({
   const isGoals = pathname?.startsWith("/goals");
   const isSetupRoot = pathname === "/settings";
   const isGoalSettings = pathname === "/settings/goals";
-  const showSettingsHeader = isSettings && !isSettingsProfile && !isSettingsTeam && !isFixedExpenses && !isWorkspacePage;
+  const hasOwnHeader = isSettingsProfile || isSettingsTeam || isFixedExpenses || isWorkspacePage;
+  const showSettingsHeader = isSettings && !isSetupRoot && !hasOwnHeader;
   const settingsTitle = isGoalSettings ? "Goal Settings" : "Settings";
 
   return (

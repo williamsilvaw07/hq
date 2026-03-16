@@ -354,24 +354,17 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[140px]">
+          <Link href="/transactions?budget=unbudgeted" className="bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[140px] active:scale-[0.98] transition-all">
             <div>
               <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Unbudgeted</p>
               <p className={`text-xl font-black tracking-tighter ${unbudgeted > 0 ? "text-orange-400" : "text-muted-foreground/30"}`}>
                 {CURRENCY_SYMBOL} {formatBRL(unbudgeted, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
             </div>
-            <div className="space-y-2">
-              <div className="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
-                {unbudgeted > 0 && periodExpense > 0 && (
-                  <div style={{ width: `${Math.min(100, (unbudgeted / periodExpense) * 100)}%` }} className="h-full bg-orange-400 rounded-full shadow-[0_0_12px_rgba(251,146,60,0.3)]" />
-                )}
-              </div>
-              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
-                {periodExpense > 0 ? `${((unbudgeted / periodExpense) * 100).toFixed(0)}% of spend` : "None"}
-              </p>
-            </div>
-          </div>
+            <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60 mt-auto">
+              {unbudgeted > 0 ? "No limit set" : "None"}
+            </p>
+          </Link>
         </section>
         )}
 
