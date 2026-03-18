@@ -110,9 +110,9 @@ export default function DashboardLayout({
   }
 
   const isSettings = pathname?.startsWith("/settings");
-  const isSettingsProfile = pathname === "/settings/profile";
-  const isSettingsTeam = pathname === "/settings/team";
-  const isFixedExpenses = pathname === "/settings/fixed-expenses";
+  const isSettingsProfile = pathname === "/settings/profile" || pathname === "/settings/profile/";
+  const isSettingsTeam = pathname === "/settings/team" || pathname === "/settings/team/";
+  const isFixedExpenses = pathname === "/settings/fixed-expenses" || pathname === "/settings/fixed-expenses/";
   const isWorkspacePage = pathname?.startsWith("/settings/workspaces");
   const isDashboard = pathname === "/dashboard";
   const isTransactions = pathname === "/transactions";
