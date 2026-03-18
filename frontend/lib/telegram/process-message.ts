@@ -3,7 +3,7 @@ import { formatMoney } from "@/lib/format";
 import { parseExpenseMessage, suggestCategory, detectReply } from "./parse";
 import { sendTelegramMessage } from "./send";
 import { validateLinkCode, linkTelegramAccount } from "./link";
-import { transcribeAudio, categorizeExpense, extractExpenseFromImage } from "./groq";
+import { transcribeAudio, categorizeExpense, extractExpenseFromImage, handleSmartMessage } from "./groq";
 
 type UserRow = {
   id: number;
@@ -378,14 +378,30 @@ async function processExpenseText(
   );
   const workspaceName = workspace?.name ?? "Unknown";
 
-  // Parse amount + description + type
-  const parsed = parseExpenseMessage(text);
+  // Parse amount + description + type (rule-based first, then AI fallback)
+  let parsed = parseExpenseMessage(text);
+
   if (!parsed) {
-    await sendTelegramMessage(
-      chatId,
-      `❓ Couldn't understand: "${text}"\n\nTry:\n  20 uber\n  uber 20\n  income 500 salary\n  recebi 500 salário`,
-    );
-    return;
+    // AI fallback: try to extract an expense or respond conversationally
+    try {
+      const aiResult = await handleSmartMessage(text, user.name, workspaceName);
+      if (aiResult.type === "reply") {
+        await sendTelegramMessage(chatId, aiResult.text);
+        return;
+      }
+      // AI extracted an expense — re-parse the cleaned text
+      parsed = parseExpenseMessage(aiResult.text);
+    } catch (err) {
+      console.error("[telegram] AI smart message failed:", err);
+    }
+
+    if (!parsed) {
+      await sendTelegramMessage(
+        chatId,
+        `❓ I couldn't find an expense in that message.\n\nHere's what I can do:\n  💸 Log expense — send "20 uber" or "gastei 50 mercado"\n  💰 Log income — send "income 500 salary"\n  🎤 Voice — send a voice message\n  📷 Receipt — send a photo\n  📂 /workspace — switch workspace\n  ℹ️ /status — check active workspace\n  ❓ /help — see all options`,
+      );
+      return;
+    }
   }
 
   const { amount, description, type, unbudgeted } = parsed;

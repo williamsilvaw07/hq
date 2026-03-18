@@ -83,9 +83,78 @@ If you cannot find a clear expense amount, reply with: NONE`,
 }
 
 /**
- * Uses Groq LLaMA to pick the best matching category from the user's budgets.
- * Returns the category name string, or null if none match well.
+ * AI-powered message handler. Given a user message that wasn't parsed as an expense,
+ * the AI either extracts an expense from natural language OR responds conversationally.
+ *
+ * Returns:
+ *   { type: "expense", text: "20 uber" } — AI extracted an expense, re-parse it
+ *   { type: "reply", text: "..." } — AI conversational response to send back
  */
+export async function handleSmartMessage(
+  userMessage: string,
+  userName: string,
+  workspaceName: string,
+): Promise<{ type: "expense"; text: string } | { type: "reply"; text: string }> {
+  const groq = getGroq();
+
+  const systemPrompt = `You are NorthTrack, a friendly financial assistant bot on Telegram/WhatsApp. You help users track expenses and income.
+
+Your capabilities:
+- Log expenses: user sends amount + description (e.g. "20 uber", "gastei 50 mercado")
+- Log income: user says "income 500 salary" or "recebi 500 salário"
+- Voice messages: user can send audio and you'll transcribe it
+- Photo receipts: user can snap a photo and you'll extract the expense
+- Change category: reply "3" after an expense to pick a different category
+- Confirm/cancel: reply "1" to confirm, "2" to cancel a pending transaction
+- Switch workspace: send "/workspace" or "workspace"
+- Check status: send "/status" or "status"
+
+Current user: ${userName}
+Current workspace: ${workspaceName}
+
+RULES:
+1. If the user's message contains an expense or income (even in natural language), extract it and respond with EXACTLY this format on the first line:
+   EXPENSE: <amount> <description>
+   or
+   INCOME: <amount> <description>
+
+   Examples:
+   - "I spent thirty bucks on gas" → EXPENSE: 30 gas
+   - "paid 150 for electricity" → EXPENSE: 150 electricity
+   - "got paid 3000 this month" → INCOME: 3000 salary
+   - "comprei um café por 8 reais" → EXPENSE: 8 café
+
+2. If the message is NOT an expense/income (greeting, question, random word, etc.), reply naturally in a friendly way. Keep it short (2-3 sentences max). Always mention what the user can do. Reply in the same language the user wrote in (Portuguese or English).
+
+3. Never make up transactions. Only extract if there's a clear amount.`;
+
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userMessage },
+    ],
+    temperature: 0.3,
+    max_tokens: 200,
+  });
+
+  const raw = response.choices[0]?.message?.content?.trim() ?? "";
+
+  // Check if AI extracted an expense
+  const expenseMatch = raw.match(/^EXPENSE:\s*(.+)$/m);
+  if (expenseMatch) {
+    return { type: "expense", text: expenseMatch[1].trim() };
+  }
+
+  const incomeMatch = raw.match(/^INCOME:\s*(.+)$/m);
+  if (incomeMatch) {
+    return { type: "expense", text: `income ${incomeMatch[1].trim()}` };
+  }
+
+  // Otherwise return the AI's conversational reply
+  return { type: "reply", text: raw };
+}
+
 /**
  * Uses Groq LLaMA to pick the best matching category from the user's budgets.
  * On retry=true uses a more lenient prompt to force a best-guess pick.
