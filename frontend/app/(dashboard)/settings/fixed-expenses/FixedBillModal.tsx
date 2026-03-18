@@ -137,7 +137,15 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
               <button
                 key={value}
                 type="button"
-                onClick={() => setDraft(prev => ({ ...prev, frequency: value as any }))}
+                onClick={() => setDraft(prev => {
+                  const d = prev.due ? new Date(prev.due + "T00:00:00") : new Date();
+                  return {
+                    ...prev,
+                    frequency: value as any,
+                    dayOfMonth: d.getDate(),
+                    dayOfWeek: d.getDay(),
+                  };
+                })}
                 className={`py-2.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all ${
                   draft.frequency === value ? "bg-white text-black shadow-sm" : "text-muted-foreground/60"
                 }`}
@@ -157,7 +165,17 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
               <input
                 type="date"
                 value={draft.due}
-                onChange={(e) => setDraft(prev => ({ ...prev, due: e.target.value }))}
+                onChange={(e) => {
+                  const picked = e.target.value;
+                  if (!picked) return;
+                  const d = new Date(picked + "T00:00:00");
+                  setDraft(prev => ({
+                    ...prev,
+                    due: picked,
+                    dayOfMonth: d.getDate(),
+                    dayOfWeek: d.getDay(),
+                  }));
+                }}
                 className="w-full bg-transparent outline-none text-sm font-semibold text-foreground appearance-none"
               />
             </div>
@@ -173,7 +191,13 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
                   onChange={(e) => {
                     const picked = e.target.value;
                     if (!picked) return;
-                    setDraft(prev => ({ ...prev, due: picked }));
+                    const d = new Date(picked + "T00:00:00");
+                    setDraft(prev => ({
+                      ...prev,
+                      due: picked,
+                      dayOfMonth: d.getDate(),
+                      dayOfWeek: d.getDay(),
+                    }));
                   }}
                   className="flex-1 bg-transparent outline-none text-sm font-semibold text-foreground appearance-none"
                 />
