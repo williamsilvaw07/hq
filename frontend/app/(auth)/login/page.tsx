@@ -48,7 +48,7 @@ function LoginContent() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="you@example.com"
-            className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
+            className="w-full rounded-xl border border-white/[0.08] bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
           />
         </div>
         <div className="space-y-1.5">
@@ -65,7 +65,7 @@ function LoginContent() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="••••••••"
-            className="w-full rounded-xl border border-white/[0.08] bg-background/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
+            className="w-full rounded-xl border border-white/[0.08] bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
           />
         </div>
         <button
