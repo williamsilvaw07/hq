@@ -166,9 +166,19 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
             <Sparkles className="w-4 h-4 text-muted-foreground/30 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Next Occurrence</p>
-              <p className="text-sm font-semibold text-foreground">
-                {nextOccurrence ? formatBillDisplayDate(nextOccurrence) : "—"} · {recurrenceRule}
-              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={nextOccurrence ? nextOccurrence.toISOString().slice(0, 10) : ""}
+                  onChange={(e) => {
+                    const picked = e.target.value;
+                    if (!picked) return;
+                    setDraft(prev => ({ ...prev, due: picked }));
+                  }}
+                  className="flex-1 bg-transparent outline-none text-sm font-semibold text-foreground appearance-none"
+                />
+                <span className="text-sm text-muted-foreground/50 shrink-0">· {recurrenceRule}</span>
+              </div>
             </div>
           </div>
         </div>
