@@ -11,17 +11,6 @@ type UserRow = {
   default_workspace_id: number | null;
 };
 
-type MemberRow = {
-  user_id: number;
-  user_name: string;
-};
-
-type ChatSession = {
-  id: number;
-  state: string;
-  payload: string | null;
-};
-
 type WorkspaceRow = {
   id: number;
   name: string;
@@ -98,10 +87,6 @@ export async function processTelegramMessage(
       return;
     }
   }
-
-  // 3b. Check if user has a pending member pick session
-  const memberPickHandled = await handlePendingMemberPick(chatId, trimmed, "telegram");
-  if (memberPickHandled) return;
 
   // 4. Handle numbered replies (1=confirm, 2=cancel, 3=categories, 4+=category picks)
   if (/^\d+$/.test(trimmed)) {
@@ -355,83 +340,6 @@ async function handleBotCommand(chatId: number, text: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Workspace member helpers
-// ---------------------------------------------------------------------------
-
-async function getWorkspaceMembers(workspaceId: number): Promise<MemberRow[]> {
-  return fetchMany<MemberRow>(
-    `SELECT wu.user_id, u.name AS user_name
-     FROM workspace_users wu
-     JOIN User u ON u.id = wu.user_id
-     WHERE wu.workspace_id = ?
-     ORDER BY u.name ASC`,
-    [workspaceId],
-  );
-}
-
-async function getChatSession(chatId: number | string, source: string): Promise<ChatSession | null> {
-  return fetchOne<ChatSession>(
-    "SELECT id, state, payload FROM chat_sessions WHERE chat_id = ? AND source = ? LIMIT 1",
-    [String(chatId), source],
-  );
-}
-
-async function setChatSession(chatId: number | string, source: string, state: string, payload: string | null): Promise<void> {
-  const existing = await getChatSession(chatId, source);
-  if (existing) {
-    await execute(
-      "UPDATE chat_sessions SET state = ?, payload = ?, updated_at = NOW(3) WHERE id = ?",
-      [state, payload, existing.id],
-    );
-  } else {
-    await insertOne(
-      "INSERT INTO chat_sessions (chat_id, source, state, payload, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(3), NOW(3))",
-      [String(chatId), source, state, payload],
-    );
-  }
-}
-
-async function clearChatSession(chatId: number | string, source: string): Promise<void> {
-  await execute("DELETE FROM chat_sessions WHERE chat_id = ? AND source = ?", [String(chatId), source]);
-}
-
-/**
- * If a "pending_member_pick" session exists, the user's reply is the member number.
- * Resolve it and continue to create the transaction with the picked member as creator.
- */
-async function handlePendingMemberPick(chatId: number, text: string, source: "telegram"): Promise<boolean> {
-  const session = await getChatSession(chatId, source);
-  if (!session || session.state !== "pending_member_pick") return false;
-
-  if (!/^\d+$/.test(text.trim())) {
-    await sendTelegramMessage(chatId, "❓ Please reply with the number of the person logging this transaction.");
-    return true;
-  }
-
-  const payload = JSON.parse(session.payload ?? "{}");
-  const { workspaceId, originalText, messageId } = payload as {
-    workspaceId: number;
-    originalText: string;
-    messageId: string;
-  };
-
-  const members = await getWorkspaceMembers(workspaceId);
-  const pick = parseInt(text.trim(), 10);
-
-  if (pick < 1 || pick > members.length) {
-    await sendTelegramMessage(chatId, `❌ Invalid pick. Reply with a number from 1 to ${members.length}.`);
-    return true;
-  }
-
-  const pickedMember = members[pick - 1];
-  await clearChatSession(chatId, source);
-
-  // Now process the expense with the picked member as the creator
-  await processExpenseTextForUser(messageId, chatId, originalText, pickedMember.user_id, workspaceId);
-  return true;
-}
-
-// ---------------------------------------------------------------------------
 // Core: parse → draft → ask confirmation
 // ---------------------------------------------------------------------------
 
@@ -440,7 +348,7 @@ async function processExpenseText(
   chatId: number,
   text: string,
 ): Promise<void> {
-  // Look up user
+  // Look up user by their linked Telegram chat ID
   const user = await fetchOne<UserRow>(
     "SELECT id, name, default_workspace_id FROM User WHERE telegram_chat_id = ? LIMIT 1",
     [chatId],
@@ -463,52 +371,12 @@ async function processExpenseText(
     return;
   }
 
-  // Check if workspace has multiple members — if so, ask who is logging
-  const members = await getWorkspaceMembers(workspaceId);
-  if (members.length > 1) {
-    // Store the original text and ask for member pick
-    await setChatSession(chatId, "telegram", "pending_member_pick", JSON.stringify({
-      workspaceId,
-      originalText: text,
-      messageId,
-    }));
-
-    let msg = "👥 Who is logging this transaction?\n\n";
-    members.forEach((m, i) => {
-      msg += `  ${i + 1}. ${m.user_name}\n`;
-    });
-    msg += "\nReply with the number.";
-    await sendTelegramMessage(chatId, msg);
-    return;
-  }
-
-  // Single member — proceed directly
-  await processExpenseTextForUser(messageId, chatId, text, user.id, workspaceId);
-}
-
-/**
- * Process expense text with a specific user as the creator.
- * This is called either directly (single-member workspace) or after member pick (multi-member).
- */
-async function processExpenseTextForUser(
-  messageId: string,
-  chatId: number,
-  text: string,
-  creatorUserId: number,
-  workspaceId: number,
-): Promise<void> {
   // Get workspace name for confirmation message
   const workspace = await fetchOne<WorkspaceRow>(
     "SELECT id, name FROM Workspace WHERE id = ? LIMIT 1",
     [workspaceId],
   );
   const workspaceName = workspace?.name ?? "Unknown";
-
-  // Get creator name for confirmation
-  const creator = await fetchOne<UserRow>(
-    "SELECT id, name, default_workspace_id FROM User WHERE id = ? LIMIT 1",
-    [creatorUserId],
-  );
 
   // Parse amount + description + type
   const parsed = parseExpenseMessage(text);
@@ -526,7 +394,7 @@ async function processExpenseTextForUser(
   await execute(
     `DELETE FROM Transaction
      WHERE workspace_id = ? AND created_by_user_id = ? AND status = 'pending_confirmation' AND source = 'telegram'`,
-    [workspaceId, creatorUserId],
+    [workspaceId, user.id],
   );
 
   // For expenses: resolve category (skip if explicitly unbudgeted)
@@ -552,7 +420,7 @@ async function processExpenseTextForUser(
        (workspace_id, category_id, created_by_user_id, type, amount, currency,
         exchange_rate, base_amount, date, description, source, status, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, 'BRL', 1, ?, ?, ?, 'telegram', 'pending_confirmation', NOW(3), NOW(3))`,
-    [workspaceId, categoryId, creatorUserId, type, amount, amount, today, description],
+    [workspaceId, categoryId, user.id, type, amount, amount, today, description],
   );
 
   const amountFormatted = formatMoney(amount, { minimumFractionDigits: 2 });
@@ -563,7 +431,7 @@ async function processExpenseTextForUser(
 
   let msg = `${typeEmoji} ${typeLabel} detected!\n\n`;
   msg += `Workspace: ${workspaceName}\n`;
-  if (creator) msg += `Logged by: ${creator.name}\n`;
+  msg += `Logged by: ${user.name}\n`;
   msg += `Amount: ${amountFormatted}\n`;
   msg += `Description: ${description}\n`;
   if (type === "expense") {
@@ -583,7 +451,7 @@ async function processExpenseTextForUser(
 
   await sendTelegramMessage(chatId, msg);
 
-  console.log(`[telegram] Pending transaction #${txId} for user ${creatorUserId} — ${amountFormatted} ${description} [${type}]`);
+  console.log(`[telegram] Pending transaction #${txId} for user ${user.id} — ${amountFormatted} ${description} [${type}]`);
 }
 
 // ---------------------------------------------------------------------------
