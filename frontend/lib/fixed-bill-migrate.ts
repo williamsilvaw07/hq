@@ -15,6 +15,7 @@ export async function ensureFixedBillTable(): Promise<void> {
       \`day_of_month\` TINYINT UNSIGNED NULL,
       \`day_of_week\` TINYINT UNSIGNED NULL,
       \`end_date\` DATE NULL,
+      \`payment_link\` VARCHAR(500) NULL,
       \`created_at\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
       \`updated_at\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
       PRIMARY KEY (\`id\`),
@@ -22,4 +23,11 @@ export async function ensureFixedBillTable(): Promise<void> {
       CONSTRAINT \`FixedBill_workspace_id_fkey\` FOREIGN KEY (\`workspace_id\`) REFERENCES \`Workspace\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+
+  // Add payment_link column if missing (existing tables)
+  try {
+    await execute(`ALTER TABLE \`FixedBill\` ADD COLUMN \`payment_link\` VARCHAR(500) NULL`);
+  } catch {
+    // Column already exists — ignore
+  }
 }

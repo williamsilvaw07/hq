@@ -19,6 +19,8 @@ export type FixedBill = {
   dayOfWeek: number | null;
   /** Optional end date for the recurrence (e.g. YYYY-MM-DD), or null for no end */
   endDate: string | null;
+  /** Optional payment URL so users can pay the bill directly */
+  paymentLink?: string | null;
 };
 
 export const MOCK_FIXED_BILLS: FixedBill[] = [

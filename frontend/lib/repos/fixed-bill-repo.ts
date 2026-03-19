@@ -13,11 +13,12 @@ export type FixedBillRow = {
   day_of_month: number | null;
   day_of_week: number | null;
   end_date: string | null;
+  payment_link: string | null;
 };
 
 export async function findFixedBillsByWorkspace(workspaceId: number): Promise<FixedBillRow[]> {
   const rows = await fetchMany<FixedBillRow>(
-    `SELECT id, workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date
+    `SELECT id, workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link
      FROM FixedBill
      WHERE workspace_id = ?
      ORDER BY name ASC`,
@@ -28,7 +29,7 @@ export async function findFixedBillsByWorkspace(workspaceId: number): Promise<Fi
 
 export async function findFixedBillById(id: number, workspaceId: number): Promise<FixedBillRow | null> {
   return fetchOne<FixedBillRow>(
-    `SELECT id, workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date
+    `SELECT id, workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link
      FROM FixedBill
      WHERE id = ? AND workspace_id = ?
      LIMIT 1`,
@@ -59,14 +60,16 @@ export async function createFixedBill(data: {
   dayOfMonth: number | null;
   dayOfWeek: number | null;
   endDate: string | null;
+  paymentLink?: string | null;
 }): Promise<number> {
   const dueStr = formatDueForDb(data.due);
   const endStr = data.endDate ? formatDueForDb(data.endDate) : null;
   const icon = data.icon && data.icon.trim() ? data.icon.trim() : null;
+  const paymentLink = data.paymentLink && data.paymentLink.trim() ? data.paymentLink.trim() : null;
 
   const id = await insertOne(
-    `INSERT INTO FixedBill (workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO FixedBill (workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.workspaceId,
       data.name,
@@ -78,6 +81,7 @@ export async function createFixedBill(data: {
       data.dayOfMonth,
       data.dayOfWeek,
       endStr,
+      paymentLink,
     ]
   );
   return id;
@@ -96,6 +100,7 @@ export async function updateFixedBill(
     dayOfMonth?: number | null;
     dayOfWeek?: number | null;
     endDate?: string | null;
+    paymentLink?: string | null;
   }
 ): Promise<void> {
   const fields: string[] = [];
@@ -136,6 +141,10 @@ export async function updateFixedBill(
   if (data.endDate !== undefined) {
     fields.push("end_date = ?");
     params.push(data.endDate ? formatDueForDb(data.endDate) : null);
+  }
+  if (data.paymentLink !== undefined) {
+    fields.push("payment_link = ?");
+    params.push(data.paymentLink && data.paymentLink.trim() ? data.paymentLink.trim() : null);
   }
 
   if (fields.length === 0) return;

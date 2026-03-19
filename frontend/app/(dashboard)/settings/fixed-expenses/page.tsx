@@ -70,6 +70,7 @@ export default function FixedExpensesPage() {
             dayOfMonth: bill.dayOfMonth,
             dayOfWeek: bill.dayOfWeek,
             endDate: bill.endDate,
+            paymentLink: bill.paymentLink,
           }),
         });
         if (r.data) {
@@ -90,6 +91,7 @@ export default function FixedExpensesPage() {
             dayOfMonth: bill.dayOfMonth,
             dayOfWeek: bill.dayOfWeek,
             endDate: bill.endDate,
+            paymentLink: bill.paymentLink,
           }),
         });
         if (updated.data) {

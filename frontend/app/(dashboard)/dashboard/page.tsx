@@ -7,6 +7,8 @@ import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import {
   fixedBillsTotal,
+  computeNextOccurrence,
+  formatBillDisplayDate,
   type FixedBill,
 } from "@/lib/fixed-expenses";
 import { CURRENCY_SYMBOL, formatBRL, formatCompact } from "@/lib/format";
@@ -92,7 +94,7 @@ export default function DashboardPage() {
         .then((r) => r.data?.accounts || []),
       api<{ id: number; name: string }[]>(`/api/workspaces/${workspaceId}/credit-cards`)
         .then((r) => Array.isArray(r.data) ? r.data.map((c: any) => ({ id: c.id, name: c.name })) : []),
-      api<any>(`/api/workspaces/${workspaceId}/transactions?per_page=5&page=1`)
+      api<any>(`/api/workspaces/${workspaceId}/transactions?per_page=6&page=1`)
         .then((r) => Array.isArray(r.data?.data) ? r.data.data : []),
     ])
       .then(([d, b, f, cat, acc, cards, txs]) => {
@@ -483,7 +485,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground text-center opacity-50">No transactions yet.</p>
               </div>
             ) : (
-              recentTransactions.map((tx) => {
+              recentTransactions.slice(0, 6).map((tx) => {
                 const isExpense = tx.type === "expense";
                 const createdDate = tx.date ? new Date(tx.date) : null;
                 const timeStr = createdDate
@@ -527,6 +529,64 @@ export default function DashboardPage() {
             )}
           </div>
         </section>
+
+        {/* Fixed Bills */}
+        {fixedBills.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">Fixed Bills</h2>
+              <Link href="/settings/fixed-expenses" className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Manage All</Link>
+            </div>
+            <div className="space-y-2.5">
+              {fixedBills.map((bill) => {
+                const next = computeNextOccurrence(bill);
+                const nextLabel = next ? formatBillDisplayDate(next) : "—";
+                return (
+                  <div
+                    key={bill.id}
+                    className="flex items-center justify-between px-3 py-3 bg-card rounded-lg"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0">
+                        <span className="text-base">{bill.icon || "🏠"}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-foreground truncate">{bill.name}</p>
+                        <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">
+                          Next: {nextLabel}
+                          {bill.dueSoon && <span className="text-chart-2 ml-1">· Due soon</span>}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <p className="text-xs font-black tracking-tight text-foreground">
+                        {CURRENCY_SYMBOL} {formatBRL(bill.amount, { minimumFractionDigits: 2 })}
+                      </p>
+                      {bill.paymentLink ? (
+                        <a
+                          href={bill.paymentLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1.5 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all"
+                        >
+                          Pay
+                        </a>
+                      ) : (
+                        <Link
+                          href="/settings/fixed-expenses"
+                          className="px-3 py-1.5 rounded-full bg-white/[0.07] text-muted-foreground text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all"
+                        >
+                          Add Link
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </main>
 
       <BudgetModal

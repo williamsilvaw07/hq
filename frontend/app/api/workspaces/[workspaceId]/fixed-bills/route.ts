@@ -17,6 +17,7 @@ function toApiBill(row: {
   day_of_month: number | null;
   day_of_week: number | null;
   end_date: string | null;
+  payment_link?: string | null;
 }) {
   const dueStr = typeof row.due === "string" ? row.due.slice(0, 10) : new Date(row.due).toISOString().slice(0, 10);
   const dueDate = new Date(dueStr + "T00:00:00");
@@ -37,6 +38,7 @@ function toApiBill(row: {
     dayOfMonth: row.day_of_month,
     dayOfWeek: row.day_of_week,
     endDate: row.end_date,
+    paymentLink: row.payment_link ?? null,
   };
 }
 
@@ -78,6 +80,7 @@ export async function POST(
     const dayOfMonth = typeof body.dayOfMonth === "number" ? body.dayOfMonth : null;
     const dayOfWeek = typeof body.dayOfWeek === "number" ? body.dayOfWeek : null;
     const endDate = typeof body.endDate === "string" && body.endDate ? body.endDate : null;
+    const paymentLink = typeof body.paymentLink === "string" && body.paymentLink.trim() ? body.paymentLink.trim() : null;
 
     const id = await createFixedBill({
       workspaceId: wid,
@@ -90,6 +93,7 @@ export async function POST(
       dayOfMonth,
       dayOfWeek,
       endDate,
+      paymentLink,
     });
 
     const rows = await findFixedBillsByWorkspace(wid);

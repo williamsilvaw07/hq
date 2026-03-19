@@ -18,6 +18,7 @@ function toApiBill(row: {
   day_of_month: number | null;
   day_of_week: number | null;
   end_date: string | null;
+  payment_link?: string | null;
 }) {
   const dueStr = typeof row.due === "string" ? row.due.slice(0, 10) : new Date(row.due).toISOString().slice(0, 10);
   const dueDate = new Date(dueStr + "T00:00:00");
@@ -38,6 +39,7 @@ function toApiBill(row: {
     dayOfMonth: row.day_of_month,
     dayOfWeek: row.day_of_week,
     endDate: row.end_date,
+    paymentLink: row.payment_link ?? null,
   };
 }
 
@@ -71,6 +73,7 @@ export async function PATCH(
     if (body.dayOfMonth !== undefined) data.dayOfMonth = body.dayOfMonth;
     if (body.dayOfWeek !== undefined) data.dayOfWeek = body.dayOfWeek;
     if (body.endDate !== undefined) data.endDate = body.endDate;
+    if (body.paymentLink !== undefined) data.paymentLink = typeof body.paymentLink === "string" && body.paymentLink.trim() ? body.paymentLink.trim() : null;
 
     await updateFixedBill(id, wid, data);
     const updated = await findFixedBillById(id, wid);

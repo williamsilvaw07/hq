@@ -8,7 +8,7 @@ import {
   formatRecurrenceRule,
 } from "@/lib/fixed-expenses";
 import { Modal } from "@/components/ui/Modal";
-import { Loader2, Pencil, RefreshCw, CalendarDays, Sparkles } from "lucide-react";
+import { Loader2, Pencil, RefreshCw, CalendarDays, Sparkles, LinkIcon } from "lucide-react";
 
 const FIXED_BILL_EMOJI_OPTIONS = [
   "🏠", "💡", "📺", "📱", "💻", "☁️", "🚗", "🏥", "📚", "🛒",
@@ -27,7 +27,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
   const [draft, setDraft] = useState<FixedBill>(initialBill ?? {
     id: -1, name: "", category: "General", amount: 0, icon: "🏠",
     due: today.toISOString().slice(0, 10), dueSoon: false,
-    frequency: "monthly", dayOfMonth: today.getDate(), dayOfWeek: null, endDate: null,
+    frequency: "monthly", dayOfMonth: today.getDate(), dayOfWeek: null, endDate: null, paymentLink: null,
   });
 
   const nextOccurrence = computeNextOccurrence(draft);
@@ -204,6 +204,21 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
                 <span className="text-sm text-muted-foreground/50 shrink-0">· {recurrenceRule}</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Payment Link */}
+        <div className="flex items-center gap-3 border border-white/[0.08] rounded-2xl px-4 py-4">
+          <LinkIcon className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Payment Link</p>
+            <input
+              type="url"
+              value={draft.paymentLink || ""}
+              onChange={(e) => setDraft(prev => ({ ...prev, paymentLink: e.target.value }))}
+              placeholder="https://..."
+              className="w-full bg-transparent outline-none text-sm font-semibold text-foreground placeholder:text-muted-foreground/25 appearance-none"
+            />
           </div>
         </div>
 
