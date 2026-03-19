@@ -562,7 +562,7 @@ export default function DashboardPage() {
                       <p className="text-xs font-black tracking-tight text-foreground">
                         {CURRENCY_SYMBOL} {formatBRL(bill.amount, { minimumFractionDigits: 2 })}
                       </p>
-                      {bill.paymentLink ? (
+                      {bill.paymentLink && (
                         <a
                           href={bill.paymentLink}
                           target="_blank"
@@ -572,13 +572,6 @@ export default function DashboardPage() {
                         >
                           Pay
                         </a>
-                      ) : (
-                        <Link
-                          href="/settings/fixed-expenses"
-                          className="px-3 py-1.5 rounded-full bg-white/[0.07] text-muted-foreground text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all"
-                        >
-                          Add Link
-                        </Link>
                       )}
                     </div>
                   </div>
