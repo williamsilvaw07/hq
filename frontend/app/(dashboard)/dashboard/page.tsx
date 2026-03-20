@@ -273,7 +273,7 @@ export default function DashboardPage() {
           <div className="flex-1 bg-card p-6 rounded-xl relative overflow-hidden shadow-2xl shadow-black/10">
             {hasAnyData ? (
               <>
-                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-widest mb-4 opacity-50">Spent This Month</p>
                 <div className={`flex items-baseline gap-2 mb-2 ${periodExpense > 0 ? "text-foreground" : "text-muted-foreground/20"}`}>
                   <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
                   <h2 className="text-5xl font-black tracking-tighter leading-none">
@@ -281,12 +281,12 @@ export default function DashboardPage() {
                   </h2>
                 </div>
                 {totalBudget > 0 && (
-                  <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-40 mb-4">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-40 mb-4">
                     of {CURRENCY_SYMBOL} {formatBRL(totalBudget, { minimumFractionDigits: 2 })} est. budget
                   </p>
                 )}
                 {periodIncome > 0 && (
-                  <p className="text-[10px] text-chart-1/60 font-normal uppercase tracking-tighter mb-4">
+                  <p className="text-[11px] sm:text-xs text-chart-1/60 font-medium uppercase tracking-tight mb-4">
                     +{CURRENCY_SYMBOL} {formatBRL(periodIncome, { minimumFractionDigits: 2 })} income
                   </p>
                 )}
@@ -299,7 +299,7 @@ export default function DashboardPage() {
                       />
                     )}
                   </div>
-                  <div className="flex items-center justify-between text-[10px] font-normal text-muted-foreground uppercase tracking-widest opacity-60">
+                  <div className="flex items-center justify-between text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider opacity-60">
                     <span className="flex items-center gap-1.5">
                       <Icon icon="solar:calendar-bold-duotone" className="text-xs text-white/40" />
                       Ends {String(monthEnd.getDate()).padStart(2, "0")}/{String(monthEnd.getMonth() + 1).padStart(2, "0")}/{String(monthEnd.getFullYear()).slice(-2)}
@@ -310,7 +310,7 @@ export default function DashboardPage() {
               </>
             ) : (
               <div className="text-center py-4">
-                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] mb-4 opacity-50">Spent This Month</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-widest mb-4 opacity-50">Spent This Month</p>
                 <div className="flex items-baseline justify-center gap-2 mb-4 text-muted-foreground/20">
                   <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
                   <h2 className="text-5xl font-black tracking-tighter leading-none">0.00</h2>
@@ -326,7 +326,7 @@ export default function DashboardPage() {
               {/* Fixed Bills */}
               <div className="flex-1 bg-card p-3 rounded-xl flex flex-col justify-between">
                 <div>
-                  <p className="text-[8px] text-muted-foreground font-normal uppercase tracking-widest mb-1 opacity-50">Fixed Bills</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-wider mb-1 opacity-50">Fixed Bills</p>
                   <p className={`text-sm font-black tracking-tighter leading-tight ${fixedBillsDueTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
                     {CURRENCY_SYMBOL} {formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </p>
@@ -340,7 +340,7 @@ export default function DashboardPage() {
                       />
                     )}
                   </div>
-                  <p className="text-[7px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-tight opacity-50">
                     {monthlyFixedTotal > 0 ? `of ${formatCompact(monthlyFixedTotal)}` : "No bills"}
                   </p>
                 </div>
@@ -348,7 +348,7 @@ export default function DashboardPage() {
               {/* Budgets */}
               <div className="flex-1 bg-card p-3 rounded-xl flex flex-col justify-between">
                 <div>
-                  <p className="text-[8px] text-muted-foreground font-normal uppercase tracking-widest mb-1 opacity-50">Budgets</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-wider mb-1 opacity-50">Budgets</p>
                   <p className={`text-sm font-black tracking-tighter leading-tight ${variableLimit === 0 ? "text-muted-foreground/30" : ""}`}>
                     {CURRENCY_SYMBOL} {formatBRL(variableSpent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </p>
@@ -362,7 +362,7 @@ export default function DashboardPage() {
                       />
                     )}
                   </div>
-                  <p className="text-[7px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-tight opacity-50">
                     {variableLimit > 0 ? `${variablePercent.toFixed(0)}% of ${formatCompact(variableLimit)}` : "No budgets"}
                   </p>
                 </div>
@@ -376,12 +376,12 @@ export default function DashboardPage() {
         <section className="flex gap-3">
           <Link href="/transactions?budget=unbudgeted" className="flex-1 bg-card p-3.5 rounded-xl flex flex-col justify-between min-h-[120px] active:scale-[0.98] transition-all">
             <div>
-              <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-50">Unbudgeted</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1.5 opacity-50">Unbudgeted</p>
               <p className={`text-xl font-black tracking-tighter ${unbudgeted > 0 ? "text-orange-400" : "text-muted-foreground/30"}`}>
                 {CURRENCY_SYMBOL} {formatBRL(unbudgeted, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
             </div>
-            <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60 mt-auto">
+            <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-60 mt-auto">
               {unbudgeted > 0 ? "No limit set" : "None"}
             </p>
           </Link>
@@ -394,8 +394,8 @@ export default function DashboardPage() {
             >
               <span className="text-base">🎯</span>
               <div>
-                <p className="text-[10px] font-bold leading-tight">Goals</p>
-                <p className="text-[7px] text-muted-foreground/40">Track progress</p>
+                <p className="text-[11px] sm:text-xs font-bold leading-tight">Goals</p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground/40 font-medium">Track progress</p>
               </div>
             </Link>
             <Link
@@ -404,8 +404,8 @@ export default function DashboardPage() {
             >
               <span className="text-base">📊</span>
               <div>
-                <p className="text-[10px] font-bold leading-tight">History</p>
-                <p className="text-[7px] text-muted-foreground/40">By month</p>
+                <p className="text-[11px] sm:text-xs font-bold leading-tight">History</p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground/40 font-medium">By month</p>
               </div>
             </Link>
           </div>
@@ -414,8 +414,8 @@ export default function DashboardPage() {
 
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">Active Budgets</h2>
-            <Link href="/budgets" className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Manage All</Link>
+            <h2 className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-widest opacity-50">Active Budgets</h2>
+            <Link href="/budgets" className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">Manage All</Link>
           </div>
           <div className="grid grid-cols-1 gap-3.5">
             {activeBudgets.map((budget) => {
@@ -433,11 +433,11 @@ export default function DashboardPage() {
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-sm font-bold truncate">{budget.name || budget.category?.name || "Budget"}</h4>
-                      <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">
+                      <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-60">
                         {budget.period_type ?? "Monthly"} • {budget.next_reset_date}
                       </p>
                       {(budget as any).credit_card_name && (
-                        <p className="text-[9px] text-muted-foreground/40 font-normal uppercase tracking-widest mt-0.5">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground/40 font-medium uppercase tracking-wider mt-0.5">
                           💳 {(budget as any).credit_card_name}
                           {(budget as any).credit_card_due_day && (() => {
                             const dueDay = (budget as any).credit_card_due_day;
@@ -453,7 +453,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold">{CURRENCY_SYMBOL} {formatBRL(budget.remaining, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">left of {formatCompact(budget.amount)}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-60">left of {formatCompact(budget.amount)}</p>
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -463,7 +463,7 @@ export default function DashboardPage() {
                       className={`h-full rounded-full transition-all duration-700 ${budget.spent_percentage >= 90 ? "bg-chart-2" : budget.spent_percentage >= 70 ? "bg-yellow-400" : "bg-white"}`}
                     />
                   </div>
-                  <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-50">
                     {budget.spent_percentage.toFixed(0)}% used • {CURRENCY_SYMBOL} {formatBRL(budget.spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
                   </p>
                 </div>
@@ -476,8 +476,8 @@ export default function DashboardPage() {
         {/* Recent Transactions */}
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">Recent Transactions</h2>
-            <Link href="/transactions" className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">See All</Link>
+            <h2 className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-widest opacity-50">Recent Transactions</h2>
+            <Link href="/transactions" className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">See All</Link>
           </div>
           <div className="space-y-2.5">
             {recentTransactions.length === 0 ? (
@@ -507,11 +507,11 @@ export default function DashboardPage() {
                         <p className="text-xs font-bold text-foreground truncate">
                           {tx.description || tx.category?.name || "Transaction"}
                         </p>
-                        <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-60 mt-0.5">
                           {tx.category?.name ?? "—"} {timeStr && `• ${timeStr}`}
                         </p>
                         {tx.status === "draft" && (
-                          <span className="inline-block mt-0.5 text-[7px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
+                          <span className="inline-block mt-0.5 text-[10px] sm:text-[11px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-wider">
                             Needs Review
                           </span>
                         )}
@@ -521,7 +521,7 @@ export default function DashboardPage() {
                       <p className={`text-xs font-black tracking-tight ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
                         {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRL(tx.amount, { minimumFractionDigits: 2 })}
                       </p>
-                      <p className="text-[9px] text-muted-foreground font-normal opacity-50 mt-0.5">{tx.account?.name ?? "—"}</p>
+                      <p className="text-[11px] sm:text-xs text-muted-foreground font-medium opacity-50 mt-0.5">{tx.account?.name ?? "—"}</p>
                     </div>
                   </Link>
                 );
@@ -534,8 +534,8 @@ export default function DashboardPage() {
         {fixedBills.length > 0 && (
           <section className="space-y-4">
             <div className="flex items-center justify-between px-1">
-              <h2 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] opacity-50">Fixed Bills</h2>
-              <Link href="/settings/fixed-expenses" className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Manage All</Link>
+              <h2 className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-widest opacity-50">Fixed Bills</h2>
+              <Link href="/settings/fixed-expenses" className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">Manage All</Link>
             </div>
             <div className="space-y-2.5">
               {fixedBills.map((bill) => {
@@ -552,7 +552,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-foreground truncate">{bill.name}</p>
-                        <p className="text-[9px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-60 mt-0.5">
                           Next: {nextLabel}
                           {bill.dueSoon && <span className="text-chart-2 ml-1">· Due soon</span>}
                         </p>

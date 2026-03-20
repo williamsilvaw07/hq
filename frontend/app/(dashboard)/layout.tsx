@@ -146,7 +146,7 @@ export default function DashboardLayout({
         <div className="w-full sm:max-w-md sm:mx-auto pointer-events-auto bg-zinc-900/95 border border-zinc-800/50 rounded-xl px-2 py-3 flex items-center justify-between shadow-2xl">
           <Link
             href="/dashboard"
-            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-colors ${
               isDashboard ? "text-white" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
@@ -155,7 +155,7 @@ export default function DashboardLayout({
           </Link>
           <Link
             href="/transactions"
-            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-colors ${
               isTransactions ? "text-white" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
@@ -165,7 +165,7 @@ export default function DashboardLayout({
           
           <button
             onClick={() => setTransactionModalOpen(true)}
-            className="flex-1 flex flex-col items-center gap-1 py-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="flex-1 flex flex-col items-center gap-1 py-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors"
           >
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white flex items-center justify-center -mt-8 shadow-xl shadow-black/40 active:scale-90 transition-all">
               <Icon icon="hugeicons:add-01" className="text-2xl text-black" />
@@ -175,7 +175,7 @@ export default function DashboardLayout({
 
           <Link
             href="/budgets"
-            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-colors ${
               isBudgets ? "text-white" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
@@ -184,7 +184,7 @@ export default function DashboardLayout({
           </Link>
           <Link
             href="/settings"
-            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-1 py-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-colors ${
               isSetupRoot || isSettings ? "text-white" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >

@@ -144,7 +144,7 @@ export default function BudgetsPage() {
           <div className="bg-card p-4 sm:p-6 rounded-lg sm:rounded-xl shadow-xl shadow-black/10">
             <div className="flex justify-between items-end mb-3 sm:mb-4">
               <div>
-                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-60">
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1.5 opacity-60">
                   Total Monthly Budget
                 </p>
                 <p className="text-2xl sm:text-3xl font-black">
@@ -156,7 +156,7 @@ export default function BudgetsPage() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mb-1.5 opacity-60">
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1.5 opacity-60">
                   Remaining
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-chart-1">
@@ -181,7 +181,7 @@ export default function BudgetsPage() {
       <main className="py-6 sm:py-8 space-y-6 sm:space-y-10">
         <section className="space-y-4">
           {!loading && (
-            <h3 className="text-[10px] font-normal text-muted-foreground ml-1 uppercase tracking-[0.2em] opacity-60">
+            <h3 className="text-[11px] sm:text-xs font-medium text-muted-foreground ml-1 uppercase tracking-widest opacity-60">
               Active Budgets
             </h3>
           )}
@@ -247,11 +247,11 @@ export default function BudgetsPage() {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-foreground">{budget.name || budget.category?.name || "Budget"}</h4>
-                          <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mt-0.5">
+                          <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider mt-0.5">
                             {budget.period_type ?? "Monthly"} • {budget.next_reset_date || "Active"}
                           </p>
                           {(budget as any).credit_card_name && (
-                            <p className="text-[9px] text-muted-foreground/40 font-normal uppercase tracking-widest mt-0.5">
+                            <p className="text-[11px] sm:text-xs text-muted-foreground/40 font-medium uppercase tracking-wider mt-0.5">
                               💳 {(budget as any).credit_card_name}
                               {(budget as any).credit_card_due_day && (() => {
                                 const dueDay = (budget as any).credit_card_due_day;
@@ -268,9 +268,9 @@ export default function BudgetsPage() {
                       <div className="text-right">
                         <p className="text-sm font-bold">
                           {CURRENCY_SYMBOL} {formatBRL(remaining, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          <span className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter ml-1">left</span>
+                          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight ml-1">left</span>
                         </p>
-                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest mt-0.5">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider mt-0.5">
                           of {CURRENCY_SYMBOL} {formatBRL(amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
                       </div>
@@ -283,10 +283,10 @@ export default function BudgetsPage() {
                         />
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-50">
                           {CURRENCY_SYMBOL} {formatBRL(spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
                         </p>
-                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-50">
                           {pct.toFixed(0)}%
                         </p>
                       </div>
