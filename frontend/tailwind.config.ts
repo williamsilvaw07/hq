@@ -32,6 +32,11 @@ const config: Config = {
         "chart-4": "var(--chart-4)",
         "chart-5": "var(--chart-5)",
       },
+      fontSize: {
+        micro: ["0.625rem", { lineHeight: "1.4" }],
+        label: ["0.6875rem", { lineHeight: "1.4" }],
+        section: ["0.75rem", { lineHeight: "1.4" }],
+      },
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
         heading: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],

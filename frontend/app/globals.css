@@ -30,8 +30,11 @@
   --radius: 0.5rem;
   /* Typography */
   --page-title: 1.2rem;
-  --section-title: 0.7rem;
-  --label: 0.55rem;
+  --section-title: 0.75rem;
+  --label: 0.6875rem;
+  --label-micro: 0.625rem;
+  --form-label: 0.75rem;
+  --nav-label: 0.6875rem;
 }
 
 body {
@@ -123,19 +126,6 @@ textarea {
   }
 }
 
-/* Prevent iOS zoom on input focus - keep at least 16px on mobile */
-input,
-select,
-textarea {
-  font-size: 16px;
-}
-@media (min-width: 640px) {
-  input,
-  select,
-  textarea {
-    font-size: inherit;
-  }
-}
 
 /* Fix browser autofill overriding dark theme text/background */
 input:-webkit-autofill,
@@ -163,10 +153,19 @@ button:focus-visible,
 
 /* Design system utilities */
 .section-title {
-  @apply text-[11px] font-bold text-muted-foreground uppercase tracking-widest;
+  @apply text-xs sm:text-[13px] font-semibold text-muted-foreground uppercase tracking-widest;
 }
 .label {
-  @apply text-[10px] font-bold text-muted-foreground uppercase tracking-wider;
+  @apply text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider;
+}
+.label-micro {
+  @apply text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase tracking-tight;
+}
+.form-label {
+  @apply text-xs sm:text-[13px] font-medium text-muted-foreground/60 uppercase tracking-wider;
+}
+.nav-label {
+  @apply text-[11px] sm:text-xs font-semibold uppercase tracking-wider;
 }
 .card-base {
   @apply bg-card rounded-2xl;
