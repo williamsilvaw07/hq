@@ -418,13 +418,12 @@ export default function DashboardPage() {
             <Link href="/budgets" className="text-[10px] font-normal text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Manage All</Link>
           </div>
           <div className="grid grid-cols-1 gap-3.5">
-            {activeBudgets.map((budget) => (
-              <div
+            {activeBudgets.map((budget) => {
+              const budgetCategoryId = budget.category?.id ?? (budget as any).categoryId;
+              return (
+              <Link
                 key={budget.id}
-                onClick={() => {
-                  setEditingBudget(budget);
-                  setBudgetModalOpen(true);
-                }}
+                href={budgetCategoryId ? `/transactions?budget=${budgetCategoryId}` : "/transactions"}
                 className="bg-card p-5 rounded-xl flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer hover:border-border/80"
               >
                 <div className="flex items-center justify-between gap-3">
@@ -468,8 +467,9 @@ export default function DashboardPage() {
                     {budget.spent_percentage.toFixed(0)}% used • {CURRENCY_SYMBOL} {formatBRL(budget.spent, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} spent
                   </p>
                 </div>
-              </div>
-            ))}
+              </Link>
+              );
+            })}
           </div>
         </section>
 

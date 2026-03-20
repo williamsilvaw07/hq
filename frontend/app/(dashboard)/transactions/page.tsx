@@ -47,9 +47,13 @@ export default function TransactionsPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [budgetCategoryIds, setBudgetCategoryIds] = useState<Set<number>>(new Set());
-  const [budgetFilter, setBudgetFilter] = useState<"all" | "unbudgeted" | number>(
-    searchParams?.get("budget") === "unbudgeted" ? "unbudgeted" : "all"
-  );
+  const [budgetFilter, setBudgetFilter] = useState<"all" | "unbudgeted" | number>(() => {
+    const param = searchParams?.get("budget");
+    if (!param) return "all";
+    if (param === "unbudgeted") return "unbudgeted";
+    const parsed = parseInt(param, 10);
+    return Number.isNaN(parsed) ? "all" : parsed;
+  });
   const [budgetPills, setBudgetPills] = useState<{ id: number; name: string }[]>([]);
 
   const fetchList = useCallback(() => {
