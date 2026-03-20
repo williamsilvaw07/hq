@@ -156,18 +156,18 @@ export default function EditBudgetPage({
         <button
           type="button"
           onClick={() => router.back()}
-          className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest text-[10px]"
+          className="font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider text-[11px] sm:text-xs"
         >
           Cancel
         </button>
-        <h1 className="text-sm font-black uppercase tracking-[0.2em] text-foreground/80">
+        <h1 className="text-sm font-black uppercase tracking-widest text-foreground/80">
           Edit Budget
         </h1>
         <button
           type="button"
           onClick={handleSave}
           disabled={saving || loading || !amount}
-          className="text-sm font-bold text-primary hover:opacity-80 disabled:opacity-40 transition-opacity uppercase tracking-widest text-[10px]"
+          className="font-bold text-primary hover:opacity-80 disabled:opacity-40 transition-opacity uppercase tracking-wider text-[11px] sm:text-xs"
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -186,7 +186,7 @@ export default function EditBudgetPage({
                 {displayIcon}
               </button>
               <div className="flex-1 space-y-1">
-                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                <label className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest">
                   Budget Title
                 </label>
                 <p className="w-full bg-transparent border-none outline-none text-2xl font-bold text-foreground">
@@ -196,7 +196,7 @@ export default function EditBudgetPage({
             </div>
 
             <div className="px-2 space-y-3">
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+              <p className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest">
                 Choose Icon
               </p>
               <div className="flex flex-wrap gap-2">
@@ -216,7 +216,7 @@ export default function EditBudgetPage({
                 ))}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                <span className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest">
                   Or custom
                 </span>
                 <input
@@ -231,16 +231,16 @@ export default function EditBudgetPage({
             </div>
 
             <div className="flex flex-col items-center py-4 group">
-              <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">
+              <label className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest mb-4">
                 Set Limit
               </label>
               <div className="flex items-center gap-1">
-                <span className="text-3xl font-light text-muted-foreground/30 tracking-tighter">
+                <span className="text-3xl font-light text-muted-foreground/30 tracking-tight">
                   {CURRENCY_SYMBOL}
                 </span>
                 <input
                   type="number"
-                  className="w-full max-w-[240px] text-7xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tighter"
+                  className="w-full max-w-[240px] text-7xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tight"
                   placeholder="0"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
@@ -257,7 +257,7 @@ export default function EditBudgetPage({
                   <span className="text-sm font-bold">Reset Frequency</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-primary">
                     {periodType === "week"
                       ? "Weekly"
                       : periodInterval === 3

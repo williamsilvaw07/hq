@@ -37,7 +37,7 @@ function WorkspaceSettingsSection() {
 
   return (
     <section className="space-y-3 sm:space-y-4">
-      <h3 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1">
+      <h3 className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
         Workspace
       </h3>
       <div className="space-y-2.5">
@@ -52,7 +52,7 @@ function WorkspaceSettingsSection() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold">{workspaceName ?? "Workspace"}</p>
-                <p className="text-[10px] text-muted-foreground font-normal">
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">
                   Currency, members, Telegram &amp; settings
                 </p>
               </div>
@@ -70,7 +70,7 @@ function WorkspaceSettingsSection() {
             </div>
             <div className="text-left">
               <p className="text-sm font-bold">All Workspaces</p>
-              <p className="text-[10px] text-muted-foreground font-normal">
+              <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">
                 Switch or create a workspace
               </p>
             </div>
@@ -93,7 +93,7 @@ export default function SettingsPage() {
           {user?.name?.charAt(0)?.toUpperCase() || "U"}
         </div>
         <h2 className="text-lg sm:text-xl font-bold mt-3 sm:mt-4">{user?.name ?? "User"}</h2>
-        <p className="text-xs text-muted-foreground font-normal mt-0.5 sm:mt-1 uppercase tracking-widest">
+        <p className="text-xs text-muted-foreground font-normal mt-0.5 sm:mt-1 uppercase tracking-wider">
           {user?.email ?? ""}
         </p>
         <Link
@@ -106,7 +106,7 @@ export default function SettingsPage() {
 
       {/* Financial Setup */}
       <section className="space-y-3 sm:space-y-4">
-        <h3 className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1">
+        <h3 className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
           Financial Setup
         </h3>
         <div className="space-y-2.5">
@@ -120,7 +120,7 @@ export default function SettingsPage() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold">Monthly Budgets</p>
-                <p className="text-[10px] text-muted-foreground font-normal">Set category limits</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">Set category limits</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -135,7 +135,7 @@ export default function SettingsPage() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold">Goals</p>
-                <p className="text-[10px] text-muted-foreground font-normal">Track and manage your goals</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">Track and manage your goals</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -150,7 +150,7 @@ export default function SettingsPage() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold">Fixed Expenses</p>
-                <p className="text-[10px] text-muted-foreground font-normal">Manage recurring bills</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">Manage recurring bills</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -165,7 +165,7 @@ export default function SettingsPage() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold">My Cards</p>
-                <p className="text-[10px] text-muted-foreground font-normal">Manage credit cards & limits</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">Manage credit cards & limits</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />

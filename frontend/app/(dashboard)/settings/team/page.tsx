@@ -173,7 +173,7 @@ export default function TeamPage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-[10px] text-muted-foreground mt-1">Choose which workspace to add this person to.</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Choose which workspace to add this person to.</p>
               </div>
               <div>
                 <label className="label block mb-2">Email</label>
@@ -200,7 +200,7 @@ export default function TeamPage() {
                   <option value="member">Member – can add/edit transactions</option>
                   <option value="admin">Admin – can manage members and settings</option>
                 </select>
-                <p className="text-[10px] text-muted-foreground mt-1">{ROLE_DESCRIPTIONS[inviteRole]}</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">{ROLE_DESCRIPTIONS[inviteRole]}</p>
               </div>
               {inviteError && <p className="text-sm text-chart-2">{inviteError}</p>}
               {inviteLink && (
@@ -238,7 +238,7 @@ export default function TeamPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{m.name || m.email}</p>
-                    <p className="text-[10px] text-muted-foreground">{m.email}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground">{m.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function TeamPage() {
                 >
                   <div>
                     <p className="text-sm font-bold text-foreground">{inv.email}</p>
-                    <p className="text-[10px] text-muted-foreground">{ROLE_LABELS[inv.role]} · Expires {(() => { const d = new Date(inv.expires_at); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getFullYear()).slice(-2)}`; })()}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground">{ROLE_LABELS[inv.role]} · Expires {(() => { const d = new Date(inv.expires_at); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getFullYear()).slice(-2)}`; })()}</p>
                   </div>
                   <button
                     type="button"

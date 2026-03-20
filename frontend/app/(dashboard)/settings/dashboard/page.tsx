@@ -37,14 +37,14 @@ export default function DashboardSettingsPage() {
             month-focused view and a more detailed timeline at any time.
           </p>
           {saved && (
-            <p className="text-[11px] text-chart-1 font-normal mt-1">
+            <p className="text-xs sm:text-[13px] text-chart-1 font-normal mt-1">
               Preference saved for this workspace.
             </p>
           )}
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
+          <h2 className="text-[11px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
             Modes
           </h2>
           <div className="space-y-3">
@@ -64,12 +64,12 @@ export default function DashboardSettingsPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold">Monthly Focus</p>
-                  <p className="text-[10px] text-muted-foreground font-normal">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">
                     Simpler dashboard optimised for month-based planning.
                   </p>
                 </div>
               </div>
-              <ul className="mt-3 space-y-1.5 text-[11px] text-muted-foreground">
+              <ul className="mt-3 space-y-1.5 text-xs sm:text-[13px] text-muted-foreground">
                 <li>• Default period is <strong>This Month</strong>.</li>
                 <li>• Keeps things focused on a single month.</li>
                 <li>• Emphasises monthly cashflow and fixed bills.</li>
@@ -92,12 +92,12 @@ export default function DashboardSettingsPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold">Full Timeline</p>
-                  <p className="text-[10px] text-muted-foreground font-normal">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">
                     Richer timeline with short-term and monthly views.
                   </p>
                 </div>
               </div>
-              <ul className="mt-3 space-y-1.5 text-[11px] text-muted-foreground">
+              <ul className="mt-3 space-y-1.5 text-xs sm:text-[13px] text-muted-foreground">
                 <li>• Shows <strong>Lifetime</strong>, <strong>3 Months</strong>, <strong>6 Months</strong>, and more timeline filters.</li>
                 <li>• Better for detailed transaction and cashflow analysis over longer periods.</li>
                 <li>• Keeps all timeline-based dashboard options visible.</li>

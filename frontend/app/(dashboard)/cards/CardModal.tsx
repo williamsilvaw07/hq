@@ -103,7 +103,7 @@ export function CardModal({ isOpen, onClose, onSave, onDelete, initialData, savi
       <div className="space-y-5 pb-2">
         {/* Card Name */}
         <div className="border border-white/[0.08] rounded-2xl p-4">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Card Name</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-2">Card Name</p>
           <input
             type="text"
             value={name}
@@ -116,7 +116,7 @@ export function CardModal({ isOpen, onClose, onSave, onDelete, initialData, savi
 
         {/* Card Owner */}
         <div className="border border-white/[0.08] rounded-2xl p-4">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Card Owner</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-2">Card Owner</p>
           <input
             type="text"
             value={owner}
@@ -128,14 +128,14 @@ export function CardModal({ isOpen, onClose, onSave, onDelete, initialData, savi
 
         {/* Card Limit */}
         <div className="text-center py-2">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-3">Card Limit</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">Card Limit</p>
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-lg font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
             <input
               type="number"
               value={limit}
               onChange={(e) => setLimit(e.target.value)}
-              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
+              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tight [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
               placeholder="0"
             />
           </div>
@@ -143,7 +143,7 @@ export function CardModal({ isOpen, onClose, onSave, onDelete, initialData, savi
 
         {/* Due Day */}
         <div className="border border-white/[0.08] rounded-2xl p-4">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Due Day (each month)</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-2">Due Day (each month)</p>
           <input
             type="number"
             value={dueDay}

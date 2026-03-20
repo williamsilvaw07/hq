@@ -216,7 +216,7 @@ export default function TransactionsPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/pending"
-              className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 hover:text-foreground px-2.5 py-1.5 rounded-lg bg-card/50 transition-colors"
+              className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 hover:text-foreground px-2.5 py-1.5 rounded-lg bg-card/50 transition-colors"
             >
               Pending
             </Link>
@@ -282,7 +282,7 @@ export default function TransactionsPage() {
             <button
               type="button"
               onClick={() => setBudgetFilter("all")}
-              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all border ${
                 budgetFilter === "all"
                   ? "bg-muted text-foreground border-border"
                   : "bg-card text-muted-foreground border-border/50"
@@ -295,7 +295,7 @@ export default function TransactionsPage() {
                 key={bp.id}
                 type="button"
                 onClick={() => setBudgetFilter(bp.id)}
-                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all border ${
                   budgetFilter === bp.id
                     ? "bg-muted text-foreground border-border"
                     : "bg-card text-muted-foreground border-border/50"
@@ -307,7 +307,7 @@ export default function TransactionsPage() {
             <button
               type="button"
               onClick={() => setBudgetFilter("unbudgeted")}
-              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all border ${
                 budgetFilter === "unbudgeted"
                   ? "bg-orange-400/20 text-orange-400 border-orange-400/30"
                   : "bg-card text-muted-foreground border-border/50"
@@ -340,7 +340,7 @@ export default function TransactionsPage() {
 
         {Object.entries(byDate).sort(([a], [b]) => b.localeCompare(a)).map(([date, items]) => (
           <div key={date} className="space-y-3 sm:space-y-4">
-            <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1 opacity-60">{formatDate(date)}</p>
+            <p className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 opacity-60">{formatDate(date)}</p>
             <div className="space-y-2.5 sm:space-y-3.5">
               {items.map((t) => {
                 const createdDate = t.created_at ? new Date(t.created_at) : null;
@@ -359,18 +359,18 @@ export default function TransactionsPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-foreground truncate">{t.description || "—"}</p>
-                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-70">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-70">
                           {t.category?.name ?? "—"}
                           {timeStr && ` • ${timeStr}`}
                         </p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           {t.status === "draft" && (
-                            <span className="inline-block text-[8px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
+                            <span className="inline-block text-[10px] sm:text-[11px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-wider">
                               Needs Review
                             </span>
                           )}
                           {t.type === "expense" && t.category?.id && !budgetCategoryIds.has(t.category.id) && (
-                            <span className="inline-block text-[8px] font-bold text-orange-400 bg-orange-400/10 border border-orange-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
+                            <span className="inline-block text-[10px] sm:text-[11px] font-bold text-orange-400 bg-orange-400/10 border border-orange-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-wider">
                               Unbudgeted
                             </span>
                           )}
@@ -383,7 +383,7 @@ export default function TransactionsPage() {
                           {t.type === "income" ? "+" : "-"}R${" "}
                           {formatNumberUK(Math.abs(t.amount), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
-                        <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60">{t.account?.name ?? "—"}</p>
+                        <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-60">{t.account?.name ?? "—"}</p>
                       </div>
                     </div>
                   </Link>
@@ -396,9 +396,9 @@ export default function TransactionsPage() {
 
       {result.last_page > 1 && (
         <div className="flex gap-2 justify-center pt-8">
-          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Prev</button>
-          <span className="py-2 text-[10px] font-normal text-muted-foreground uppercase tracking-widest self-center">Page {result.current_page} / {result.last_page}</span>
-          <button type="button" disabled={page >= result.last_page} onClick={() => setPage((p) => p + 1)} className="rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Next</button>
+          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-xl px-4 py-2 text-[11px] sm:text-xs font-black uppercase tracking-wider disabled:opacity-30">Prev</button>
+          <span className="py-2 text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider self-center">Page {result.current_page} / {result.last_page}</span>
+          <button type="button" disabled={page >= result.last_page} onClick={() => setPage((p) => p + 1)} className="rounded-xl px-4 py-2 text-[11px] sm:text-xs font-black uppercase tracking-wider disabled:opacity-30">Next</button>
         </div>
       )}
 

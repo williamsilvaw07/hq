@@ -95,7 +95,7 @@ export default function GoalSettingsPage() {
             </div>
             <div className="text-left">
               <p className="text-sm font-bold">View Goals</p>
-              <p className="text-[10px] text-muted-foreground/40">Manage and track all your goals</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground/40">Manage and track all your goals</p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
@@ -103,7 +103,7 @@ export default function GoalSettingsPage() {
 
         {/* General */}
         <section className="space-y-3">
-          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">General</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-wider px-1">General</p>
           <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-white/[0.04]">
             <ToggleRow label="Goals Enabled" value={settings.enabled} onToggle={() => toggle("enabled")} />
             <ToggleRow label="Show Completed Goals" value={settings.show_completed} onToggle={() => toggle("show_completed")} />
@@ -123,7 +123,7 @@ export default function GoalSettingsPage() {
 
         {/* Permissions */}
         <section className="space-y-3">
-          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Permissions</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-wider px-1">Permissions</p>
           <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-white/[0.04]">
             <RoleSelect
               label="Who can view goals"
@@ -141,14 +141,14 @@ export default function GoalSettingsPage() {
               onChange={(v) => setSettings({ ...settings, goals_edit_role: v })}
             />
           </div>
-          <p className="text-[9px] text-muted-foreground/40 px-1">
+          <p className="text-[11px] sm:text-xs text-muted-foreground/40 px-1">
             Users with the selected role or higher will have access. Delete is always admin-only.
           </p>
         </section>
 
         {/* Features */}
         <section className="space-y-3">
-          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Features</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-wider px-1">Features</p>
           <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-white/[0.04]">
             <ToggleRow label="Allow Milestones" value={settings.allow_milestones} onToggle={() => toggle("allow_milestones")} />
             <ToggleRow label="Allow Notes" value={settings.allow_notes} onToggle={() => toggle("allow_notes")} />
@@ -158,7 +158,7 @@ export default function GoalSettingsPage() {
 
         {/* Reminders */}
         <section className="space-y-3">
-          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Reminders</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-wider px-1">Reminders</p>
           <div className="bg-card/30 rounded-xl overflow-hidden divide-y divide-white/[0.04]">
             <ToggleRow label="Reminders Enabled" value={settings.reminders_enabled} onToggle={() => toggle("reminders_enabled")} />
             {settings.reminders_enabled && (
@@ -184,7 +184,7 @@ export default function GoalSettingsPage() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-3 rounded-xl bg-white text-black font-black text-sm uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
+          className="w-full py-3 rounded-xl bg-white text-black font-black text-sm uppercase tracking-wider shadow-2xl shadow-white/5 active:scale-[0.98] transition-all disabled:opacity-40"
         >
           {saving ? "Saving…" : "Save Settings"}
         </button>

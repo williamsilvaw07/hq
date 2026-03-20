@@ -40,7 +40,7 @@ function LoginContent() {
           </p>
         )}
         <div className="space-y-1.5">
-          <label htmlFor="email" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Email</label>
+          <label htmlFor="email" className="text-xs sm:text-[13px] font-medium text-muted-foreground/60 uppercase tracking-wider ml-1">Email</label>
           <input
             id="email"
             type="email"
@@ -53,8 +53,8 @@ function LoginContent() {
         </div>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Password</label>
-            <Link href="/forgot-password" className="text-[11px] text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+            <label htmlFor="password" className="text-xs sm:text-[13px] font-medium text-muted-foreground/60 uppercase tracking-wider ml-1">Password</label>
+            <Link href="/forgot-password" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
               Forgot?
             </Link>
           </div>

@@ -118,7 +118,7 @@ export default function FeaturesPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 sm:px-10 py-16 sm:py-24">
       <div className="max-w-2xl mb-16">
-        <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-4">Features</p>
+        <p className="text-xs sm:text-[13px] font-bold text-muted-foreground/40 uppercase tracking-widest mb-4">Features</p>
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-4">
           Everything you need to<br />
           <span className="text-white/30">manage your money.</span>
@@ -148,7 +148,7 @@ export default function FeaturesPage() {
               <ul className="sm:w-72 shrink-0 space-y-2">
                 {f.details.map((d) => (
                   <li key={d} className="flex items-start gap-2.5">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5 ${colors.split(" ").slice(0, 2).join(" ")}`}>✓</span>
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-medium shrink-0 mt-0.5 ${colors.split(" ").slice(0, 2).join(" ")}`}>✓</span>
                     <span className="text-xs text-muted-foreground/70 leading-relaxed">{d}</span>
                   </li>
                 ))}

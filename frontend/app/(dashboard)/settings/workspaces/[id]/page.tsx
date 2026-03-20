@@ -299,7 +299,7 @@ export default function WorkspaceSettingsPage() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-6">
         <p className="text-sm text-muted-foreground">Workspace not found.</p>
         {loadError && (
-          <p className="text-[10px] text-chart-2/60 font-mono text-center max-w-xs">{loadError}</p>
+          <p className="text-[11px] sm:text-xs text-chart-2/60 font-mono text-center max-w-xs">{loadError}</p>
         )}
         <button
           type="button"
@@ -324,11 +324,11 @@ export default function WorkspaceSettingsPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em]">Workspace</p>
+          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider">Workspace</p>
           <p className="text-sm font-bold truncate">{workspace.name}</p>
         </div>
         {isActive && (
-          <span className="text-[10px] font-normal text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-2.5 py-1 uppercase tracking-widest shrink-0">
+          <span className="text-[11px] sm:text-xs font-medium text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-2.5 py-1 uppercase tracking-wider shrink-0">
             Active
           </span>
         )}
@@ -338,7 +338,7 @@ export default function WorkspaceSettingsPage() {
 
         {/* General */}
         <section className="space-y-2">
-          <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1">General</p>
+          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">General</p>
           <div className="bg-card rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
             {/* Name */}
             {canEdit ? (
@@ -348,7 +348,7 @@ export default function WorkspaceSettingsPage() {
                 className="w-full flex items-center justify-between px-4 py-4 active:bg-white/5 transition-colors"
               >
                 <div className="text-left min-w-0">
-                  <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mb-0.5">Workspace Name</p>
+                  <p className="text-[11px] sm:text-xs font-medium text-muted-foreground/60 uppercase tracking-wider mb-0.5">Workspace Name</p>
                   <p className="text-sm font-bold text-foreground truncate">{workspace.name}</p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-white/[0.07] flex items-center justify-center shrink-0 ml-3">
@@ -357,7 +357,7 @@ export default function WorkspaceSettingsPage() {
               </button>
             ) : (
               <div className="px-4 py-4">
-                <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mb-0.5">Workspace Name</p>
+                <p className="text-[11px] sm:text-xs font-medium text-muted-foreground/60 uppercase tracking-wider mb-0.5">Workspace Name</p>
                 <p className="text-sm font-bold text-foreground truncate">{workspace.name}</p>
               </div>
             )}
@@ -369,7 +369,7 @@ export default function WorkspaceSettingsPage() {
                 className="w-full flex items-center justify-between px-4 py-4 active:bg-white/5 transition-colors"
               >
                 <div className="text-left min-w-0">
-                  <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mb-0.5">Currency</p>
+                  <p className="text-[11px] sm:text-xs font-medium text-muted-foreground/60 uppercase tracking-wider mb-0.5">Currency</p>
                   <p className="text-sm font-bold text-foreground">
                     {currencyInfo.symbol} · {currencyInfo.code} — {currencyInfo.label}
                   </p>
@@ -380,7 +380,7 @@ export default function WorkspaceSettingsPage() {
               </button>
             ) : (
               <div className="px-4 py-4">
-                <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-widest mb-0.5">Currency</p>
+                <p className="text-[11px] sm:text-xs font-medium text-muted-foreground/60 uppercase tracking-wider mb-0.5">Currency</p>
                 <p className="text-sm font-bold text-foreground">
                   {currencyInfo.symbol} · {currencyInfo.code} — {currencyInfo.label}
                 </p>
@@ -392,12 +392,12 @@ export default function WorkspaceSettingsPage() {
         {/* Team Members */}
         <section className="space-y-2">
           <div className="flex items-center justify-between px-1">
-            <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em]">Team Members</p>
+            <p className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider">Team Members</p>
             {canEdit && (
               <button
                 type="button"
                 onClick={() => openSheet({ type: "invite" })}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-black text-[11px] sm:text-xs font-bold uppercase tracking-wider active:scale-95 transition-all"
               >
                 <UserPlus className="w-3 h-3" /> Invite
               </button>
@@ -422,11 +422,11 @@ export default function WorkspaceSettingsPage() {
                           {m.name}
                           {isMe && <span className="text-muted-foreground font-normal text-xs"> (you)</span>}
                         </p>
-                        <p className="text-[10px] font-normal text-muted-foreground truncate">{m.email}</p>
+                        <p className="text-[11px] sm:text-xs font-medium text-muted-foreground truncate">{m.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-normal uppercase tracking-widest ${role.color}`}>
+                      <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium uppercase tracking-wider ${role.color}`}>
                         {role.icon} {role.label}
                       </span>
                       {canManage && (
@@ -457,7 +457,7 @@ export default function WorkspaceSettingsPage() {
 
         {/* Telegram */}
         <section className="space-y-2">
-          <p className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.2em] px-1">Integrations</p>
+          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">Integrations</p>
           <div className="bg-card rounded-2xl p-4">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -467,10 +467,10 @@ export default function WorkspaceSettingsPage() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-bold">Telegram</p>
                   {telegramConnected && (
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-2 py-0.5 uppercase tracking-widest">Connected</span>
+                    <span className="text-[11px] sm:text-xs font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Connected</span>
                   )}
                 </div>
-                <p className="text-[10px] font-normal text-muted-foreground">
+                <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">
                   {telegramConnected
                     ? <>Linked to <span className="text-foreground font-semibold">{workspace.name}</span></>
                     : <>Log expenses &amp; income for <span className="text-foreground font-semibold">{workspace.name}</span> via bot</>}
@@ -487,7 +487,7 @@ export default function WorkspaceSettingsPage() {
                 <Send className="w-4 h-4 text-blue-400 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-blue-400">@{process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}</p>
-                  <p className="text-[10px] text-muted-foreground/60">Tap to open bot in Telegram</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground/60">Tap to open bot in Telegram</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-blue-400/40 shrink-0" />
               </a>
@@ -496,13 +496,13 @@ export default function WorkspaceSettingsPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 bg-blue-500/5 border border-blue-500/10 rounded-xl px-3 py-2.5">
                   <CheckCheck className="w-4 h-4 text-blue-400 shrink-0" />
-                  <p className="text-[10px] text-muted-foreground">Telegram is linked.</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">Telegram is linked.</p>
                 </div>
                 <button
                   type="button"
                   onClick={handleGenerateTelegramCode}
                   disabled={telegramLoading}
-                  className="w-full py-2 text-[10px] font-normal text-muted-foreground uppercase tracking-widest"
+                  className="w-full py-2 text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider"
                 >
                   {telegramLoading ? "Generating…" : "Re-link with new code"}
                 </button>
@@ -510,8 +510,8 @@ export default function WorkspaceSettingsPage() {
             ) : !telegramCode ? (
               <div className="space-y-3">
                 <div className="bg-white/[0.03] rounded-xl p-3 space-y-2">
-                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">How it works</p>
-                  <ol className="text-[10px] text-muted-foreground/50 space-y-1.5 list-decimal list-inside">
+                  <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">How it works</p>
+                  <ol className="text-[11px] sm:text-xs text-muted-foreground/50 space-y-1.5 list-decimal list-inside">
                     <li>Generate a linking code below</li>
                     <li>Open the bot in Telegram{process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ? ` (@${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME})` : ""}</li>
                     <li>Send the code to the bot</li>
@@ -532,7 +532,7 @@ export default function WorkspaceSettingsPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-[10px] font-normal text-muted-foreground">
+                <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">
                   Send this code to the bot{process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ? ` (@${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME})` : ""} in Telegram. Expires in 15 minutes.
                 </p>
                 <div className="flex items-center justify-between bg-background rounded-xl px-4 py-3">
@@ -552,7 +552,7 @@ export default function WorkspaceSettingsPage() {
                   type="button"
                   onClick={handleGenerateTelegramCode}
                   disabled={telegramLoading}
-                  className="w-full py-2 text-[10px] font-normal text-muted-foreground uppercase tracking-widest"
+                  className="w-full py-2 text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider"
                 >
                   {telegramLoading ? "Generating…" : "Generate New Code"}
                 </button>
@@ -574,10 +574,10 @@ export default function WorkspaceSettingsPage() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-bold">WhatsApp</p>
                   {whatsappConnected && (
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-2 py-0.5 uppercase tracking-widest">Connected</span>
+                    <span className="text-[11px] sm:text-xs font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Connected</span>
                   )}
                 </div>
-                <p className="text-[10px] font-normal text-muted-foreground">
+                <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">
                   {whatsappConnected
                     ? <>Linked as <span className="text-foreground font-semibold">+{connectedWhatsappId}</span></>
                     : <>Log expenses &amp; income for <span className="text-foreground font-semibold">{workspace.name}</span> via WhatsApp</>}
@@ -588,13 +588,13 @@ export default function WorkspaceSettingsPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 bg-emerald-400/5 border border-emerald-400/10 rounded-xl px-3 py-2.5">
                   <CheckCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <p className="text-[10px] text-muted-foreground">WhatsApp is linked.</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">WhatsApp is linked.</p>
                 </div>
                 <button
                   type="button"
                   onClick={handleGenerateWhatsappCode}
                   disabled={whatsappLoading}
-                  className="w-full py-2 text-[10px] font-normal text-muted-foreground uppercase tracking-widest"
+                  className="w-full py-2 text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider"
                 >
                   {whatsappLoading ? "Generating…" : "Re-link with new code"}
                 </button>
@@ -602,8 +602,8 @@ export default function WorkspaceSettingsPage() {
             ) : !whatsappCode ? (
               <div className="space-y-3">
                 <div className="bg-white/[0.03] rounded-xl p-3 space-y-2">
-                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">How it works</p>
-                  <ol className="text-[10px] text-muted-foreground/50 space-y-1.5 list-decimal list-inside">
+                  <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">How it works</p>
+                  <ol className="text-[11px] sm:text-xs text-muted-foreground/50 space-y-1.5 list-decimal list-inside">
                     <li>Generate a linking code below</li>
                     <li>Open the NorthTrack number on WhatsApp</li>
                     <li>Send the code as a message</li>
@@ -624,7 +624,7 @@ export default function WorkspaceSettingsPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-[10px] font-normal text-muted-foreground">
+                <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">
                   Send this code to the NorthTrack WhatsApp number. Expires in 15 minutes.
                 </p>
                 <div className="flex items-center justify-between bg-background rounded-xl px-4 py-3">
@@ -644,7 +644,7 @@ export default function WorkspaceSettingsPage() {
                   type="button"
                   onClick={handleGenerateWhatsappCode}
                   disabled={whatsappLoading}
-                  className="w-full py-2 text-[10px] font-normal text-muted-foreground uppercase tracking-widest"
+                  className="w-full py-2 text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider"
                 >
                   {whatsappLoading ? "Generating…" : "Generate New Code"}
                 </button>
@@ -656,7 +656,7 @@ export default function WorkspaceSettingsPage() {
         {/* Danger Zone */}
         {isOwner && (
           <section className="space-y-2 pt-2">
-            <p className="text-[10px] font-normal text-chart-2/60 uppercase tracking-[0.2em] px-1">Danger Zone</p>
+            <p className="text-[11px] sm:text-xs font-medium text-chart-2/60 uppercase tracking-wider px-1">Danger Zone</p>
             <button
               type="button"
               onClick={() => openSheet({ type: "delete" })}
@@ -734,7 +734,7 @@ export default function WorkspaceSettingsPage() {
                         <span className="text-base font-bold w-8 text-left">{c.symbol}</span>
                         <div className="text-left">
                           <p className="text-sm font-bold text-foreground">{c.code}</p>
-                          <p className="text-[10px] font-normal text-muted-foreground">{c.label}</p>
+                          <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{c.label}</p>
                         </div>
                       </div>
                       {selectedCurrency === c.code && <Check className="w-4 h-4 text-foreground" />}
@@ -774,7 +774,7 @@ export default function WorkspaceSettingsPage() {
                       className={`w-full text-left px-4 py-3 rounded-xl transition-all ${inviteRole === id ? "bg-white/10 text-foreground" : "bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06]"}`}
                     >
                       <p className="text-xs font-bold uppercase tracking-wide">{id}</p>
-                      <p className="text-[10px] font-normal text-muted-foreground/60 mt-0.5">{desc}</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-muted-foreground/60 mt-0.5">{desc}</p>
                     </button>
                   ))}
                 </div>
@@ -792,7 +792,7 @@ export default function WorkspaceSettingsPage() {
               <div className="space-y-4">
                 <div className="bg-emerald-400/10 border border-emerald-400/20 rounded-xl p-3">
                   <p className="text-xs text-emerald-400 font-bold">Invite link created!</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
                     Share this link with <span className="text-foreground font-semibold">{inviteEmail}</span>. They can sign up or log in to join as <span className="text-foreground font-semibold">{inviteRole}</span>.
                   </p>
                 </div>
@@ -809,7 +809,7 @@ export default function WorkspaceSettingsPage() {
                       : <Copy className="w-5 h-5" />}
                   </button>
                 </div>
-                <p className="text-[10px] text-muted-foreground/50 text-center">Link expires in 7 days</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground/50 text-center">Link expires in 7 days</p>
                 <div className="flex gap-3">
                   <button type="button" onClick={closeSheet} className="flex-1 py-3.5 rounded-full bg-white/[0.07] text-sm font-bold uppercase tracking-widest text-muted-foreground active:scale-95 transition-all">Done</button>
                   <button
@@ -840,7 +840,7 @@ export default function WorkspaceSettingsPage() {
                       className={`w-full text-left px-4 py-3 rounded-xl transition-all ${selectedRole === id ? "bg-white/10 text-foreground" : "bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06]"}`}
                     >
                       <p className="text-xs font-bold uppercase tracking-wide">{id}</p>
-                      <p className="text-[10px] font-normal text-muted-foreground/60 mt-0.5">{desc}</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-muted-foreground/60 mt-0.5">{desc}</p>
                     </button>
                   ))}
                 </div>

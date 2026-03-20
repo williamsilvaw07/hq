@@ -80,18 +80,18 @@ export default function NewGoalPage() {
         <button
           type="button"
           onClick={() => router.back()}
-          className="text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest"
+          className="text-[11px] sm:text-xs font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
         >
           Cancel
         </button>
-        <h1 className="text-sm font-black uppercase tracking-[0.2em] text-foreground/80">
+        <h1 className="text-sm font-black uppercase tracking-widest text-foreground/80">
           New Goal
         </h1>
         <button
           type="button"
           onClick={handleSave}
           disabled={saving || !name.trim()}
-          className="text-[10px] font-bold text-primary hover:opacity-80 disabled:opacity-40 transition-opacity uppercase tracking-widest"
+          className="text-[11px] sm:text-xs font-bold text-primary hover:opacity-80 disabled:opacity-40 transition-opacity uppercase tracking-wider"
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -121,7 +121,7 @@ export default function NewGoalPage() {
           <div className="relative shrink-0">
             <div className="w-16 h-16 rounded-xl bg-card flex flex-col items-center justify-center gap-0.5 shadow-xl shadow-black/20">
               <span className="text-3xl leading-none">{icon}</span>
-              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-wider">Emoji</span>
+              <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/40 uppercase tracking-wider">Emoji</span>
             </div>
             <select
               value={icon}
@@ -133,7 +133,7 @@ export default function NewGoalPage() {
             </select>
           </div>
           <div className="flex-1 space-y-1">
-            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+            <label className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest">
               Goal Name
             </label>
             <input
@@ -148,7 +148,7 @@ export default function NewGoalPage() {
 
         {/* Custom Icon */}
         <div className="flex items-center gap-2 px-1">
-          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+          <span className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest">
             Or custom
           </span>
           <input
@@ -165,16 +165,16 @@ export default function NewGoalPage() {
         {goalType === "financial" && (
           <>
             <div className="flex flex-col items-center py-4">
-              <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">
+              <label className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest mb-4">
                 Target Amount
               </label>
               <div className="flex items-center gap-1">
-                <span className="text-3xl font-light text-muted-foreground/30 tracking-tighter">
+                <span className="text-3xl font-light text-muted-foreground/30 tracking-tight">
                   {CURRENCY_SYMBOL}
                 </span>
                 <input
                   type="number"
-                  className="w-full max-w-[240px] text-4xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tighter"
+                  className="w-full max-w-[240px] text-4xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tight"
                   placeholder="0"
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
@@ -226,7 +226,7 @@ export default function NewGoalPage() {
         {/* General Goal - Milestones */}
         {goalType === "general" && (
           <div className="space-y-3">
-            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">
+            <p className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest px-1">
               Milestones
             </p>
             <div className="space-y-2">
@@ -287,7 +287,7 @@ export default function NewGoalPage() {
 
         {/* Notes */}
         <div className="space-y-3">
-          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">
+          <p className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest px-1">
             Notes
           </p>
           <textarea

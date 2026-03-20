@@ -229,7 +229,7 @@ export default function HistoryPage() {
                     : "bg-card/30 opacity-40 cursor-default"
                 } ${isCurrentMonth ? "ring-1 ring-white/20" : ""}`}
               >
-                <p className={`text-[10px] font-semibold uppercase tracking-widest mb-2 ${
+                <p className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider mb-2 ${
                   isCurrentMonth ? "text-white" : "text-muted-foreground/60"
                 }`}>
                   {MONTH_SHORT[m.month - 1]}
@@ -238,39 +238,39 @@ export default function HistoryPage() {
                 {hasData ? (
                   <div className="space-y-2">
                     <div>
-                      <p className="text-sm font-black tracking-tighter">
+                      <p className="text-sm font-black tracking-tight">
                         {CURRENCY_SYMBOL} {formatBRL(m.totalExpenses, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                       </p>
-                      <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">spent</p>
+                      <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider">spent</p>
                     </div>
 
                     {m.totalIncome > 0 && (
-                      <p className="text-[9px] text-emerald-400/70">
+                      <p className="text-[11px] sm:text-xs text-emerald-400/70">
                         +{CURRENCY_SYMBOL} {formatBRL(m.totalIncome, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} income
                       </p>
                     )}
 
                     <div className="flex items-center gap-1.5">
-                      <span className={`text-[9px] font-semibold ${m.netResult >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      <span className={`text-[11px] sm:text-xs font-semibold ${m.netResult >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                         {m.netResult >= 0 ? "+" : ""}{CURRENCY_SYMBOL} {formatBRL(Math.abs(m.netResult), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                       </span>
-                      <span className="text-[8px] text-muted-foreground/30">net</span>
+                      <span className="text-[10px] sm:text-[11px] text-muted-foreground/30">net</span>
                     </div>
 
                     {m.topCategories.length > 0 && (
                       <div className="flex gap-1 flex-wrap">
                         {m.topCategories.slice(0, 2).map((c) => (
-                          <span key={c.name} className="text-[8px] bg-white/5 text-muted-foreground/50 rounded px-1.5 py-0.5 truncate max-w-[80px]">
+                          <span key={c.name} className="text-[10px] sm:text-[11px] bg-white/5 text-muted-foreground/50 rounded px-1.5 py-0.5 truncate max-w-[80px]">
                             {c.icon ?? ""} {c.name}
                           </span>
                         ))}
                       </div>
                     )}
 
-                    <p className="text-[8px] text-muted-foreground/30">{m.transactionCount} transactions</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground/30">{m.transactionCount} transactions</p>
                   </div>
                 ) : (
-                  <p className="text-[10px] text-muted-foreground/30 mt-2">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground/30 mt-2">
                     {isFuture ? "Upcoming" : "No data"}
                   </p>
                 )}
@@ -327,44 +327,44 @@ function MonthDetailView({ detail, onBack }: { detail: MonthDetail | null; onBac
 
       {/* Summary Card */}
       <section className="bg-card rounded-2xl p-5 space-y-4">
-        <h2 className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] opacity-50">Month Summary</h2>
+        <h2 className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-50">Month Summary</h2>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider mb-0.5">Income</p>
-            <p className="text-lg font-black tracking-tighter text-emerald-400">
+            <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider mb-0.5">Income</p>
+            <p className="text-lg font-black tracking-tight text-emerald-400">
               {CURRENCY_SYMBOL} {formatBRL(detail.totalIncome, { minimumFractionDigits: 2 })}
             </p>
           </div>
           <div>
-            <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider mb-0.5">Expenses</p>
-            <p className="text-lg font-black tracking-tighter">
+            <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider mb-0.5">Expenses</p>
+            <p className="text-lg font-black tracking-tight">
               {CURRENCY_SYMBOL} {formatBRL(detail.totalExpenses, { minimumFractionDigits: 2 })}
             </p>
           </div>
           <div>
-            <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider mb-0.5">Net Result</p>
-            <p className={`text-lg font-black tracking-tighter ${detail.netResult >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+            <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider mb-0.5">Net Result</p>
+            <p className={`text-lg font-black tracking-tight ${detail.netResult >= 0 ? "text-emerald-400" : "text-red-400"}`}>
               {detail.netResult >= 0 ? "+" : "-"}{CURRENCY_SYMBOL} {formatBRL(Math.abs(detail.netResult), { minimumFractionDigits: 2 })}
             </p>
           </div>
           <div>
-            <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider mb-0.5">Fixed Bills</p>
-            <p className="text-lg font-black tracking-tighter text-chart-1">
+            <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider mb-0.5">Fixed Bills</p>
+            <p className="text-lg font-black tracking-tight text-chart-1">
               {CURRENCY_SYMBOL} {formatBRL(detail.fixedBillsTotal, { minimumFractionDigits: 2 })}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 pt-1 border-t border-white/[0.04]">
-          <span className="text-[9px] text-muted-foreground/40 uppercase tracking-wider">{detail.transactionCount} transactions</span>
+          <span className="text-[11px] sm:text-xs text-muted-foreground/40 uppercase tracking-wider">{detail.transactionCount} transactions</span>
         </div>
       </section>
 
       {/* Category Breakdown */}
       {detail.categories.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] opacity-50 px-1">Spending by Category</h2>
+          <h2 className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-50 px-1">Spending by Category</h2>
           <div className="bg-card rounded-2xl divide-y divide-white/[0.04]">
             {detail.categories.map((cat) => (
               <div key={cat.name} className="flex items-center gap-3 p-4">
@@ -392,7 +392,7 @@ function MonthDetailView({ detail, onBack }: { detail: MonthDetail | null; onBac
       {/* Fixed Bills */}
       {detail.fixedBills.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] opacity-50 px-1">Fixed Bills</h2>
+          <h2 className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-50 px-1">Fixed Bills</h2>
           <div className="bg-card rounded-2xl divide-y divide-white/[0.04]">
             {detail.fixedBills.map((bill) => (
               <div key={bill.id} className="flex items-center gap-3 p-4">
@@ -400,7 +400,7 @@ function MonthDetailView({ detail, onBack }: { detail: MonthDetail | null; onBac
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold truncate">{bill.name}</p>
                   {bill.dayOfMonth && (
-                    <p className="text-[9px] text-muted-foreground/40">Day {bill.dayOfMonth}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground/40">Day {bill.dayOfMonth}</p>
                   )}
                 </div>
                 <p className="text-xs font-bold shrink-0">
@@ -415,10 +415,10 @@ function MonthDetailView({ detail, onBack }: { detail: MonthDetail | null; onBac
       {/* Transactions */}
       {dateGroups.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-[10px] text-muted-foreground font-normal uppercase tracking-[0.2em] opacity-50 px-1">Transactions</h2>
+          <h2 className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-50 px-1">Transactions</h2>
           {dateGroups.map(([date, txs]) => (
             <div key={date} className="space-y-1">
-              <p className="text-[9px] text-muted-foreground/40 uppercase tracking-wider px-1 mb-1.5">{formatDate(date)}</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground/40 uppercase tracking-wider px-1 mb-1.5">{formatDate(date)}</p>
               <div className="bg-card rounded-2xl divide-y divide-white/[0.04]">
                 {txs.map((tx) => (
                   <Link
@@ -436,7 +436,7 @@ function MonthDetailView({ detail, onBack }: { detail: MonthDetail | null; onBac
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold truncate">{tx.description || "—"}</p>
-                      <p className="text-[9px] text-muted-foreground/40">{tx.category?.name ?? "Uncategorized"}</p>
+                      <p className="text-[11px] sm:text-xs text-muted-foreground/40">{tx.category?.name ?? "Uncategorized"}</p>
                     </div>
                     <p className={`text-xs font-bold shrink-0 ${tx.type === "income" ? "text-emerald-400" : ""}`}>
                       {tx.type === "income" ? "+" : "-"}{CURRENCY_SYMBOL} {formatBRL(tx.amount, { minimumFractionDigits: 2 })}

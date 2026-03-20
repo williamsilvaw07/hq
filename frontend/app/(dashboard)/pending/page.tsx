@@ -40,7 +40,7 @@ export default function PendingPage() {
       <header className="z-30 -mx-5 px-5 py-3 sm:py-4 bg-background/80 backdrop-blur-md flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">Pending Review</h1>
-          <p className="text-[11px] text-chart-1 font-normal uppercase tracking-widest mt-1 flex items-center gap-2">
+          <p className="text-xs sm:text-[13px] text-chart-1 font-medium uppercase tracking-wider mt-1 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-chart-1 animate-pulse" />
             {list.length} Transaction{list.length !== 1 ? "s" : ""} captured
           </p>
@@ -66,7 +66,7 @@ export default function PendingPage() {
         ) : list.length === 0 ? (
           <div className="bg-card rounded-lg sm:rounded-xl p-5 sm:p-8 text-center">
             <p className="text-muted-foreground text-sm">No pending transactions.</p>
-            <p className="text-[11px] text-muted-foreground mt-2">Send a message via Telegram to record an expense or income.</p>
+            <p className="text-xs sm:text-[13px] text-muted-foreground mt-2">Send a message via Telegram to record an expense or income.</p>
           </div>
         ) : (
           list.map((t) => (
@@ -77,13 +77,13 @@ export default function PendingPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-foreground truncate">{t.description || "—"}</p>
-                  <p className="text-[11px] text-muted-foreground font-normal uppercase tracking-tighter">
+                  <p className="text-xs sm:text-[13px] text-muted-foreground font-medium uppercase tracking-tight">
                   {t.date}
                   {t.created_at && ` · ${new Date(t.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })}`}
                   {" · "}{t.category?.name ?? "No category"}
                 </p>
                 {t.status === "draft" && (
-                  <span className="inline-block mt-0.5 text-[8px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-widest">
+                  <span className="inline-block mt-0.5 text-[10px] sm:text-[11px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-1.5 py-0.5 uppercase tracking-wider">
                     Needs Review
                   </span>
                 )}

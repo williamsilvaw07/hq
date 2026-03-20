@@ -44,7 +44,7 @@ export function Modal({ isOpen, title, subtitle, children, footer, onClose }: Mo
         {(subtitle || title) && (
           <div className="text-center px-6 pt-5 pb-2 shrink-0">
             {subtitle && (
-              <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-1">
+              <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mb-1">
                 {subtitle}
               </p>
             )}

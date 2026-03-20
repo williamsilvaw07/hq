@@ -46,7 +46,7 @@ function RegisterContent() {
           </p>
         )}
         <div className="space-y-1.5">
-          <label htmlFor="name" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Name</label>
+          <label htmlFor="name" className="text-xs sm:text-[13px] font-medium text-muted-foreground/60 uppercase tracking-wider ml-1">Name</label>
           <input
             id="name"
             type="text"
@@ -58,7 +58,7 @@ function RegisterContent() {
           />
         </div>
         <div className="space-y-1.5">
-          <label htmlFor="email" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Email</label>
+          <label htmlFor="email" className="text-xs sm:text-[13px] font-medium text-muted-foreground/60 uppercase tracking-wider ml-1">Email</label>
           <input
             id="email"
             type="email"
@@ -70,7 +70,7 @@ function RegisterContent() {
           />
         </div>
         <div className="space-y-1.5">
-          <label htmlFor="password" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Password</label>
+          <label htmlFor="password" className="text-xs sm:text-[13px] font-medium text-muted-foreground/60 uppercase tracking-wider ml-1">Password</label>
           <input
             id="password"
             type="password"
@@ -82,7 +82,7 @@ function RegisterContent() {
           />
         </div>
         <div className="space-y-1.5">
-          <label htmlFor="password_confirmation" className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest ml-1">Confirm Password</label>
+          <label htmlFor="password_confirmation" className="text-xs sm:text-[13px] font-medium text-muted-foreground/60 uppercase tracking-wider ml-1">Confirm Password</label>
           <input
             id="password_confirmation"
             type="password"

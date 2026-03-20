@@ -144,7 +144,7 @@ export default function GoalsPage() {
           {/* Financial Goals */}
           {financialGoals.length > 0 && (
             <section className="space-y-3">
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Financial Goals</p>
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-widest px-1">Financial Goals</p>
               <div className="space-y-3">
                 {financialGoals.map((goal) => {
                   const pct = goal.target_amount ? Math.min(100, (goal.current_amount / goal.target_amount) * 100) : 0;
@@ -160,13 +160,13 @@ export default function GoalsPage() {
                           <span className="text-2xl">{goal.icon || "🎯"}</span>
                           <div>
                             <p className="text-sm font-bold">{goal.name}</p>
-                            <p className={`text-[9px] font-bold uppercase tracking-widest ${status.color} inline-block px-1.5 py-0.5 rounded-full mt-0.5`}>
+                            <p className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider ${status.color} inline-block px-1.5 py-0.5 rounded-full mt-0.5`}>
                               FINANCIAL · {status.label}
                             </p>
                           </div>
                         </div>
                         {goal.deadline && (
-                          <p className="text-[10px] text-muted-foreground/50 font-bold uppercase">
+                          <p className="text-[11px] sm:text-xs text-muted-foreground/50 font-bold uppercase">
                             {formatDate(goal.deadline)}
                           </p>
                         )}
@@ -176,7 +176,7 @@ export default function GoalsPage() {
                           {CURRENCY_SYMBOL} {formatBRL(goal.current_amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                           {goal.target_amount ? ` of ${CURRENCY_SYMBOL} ${formatBRL(goal.target_amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : ""}
                         </p>
-                        <p className="text-[10px] text-muted-foreground/40 font-bold">{pct.toFixed(0)}%</p>
+                        <p className="text-[11px] sm:text-xs text-muted-foreground/40 font-bold">{pct.toFixed(0)}%</p>
                       </div>
                       <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                         <div
@@ -194,7 +194,7 @@ export default function GoalsPage() {
           {/* General Goals */}
           {generalGoals.length > 0 && (
             <section className="space-y-3">
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">Life Goals</p>
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-widest px-1">Life Goals</p>
               <div className="space-y-3">
                 {generalGoals.map((goal) => {
                   const status = getGeneralStatus(goal);
@@ -210,13 +210,13 @@ export default function GoalsPage() {
                           <span className="text-2xl">{goal.icon || "🏁"}</span>
                           <div>
                             <p className="text-sm font-bold">{goal.name}</p>
-                            <p className={`text-[9px] font-bold uppercase tracking-widest ${status.color} inline-block px-1.5 py-0.5 rounded-full mt-0.5`}>
+                            <p className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider ${status.color} inline-block px-1.5 py-0.5 rounded-full mt-0.5`}>
                               GENERAL · {status.label}
                             </p>
                           </div>
                         </div>
                         {goal.deadline && (
-                          <p className="text-[10px] text-muted-foreground/50 font-bold uppercase">
+                          <p className="text-[11px] sm:text-xs text-muted-foreground/50 font-bold uppercase">
                             {formatDate(goal.deadline)}
                           </p>
                         )}
@@ -226,7 +226,7 @@ export default function GoalsPage() {
                           <p className="text-xs text-muted-foreground/60">
                             {goal.milestones_completed} of {goal.milestone_count} milestones
                           </p>
-                          <p className="text-[10px] text-muted-foreground/40 font-bold">{milestonePct.toFixed(0)}%</p>
+                          <p className="text-[11px] sm:text-xs text-muted-foreground/40 font-bold">{milestonePct.toFixed(0)}%</p>
                         </div>
                       )}
                       <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">

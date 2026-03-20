@@ -92,7 +92,7 @@ export function TransactionModal({
 
         {/* Type toggle */}
         <div className="border border-white/[0.08] rounded-2xl p-4">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-3">Type</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">Type</p>
           <div className="grid grid-cols-2 bg-black/30 p-1 rounded-full gap-1">
             {(["expense", "income"] as const).map((t) => (
               <button
@@ -111,14 +111,14 @@ export function TransactionModal({
 
         {/* Amount */}
         <div className="text-center py-2">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-3">Amount</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">Amount</p>
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-lg font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
+              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tight [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
               placeholder="0"
               autoFocus={!initialData}
             />
@@ -132,7 +132,7 @@ export function TransactionModal({
           <div className="flex items-center gap-3 px-4 py-4">
             <FileText className="w-4 h-4 text-muted-foreground/30 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Description</p>
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Description</p>
               <input
                 type="text"
                 value={description}
@@ -149,7 +149,7 @@ export function TransactionModal({
               <div className="flex items-center gap-3 px-4 py-4">
                 <Tag className="w-4 h-4 text-muted-foreground/30 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">
+                  <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">
                     Category
                     {hasSuggestedCategory && !categoryConfirmed && categoryId === initialData?.category_id?.toString() && (
                       <span className="ml-2 text-yellow-400/80 normal-case tracking-normal">— AI suggestion</span>
@@ -170,7 +170,7 @@ export function TransactionModal({
                 <button
                   type="button"
                   onClick={() => setCategoryConfirmed(true)}
-                  className="mx-4 mb-3 py-2 rounded-xl bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all"
+                  className="mx-4 mb-3 py-2 rounded-xl bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-[11px] sm:text-xs font-bold uppercase tracking-wider active:scale-95 transition-all"
                 >
                   Confirm Category
                 </button>
@@ -182,7 +182,7 @@ export function TransactionModal({
           <div className="flex items-center gap-3 px-4 py-4">
             <CalendarDays className="w-4 h-4 text-muted-foreground/30 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Date</p>
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Date</p>
               <input
                 type="date"
                 value={date}

@@ -122,14 +122,14 @@ export default function CardsPage() {
                   <div>
                     <p className="text-sm font-bold text-foreground">{card.name}</p>
                     {card.owner && (
-                      <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-widest opacity-60 mt-0.5">{card.owner}</p>
+                      <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-60 mt-0.5">{card.owner}</p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-black tracking-tighter">
+                    <p className="text-lg font-black tracking-tight">
                       {CURRENCY_SYMBOL} {formatBRL(card.credit_limit, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </p>
-                    <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-60">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-60">
                       {(() => {
                         const dueDay = card.payment_due_day;
                         const now = new Date();
@@ -151,10 +151,10 @@ export default function CardsPage() {
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-50">
                       {CURRENCY_SYMBOL} {formatBRL(card.current_balance, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} used
                     </p>
-                    <p className="text-[10px] text-muted-foreground font-normal uppercase tracking-tighter opacity-50">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-50">
                       {usedPct.toFixed(0)}%
                     </p>
                   </div>

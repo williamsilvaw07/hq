@@ -78,7 +78,7 @@ export default function WorkspacesPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex flex-col items-center">
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-0.5">Workspace</p>
+          <p className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-wider mb-0.5">Workspace</p>
           <p className="text-sm font-bold text-foreground">Manage Spaces</p>
         </div>
         <button
@@ -111,7 +111,7 @@ export default function WorkspacesPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{w.name}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-60">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider font-black opacity-60">
                       {isActive ? "Active" : w.slug}
                     </p>
                   </div>
@@ -159,8 +159,8 @@ export default function WorkspacesPage() {
                   autoFocus
                 />
                 <div className="flex gap-2">
-                  <button type="button" onClick={closeSheet} className="flex-1 py-3 rounded-lg border border-border text-xs font-black uppercase tracking-widest text-muted-foreground">Cancel</button>
-                  <button type="submit" disabled={saving || !name.trim()} className="flex-1 py-3 rounded-lg bg-white text-black text-xs font-black uppercase tracking-widest disabled:opacity-40">
+                  <button type="button" onClick={closeSheet} className="flex-1 py-3 rounded-lg border border-border text-xs font-black uppercase tracking-wider text-muted-foreground">Cancel</button>
+                  <button type="submit" disabled={saving || !name.trim()} className="flex-1 py-3 rounded-lg bg-white text-black text-xs font-black uppercase tracking-wider disabled:opacity-40">
                     {saving ? "Creating…" : "Create"}
                   </button>
                 </div>

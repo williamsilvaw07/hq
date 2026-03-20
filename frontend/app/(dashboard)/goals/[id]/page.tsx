@@ -94,13 +94,13 @@ function EditGoalModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl p-6 space-y-5 animate-in slide-in-from-bottom max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black uppercase tracking-[0.2em]">Edit Goal</h3>
+          <h3 className="text-sm font-black uppercase tracking-widest">Edit Goal</h3>
           <button onClick={onClose} className="text-muted-foreground"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Name</label>
+            <label className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Name</label>
             <input
               type="text"
               value={name}
@@ -109,7 +109,7 @@ function EditGoalModal({
             />
           </div>
           <div>
-            <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Icon (emoji)</label>
+            <label className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Icon (emoji)</label>
             <input
               type="text"
               value={icon}
@@ -121,7 +121,7 @@ function EditGoalModal({
           {isFinancial && (
             <>
               <div>
-                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Target Amount</label>
+                <label className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Target Amount</label>
                 <input
                   type="number"
                   value={targetAmount}
@@ -130,7 +130,7 @@ function EditGoalModal({
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Contribution Frequency</label>
+                <label className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Contribution Frequency</label>
                 <select
                   value={contributionFrequency}
                   onChange={(e) => setContributionFrequency(e.target.value)}
@@ -144,7 +144,7 @@ function EditGoalModal({
               </div>
               {contributionFrequency && (
                 <div>
-                  <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Contribution Amount</label>
+                  <label className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Contribution Amount</label>
                   <input
                     type="number"
                     value={contributionAmount}
@@ -156,7 +156,7 @@ function EditGoalModal({
             </>
           )}
           <div>
-            <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5 block">Deadline</label>
+            <label className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Deadline</label>
             <input
               type="date"
               value={deadline}
@@ -209,7 +209,7 @@ function DeleteConfirmModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl p-6 space-y-5 animate-in slide-in-from-bottom">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-red-400">Delete Goal</h3>
+          <h3 className="text-sm font-black uppercase tracking-widest text-red-400">Delete Goal</h3>
           <button onClick={onClose} className="text-muted-foreground"><X className="w-5 h-5" /></button>
         </div>
         <p className="text-sm text-muted-foreground">
@@ -257,7 +257,7 @@ function ContributionModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl p-6 space-y-6 animate-in slide-in-from-bottom">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black uppercase tracking-[0.2em]">Add Contribution</h3>
+          <h3 className="text-sm font-black uppercase tracking-widest">Add Contribution</h3>
           <button onClick={onClose} className="text-muted-foreground"><X className="w-5 h-5" /></button>
         </div>
 
@@ -266,7 +266,7 @@ function ContributionModal({
             <span className="text-2xl font-light text-muted-foreground/30">{CURRENCY_SYMBOL}</span>
             <input
               type="number"
-              className="w-full max-w-[200px] text-4xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tighter"
+              className="w-full max-w-[200px] text-4xl font-heading font-black bg-transparent border-none outline-none text-center placeholder:text-muted/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none tracking-tight"
               placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -495,7 +495,7 @@ export default function GoalDetailPage() {
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="text-sm font-bold truncate">{goal.name}</h1>
-          <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">
+          <p className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider font-bold">
             {isFinancial ? "Financial Goal" : "Life Goal"}
           </p>
         </div>
@@ -550,16 +550,16 @@ export default function GoalDetailPage() {
                     style={{ width: `${Math.min(100, pct)}%` }}
                   />
                 </div>
-                <p className="text-center text-[10px] text-muted-foreground/60 font-bold">{pct.toFixed(1)}% complete</p>
+                <p className="text-center text-[11px] sm:text-xs text-muted-foreground/60 font-bold">{pct.toFixed(1)}% complete</p>
               </>
             )}
             {goal.deadline && (
-              <p className="text-center text-[10px] text-muted-foreground/40 font-bold uppercase">
+              <p className="text-center text-[11px] sm:text-xs text-muted-foreground/40 font-bold uppercase">
                 Target: {formatDate(goal.deadline)}
               </p>
             )}
             {goal.contribution_frequency && goal.contribution_amount && (
-              <p className="text-center text-[10px] text-muted-foreground/40">
+              <p className="text-center text-[11px] sm:text-xs text-muted-foreground/40">
                 {formatMoney(goal.contribution_amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} {goal.contribution_frequency}
               </p>
             )}
@@ -581,11 +581,11 @@ export default function GoalDetailPage() {
                     style={{ width: `${Math.min(100, milestonePct)}%` }}
                   />
                 </div>
-                <p className="text-center text-[10px] text-muted-foreground/60 font-bold">{milestonePct.toFixed(0)}% complete</p>
+                <p className="text-center text-[11px] sm:text-xs text-muted-foreground/60 font-bold">{milestonePct.toFixed(0)}% complete</p>
               </>
             )}
             {goal.deadline && (
-              <p className="text-center text-[10px] text-muted-foreground/40 font-bold uppercase">
+              <p className="text-center text-[11px] sm:text-xs text-muted-foreground/40 font-bold uppercase">
                 Target: {formatDate(goal.deadline)}
               </p>
             )}
@@ -626,7 +626,7 @@ export default function GoalDetailPage() {
           <button
             key={t}
             onClick={() => setActiveTab(t)}
-            className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all border ${
+            className={`px-4 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all border ${
               activeTab === t
                 ? "bg-white text-black border-white"
                 : "bg-transparent text-muted-foreground border-white/10"
@@ -643,7 +643,7 @@ export default function GoalDetailPage() {
           {/* Recent Contributions (financial) */}
           {isFinancial && goal.contributions.length > 0 && (
             <section className="space-y-3">
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-widest px-1">
                 Recent Contributions
               </p>
               <div className="space-y-2">
@@ -653,10 +653,10 @@ export default function GoalDetailPage() {
                       <p className="text-sm font-bold text-emerald-400">
                         + {formatMoney(c.amount)}
                       </p>
-                      <p className="text-[10px] text-muted-foreground/50">
+                      <p className="text-[11px] sm:text-xs text-muted-foreground/50">
                         {c.user_name} · {formatDate(c.date)}
                       </p>
-                      {c.note && <p className="text-[10px] text-muted-foreground/40 mt-0.5">{c.note}</p>}
+                      {c.note && <p className="text-[11px] sm:text-xs text-muted-foreground/40 mt-0.5">{c.note}</p>}
                     </div>
                   </div>
                 ))}
@@ -667,7 +667,7 @@ export default function GoalDetailPage() {
           {/* Milestones Preview */}
           {goal.milestones.length > 0 && (
             <section className="space-y-3">
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-widest px-1">
                 Milestones
               </p>
               <div className="space-y-2">
@@ -689,7 +689,7 @@ export default function GoalDetailPage() {
                 {goal.milestones.length > 4 && (
                   <button
                     onClick={() => setActiveTab("milestones")}
-                    className="text-[10px] text-primary font-bold uppercase tracking-widest px-1"
+                    className="text-[11px] sm:text-xs text-primary font-bold uppercase tracking-wider px-1"
                   >
                     View all {goal.milestones.length} milestones →
                   </button>
@@ -701,14 +701,14 @@ export default function GoalDetailPage() {
           {/* Recent Notes Preview */}
           {goal.notes.length > 0 && (
             <section className="space-y-3">
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] px-1">
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-widest px-1">
                 Recent Notes
               </p>
               <div className="space-y-2">
                 {goal.notes.slice(0, 2).map((n) => (
                   <div key={n.id} className="bg-card rounded-xl px-4 py-3">
                     <p className="text-sm">{n.content}</p>
-                    <p className="text-[10px] text-muted-foreground/40 mt-1">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground/40 mt-1">
                       {n.user_name} · {formatDate(n.created_at)}
                     </p>
                   </div>
@@ -716,7 +716,7 @@ export default function GoalDetailPage() {
                 {goal.notes.length > 2 && (
                   <button
                     onClick={() => setActiveTab("notes")}
-                    className="text-[10px] text-primary font-bold uppercase tracking-widest px-1"
+                    className="text-[11px] sm:text-xs text-primary font-bold uppercase tracking-wider px-1"
                   >
                     View all {goal.notes.length} notes →
                   </button>
@@ -744,7 +744,7 @@ export default function GoalDetailPage() {
                   {m.title}
                 </span>
                 {m.target_date && (
-                  <p className="text-[9px] text-muted-foreground/40">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground/40">
                     {formatDate(m.target_date)}
                   </p>
                 )}
@@ -804,7 +804,7 @@ export default function GoalDetailPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="text-sm">{n.content}</p>
-                  <p className="text-[10px] text-muted-foreground/40 mt-1">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground/40 mt-1">
                     {n.user_name} · {formatDate(n.created_at)}
                   </p>
                 </div>

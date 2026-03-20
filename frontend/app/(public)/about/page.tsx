@@ -7,7 +7,7 @@ export default function AboutPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 sm:px-10 py-16 sm:py-24">
       <div className="max-w-2xl mb-16">
-        <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-4">About</p>
+        <p className="text-xs sm:text-[13px] font-bold text-muted-foreground/40 uppercase tracking-widest mb-4">About</p>
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-6">
           Built for people who<br />
           <span className="text-white/30">want clarity, not complexity.</span>
@@ -29,28 +29,28 @@ export default function AboutPage() {
           <h2 className="text-base font-bold">What makes it different</h2>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-emerald-400/10 flex items-center justify-center text-[10px] text-emerald-400 shrink-0 mt-0.5">1</span>
+              <span className="w-6 h-6 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400 shrink-0 mt-0.5">1</span>
               <div>
                 <p className="text-sm font-bold mb-1">Telegram-first input</p>
                 <p className="text-xs text-muted-foreground/60 leading-relaxed">Text, voice, or photo — the bot understands all three. AI picks the right category. You just confirm.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-blue-400/10 flex items-center justify-center text-[10px] text-blue-400 shrink-0 mt-0.5">2</span>
+              <span className="w-6 h-6 rounded-full bg-blue-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-blue-400 shrink-0 mt-0.5">2</span>
               <div>
                 <p className="text-sm font-bold mb-1">Real team support</p>
                 <p className="text-xs text-muted-foreground/60 leading-relaxed">Workspaces with roles (Owner, Admin, Member, Viewer). Share budgets with your partner, family, or roommates.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-purple-400/10 flex items-center justify-center text-[10px] text-purple-400 shrink-0 mt-0.5">3</span>
+              <span className="w-6 h-6 rounded-full bg-purple-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-purple-400 shrink-0 mt-0.5">3</span>
               <div>
                 <p className="text-sm font-bold mb-1">Dashboard that matters</p>
                 <p className="text-xs text-muted-foreground/60 leading-relaxed">See spent vs. budget, fixed bills total, variable spending, and recent transactions — all on one screen.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-orange-400/10 flex items-center justify-center text-[10px] text-orange-400 shrink-0 mt-0.5">4</span>
+              <span className="w-6 h-6 rounded-full bg-orange-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-orange-400 shrink-0 mt-0.5">4</span>
               <div>
                 <p className="text-sm font-bold mb-1">Privacy by default</p>
                 <p className="text-xs text-muted-foreground/60 leading-relaxed">No ads, no tracking, no data selling. Your financial data is yours. Period.</p>

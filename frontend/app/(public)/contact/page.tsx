@@ -6,7 +6,7 @@ export default function ContactPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 sm:px-10 py-16 sm:py-24">
       <div className="max-w-2xl mb-16">
-        <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-4">Contact</p>
+        <p className="text-xs sm:text-[13px] font-bold text-muted-foreground/40 uppercase tracking-widest mb-4">Contact</p>
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-6">
           Get in touch.
         </h1>

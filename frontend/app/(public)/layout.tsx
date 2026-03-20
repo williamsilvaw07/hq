@@ -30,12 +30,12 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <Logo size="sm" />
           <div className="flex items-center gap-6">
-            <Link href="/features" className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Features</Link>
-            <Link href="/about" className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">About</Link>
-            <Link href="/contact" className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Contact</Link>
-            <Link href="/privacy" className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Privacy</Link>
+            <Link href="/features" className="text-xs sm:text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Features</Link>
+            <Link href="/about" className="text-xs sm:text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">About</Link>
+            <Link href="/contact" className="text-xs sm:text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Contact</Link>
+            <Link href="/privacy" className="text-xs sm:text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Privacy</Link>
           </div>
-          <p className="text-[11px] text-muted-foreground/40">&copy; {new Date().getFullYear()} NorthTrack</p>
+          <p className="text-xs sm:text-[13px] text-muted-foreground/40">&copy; {new Date().getFullYear()} NorthTrack</p>
         </div>
       </footer>
     </div>

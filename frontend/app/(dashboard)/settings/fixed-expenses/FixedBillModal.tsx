@@ -47,7 +47,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 py-4 rounded-full bg-white/[0.07] text-sm font-bold uppercase tracking-widest text-muted-foreground active:scale-95 transition-all disabled:opacity-40"
+              className="flex-1 py-4 rounded-full bg-white/[0.07] text-sm font-bold uppercase tracking-wider text-muted-foreground active:scale-95 transition-all disabled:opacity-40"
             >
               Discard
             </button>
@@ -55,7 +55,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
               type="button"
               onClick={async () => { const ok = await onSave(draft); if (ok) onClose(); }}
               disabled={!canSave}
-              className="flex-[1.4] py-4 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+              className="flex-[1.4] py-4 rounded-full bg-white text-black text-sm font-bold uppercase tracking-wider active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
             >
               {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving…</> : isNew ? "Create Bill" : "Save Changes"}
             </button>
@@ -65,7 +65,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
               type="button"
               onClick={() => onDelete(draft.id)}
               disabled={saving}
-              className="w-full py-2 text-sm font-bold text-chart-2 uppercase tracking-widest text-center active:opacity-70 transition-all disabled:opacity-40"
+              className="w-full py-2 text-sm font-bold text-chart-2 uppercase tracking-wider text-center active:opacity-70 transition-all disabled:opacity-40"
             >
               Delete Bill
             </button>
@@ -80,7 +80,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
           <div className="relative shrink-0">
             <div className="w-14 h-14 rounded-xl bg-white/[0.06] flex flex-col items-center justify-center gap-0.5">
               <span className="text-3xl leading-none">{draft.icon || "🏠"}</span>
-              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-wider">Emoji</span>
+              <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/40 uppercase tracking-wider">Emoji</span>
             </div>
             <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md pointer-events-none">
               <Pencil className="w-2.5 h-2.5 text-black" />
@@ -95,7 +95,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
             </select>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Bill Name</p>
+            <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Bill Name</p>
             <input
               type="text"
               value={draft.name}
@@ -109,7 +109,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
 
         {/* Amount */}
         <div className="text-center py-2">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-3">Monthly Amount</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">Monthly Amount</p>
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-lg font-light text-muted-foreground/30 leading-none">R$</span>
             <input
@@ -117,7 +117,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
               step="0.01"
               value={draft.amount || ""}
               onChange={(e) => setDraft(prev => ({ ...prev, amount: Number(e.target.value) || 0 }))}
-              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
+              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tight [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
               placeholder="0"
             />
           </div>
@@ -126,7 +126,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
         {/* Frequency */}
         <div className="border border-white/[0.08] rounded-2xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Frequency</p>
+            <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">Frequency</p>
             <RefreshCw className="w-3.5 h-3.5 text-muted-foreground/30" />
           </div>
           <div className="grid grid-cols-2 bg-black/30 p-1 rounded-full gap-1">
@@ -161,7 +161,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
           <div className="flex items-center gap-3 px-4 py-4">
             <CalendarDays className="w-4 h-4 text-muted-foreground/30 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Starts On</p>
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Starts On</p>
               <input
                 type="date"
                 value={draft.due}
@@ -183,7 +183,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
           <div className="flex items-center gap-3 px-4 py-4">
             <Sparkles className="w-4 h-4 text-muted-foreground/30 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Next Occurrence</p>
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Next Occurrence</p>
               <div className="flex items-center gap-2">
                 <input
                   type="date"
@@ -211,7 +211,7 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
         <div className="flex items-center gap-3 border border-white/[0.08] rounded-2xl px-4 py-4">
           <LinkIcon className="w-4 h-4 text-muted-foreground/30 shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Payment Link</p>
+            <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Payment Link</p>
             <input
               type="url"
               value={draft.paymentLink || ""}

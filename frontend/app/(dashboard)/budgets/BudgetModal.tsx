@@ -96,7 +96,7 @@ export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, cr
           <div className="relative shrink-0">
             <div className="w-14 h-14 rounded-xl bg-white/[0.06] flex flex-col items-center justify-center gap-0.5">
               <span className="text-3xl leading-none">{icon}</span>
-              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-wider">Emoji</span>
+              <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground/40 uppercase tracking-wider">Emoji</span>
             </div>
             {/* Edit badge */}
             <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md pointer-events-none">
@@ -113,7 +113,7 @@ export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, cr
             </select>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Category</p>
+            <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Category</p>
             <input
               type="text"
               value={name}
@@ -127,14 +127,14 @@ export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, cr
 
         {/* Budget Limit */}
         <div className="text-center py-2">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-3">Budget Limit</p>
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">Budget Limit</p>
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-lg font-light text-muted-foreground/30 leading-none">{CURRENCY_SYMBOL}</span>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
+              className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tight [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
               placeholder="0"
             />
           </div>
@@ -143,7 +143,7 @@ export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, cr
         {/* Reset Frequency */}
         <div className="border border-white/[0.08] rounded-2xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Reset Frequency</p>
+            <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">Reset Frequency</p>
             <RefreshCw className="w-3.5 h-3.5 text-muted-foreground/30" />
           </div>
           <div className="grid grid-cols-3 bg-black/30 p-1 rounded-full gap-1">
@@ -168,7 +168,7 @@ export function BudgetModal({ isOpen, onClose, onSave, onDelete, initialData, cr
         {creditCards.length > 0 && (
           <div className="border border-white/[0.08] rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Linked Card</p>
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">Linked Card</p>
               <CreditCard className="w-3.5 h-3.5 text-muted-foreground/30" />
             </div>
             <select

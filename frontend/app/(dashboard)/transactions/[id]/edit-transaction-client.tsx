@@ -43,7 +43,7 @@ function DeleteConfirm({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl p-6 space-y-5 animate-in slide-in-from-bottom">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-red-400">Delete Transaction</h3>
+          <h3 className="text-sm font-black uppercase tracking-widest text-red-400">Delete Transaction</h3>
           <button onClick={onClose} className="text-muted-foreground"><X className="w-5 h-5" /></button>
         </div>
         <p className="text-sm text-muted-foreground">
@@ -206,20 +206,20 @@ export default function EditTransactionClient() {
 
       {/* Amount Card */}
       <div className="bg-card rounded-2xl p-6 mt-4 text-center space-y-2">
-        <p className={`text-4xl font-black tracking-tighter ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
+        <p className={`text-4xl font-black tracking-tight ${isExpense ? "text-chart-2" : "text-chart-1"}`}>
           {isExpense ? "-" : "+"}{CURRENCY_SYMBOL} {formatBRL(transaction.amount, { minimumFractionDigits: 2 })}
         </p>
-        <p className="text-xs text-muted-foreground/60 uppercase tracking-widest font-bold">
+        <p className="text-xs text-muted-foreground/60 uppercase tracking-wider font-bold">
           {isExpense ? "Expense" : "Income"}
         </p>
         <div className="flex items-center justify-center gap-2 mt-1">
           {transaction.status === "draft" && (
-            <span className="inline-block text-[8px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-2 py-0.5 uppercase tracking-widest">
+            <span className="inline-block text-[10px] sm:text-[11px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-2 py-0.5 uppercase tracking-wider">
               Needs Review
             </span>
           )}
           {isExpense && transaction.category_id && !budgetCategoryIds.has(transaction.category_id) && (
-            <span className="inline-block text-[8px] font-bold text-orange-400 bg-orange-400/10 border border-orange-400/20 rounded-full px-2 py-0.5 uppercase tracking-widest">
+            <span className="inline-block text-[10px] sm:text-[11px] font-bold text-orange-400 bg-orange-400/10 border border-orange-400/20 rounded-full px-2 py-0.5 uppercase tracking-wider">
               Unbudgeted
             </span>
           )}
@@ -269,7 +269,7 @@ export default function EditTransactionClient() {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between px-4 py-3.5">
-      <span className="text-[10px] text-muted-foreground/40 uppercase tracking-widest font-bold">{label}</span>
+      <span className="text-[11px] sm:text-xs text-muted-foreground/40 uppercase tracking-wider font-bold">{label}</span>
       <span className="text-sm font-semibold">{value}</span>
     </div>
   );

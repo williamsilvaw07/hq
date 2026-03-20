@@ -130,7 +130,7 @@ export default function NewTransactionPage() {
           <X className="w-5 h-5" />
         </Link>
         <div className="flex flex-col items-center absolute left-1/2 -translate-x-1/2">
-          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+          <p className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider">
             TRANSACTION
           </p>
           <h1 className="text-base sm:text-lg font-bold text-foreground">New Entry</h1>
@@ -173,7 +173,7 @@ export default function NewTransactionPage() {
         </div>
 
         <div className="space-y-1">
-          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+          <p className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider">
             ENTER AMOUNT
           </p>
           <div className="flex items-baseline gap-2">
@@ -203,7 +203,7 @@ export default function NewTransactionPage() {
                   <LayoutGrid className="w-5 h-5 text-chart-1" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-0.5">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-0.5">
                     BUDGET
                   </p>
                   <select
@@ -237,7 +237,7 @@ export default function NewTransactionPage() {
 
           {type === "expense" && (showNewCategory ? (
             <div className="p-3 sm:p-4 bg-card rounded-xl sm:rounded-lg space-y-2">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 New category
               </p>
               <form onSubmit={handleAddCategory} className="flex gap-2">
@@ -286,7 +286,7 @@ export default function NewTransactionPage() {
                 <Calendar className="w-5 h-5 text-chart-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1.5">
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1.5">
                   DATE
                 </p>
                 <input
@@ -305,7 +305,7 @@ export default function NewTransactionPage() {
                 <FileText className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-0.5">
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider mb-0.5">
                   NOTES
                 </p>
                 <input

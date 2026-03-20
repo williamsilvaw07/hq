@@ -34,7 +34,7 @@ export default function LandingPage() {
         <div className="max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] mb-6">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">Now in Beta</span>
+            <span className="text-xs sm:text-[13px] font-medium text-muted-foreground uppercase tracking-wider">Now in Beta</span>
           </div>
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] mb-6">
             Track your money,<br />
@@ -62,7 +62,7 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="max-w-5xl mx-auto px-6 sm:px-10 pb-24 sm:pb-36">
-        <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-8">Everything you need</p>
+        <p className="text-xs sm:text-[13px] font-bold text-muted-foreground/40 uppercase tracking-widest mb-8">Everything you need</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-card border border-white/[0.06] rounded-2xl p-6 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-400/10 flex items-center justify-center text-emerald-400 text-lg">
@@ -96,7 +96,7 @@ export default function LandingPage() {
 
       {/* How it works */}
       <section className="max-w-5xl mx-auto px-6 sm:px-10 pb-24 sm:pb-36">
-        <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-8">How it works</p>
+        <p className="text-xs sm:text-[13px] font-bold text-muted-foreground/40 uppercase tracking-widest mb-8">How it works</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-10">
           <div className="space-y-3">
             <div className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center text-xs font-black text-white/60">1</div>
@@ -128,7 +128,7 @@ export default function LandingPage() {
           <div className="flex-1 space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-400/10 border border-blue-400/20">
               <span className="text-sm">💬</span>
-              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Telegram Bot</span>
+              <span className="text-[11px] sm:text-xs font-bold text-blue-400 uppercase tracking-wider">Telegram Bot</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
               Log expenses without<br />opening the app.
@@ -139,19 +139,19 @@ export default function LandingPage() {
             </p>
             <div className="space-y-2 pt-2">
               <div className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[10px] text-emerald-400">✓</span>
+                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400">✓</span>
                 <span className="text-xs text-muted-foreground/80">Text, voice, and photo support</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[10px] text-emerald-400">✓</span>
+                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400">✓</span>
                 <span className="text-xs text-muted-foreground/80">AI-powered category detection</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[10px] text-emerald-400">✓</span>
+                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400">✓</span>
                 <span className="text-xs text-muted-foreground/80">Switch workspaces with /workspace</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[10px] text-emerald-400">✓</span>
+                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400">✓</span>
                 <span className="text-xs text-muted-foreground/80">Confirm before saving — nothing goes through without your OK</span>
               </div>
             </div>
@@ -186,19 +186,19 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="text-center space-y-1 py-6">
             <p className="text-2xl sm:text-3xl font-black tracking-tight">100%</p>
-            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-bold">Free to use</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider font-bold">Free to use</p>
           </div>
           <div className="text-center space-y-1 py-6">
             <p className="text-2xl sm:text-3xl font-black tracking-tight">3</p>
-            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-bold">Input methods</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider font-bold">Input methods</p>
           </div>
           <div className="text-center space-y-1 py-6">
             <p className="text-2xl sm:text-3xl font-black tracking-tight">AI</p>
-            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-bold">Categorization</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider font-bold">Categorization</p>
           </div>
           <div className="text-center space-y-1 py-6">
             <p className="text-2xl sm:text-3xl font-black tracking-tight">∞</p>
-            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-bold">Workspaces</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground/50 uppercase tracking-wider font-bold">Workspaces</p>
           </div>
         </div>
       </section>
@@ -228,12 +228,12 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <Logo size="sm" />
           <div className="flex items-center gap-6">
-            <Link href="/features" className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Features</Link>
-            <Link href="/about" className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">About</Link>
-            <Link href="/contact" className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Contact</Link>
-            <Link href="/privacy" className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Privacy</Link>
+            <Link href="/features" className="text-xs sm:text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Features</Link>
+            <Link href="/about" className="text-xs sm:text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">About</Link>
+            <Link href="/contact" className="text-xs sm:text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Contact</Link>
+            <Link href="/privacy" className="text-xs sm:text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">Privacy</Link>
           </div>
-          <p className="text-[11px] text-muted-foreground/40">&copy; {new Date().getFullYear()} NorthTrack</p>
+          <p className="text-xs sm:text-[13px] text-muted-foreground/40">&copy; {new Date().getFullYear()} NorthTrack</p>
         </div>
       </footer>
     </div>
