@@ -162,7 +162,8 @@ button:focus-visible,
   @apply text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase tracking-tight;
 }
 .form-label {
-  @apply text-xs sm:text-[13px] font-medium text-muted-foreground/60 uppercase tracking-wider;
+  @apply text-xs sm:text-[13px] font-medium text-muted-foreground uppercase tracking-wider;
+  opacity: 0.6;
 }
 .nav-label {
   @apply text-[11px] sm:text-xs font-semibold uppercase tracking-wider;
