@@ -41,7 +41,7 @@ export default function LandingPage() {
             <span className="text-white/30">not your time.</span>
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground/70 leading-relaxed mb-10 max-w-lg">
-            NorthTrack helps you manage budgets, track expenses, and stay on top of your finances — from your browser or Telegram.
+            NorthTrack helps you manage budgets, track expenses, and stay on top of your finances — from your browser, Telegram, or WhatsApp.
           </p>
           <div className="flex flex-col sm:flex-row items-start gap-3">
             <Link
@@ -77,9 +77,9 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-xl bg-blue-400/10 flex items-center justify-center text-blue-400 text-lg">
               🤖
             </div>
-            <h3 className="text-sm font-bold">Telegram Integration</h3>
+            <h3 className="text-sm font-bold">Telegram & WhatsApp</h3>
             <p className="text-xs text-muted-foreground/60 leading-relaxed">
-              Send expenses via text, voice, or photo in Telegram. AI categorizes them automatically.
+              Send expenses via text, voice, or photo in Telegram or WhatsApp. AI categorizes them automatically.
             </p>
           </div>
           <div className="bg-card border border-white/[0.06] rounded-2xl p-6 space-y-3">
@@ -109,7 +109,7 @@ export default function LandingPage() {
             <div className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center text-xs font-black text-white/60">2</div>
             <h3 className="text-sm font-bold">Log transactions</h3>
             <p className="text-xs text-muted-foreground/60 leading-relaxed">
-              Add expenses and income from the app, or just send a message to the Telegram bot. Voice messages and receipt photos work too.
+              Add expenses and income from the app, or just send a message to the Telegram or WhatsApp bot. Voice messages and receipt photos work too.
             </p>
           </div>
           <div className="space-y-3">
@@ -134,7 +134,7 @@ export default function LandingPage() {
               Log expenses without<br />opening the app.
             </h2>
             <p className="text-sm text-muted-foreground/60 leading-relaxed max-w-md">
-              Just send a message like &quot;20 uber&quot; or &quot;income 500 salary&quot; to the NorthTrack bot.
+              Just send a message like &quot;20 uber&quot; or &quot;income 500 salary&quot; to the NorthTrack Telegram bot.
               Send a voice note describing your purchase, or snap a photo of a receipt — AI handles the rest.
             </p>
             <div className="space-y-2 pt-2">
@@ -176,6 +176,65 @@ export default function LandingPage() {
             </div>
             <div className="flex justify-start">
               <div className="bg-white/[0.06] text-muted-foreground rounded-xl rounded-bl-sm px-3 py-2">✅ Confirmed!</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* WhatsApp highlight */}
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 pb-24 sm:pb-36">
+        <div className="bg-card border border-white/[0.06] rounded-2xl p-8 sm:p-12 flex flex-col sm:flex-row gap-8 sm:gap-12 items-start">
+          <div className="flex-1 space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+              <span className="text-sm">📱</span>
+              <span className="text-[11px] sm:text-xs font-bold text-emerald-400 uppercase tracking-wider">WhatsApp Bot</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+              Track expenses from<br />WhatsApp.
+            </h2>
+            <p className="text-sm text-muted-foreground/60 leading-relaxed max-w-md">
+              Already using WhatsApp? Send a message like &quot;50 groceries&quot; or a receipt photo to the NorthTrack bot.
+              Same AI-powered experience — just on the app you already use every day.
+            </p>
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center gap-3">
+                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400">✓</span>
+                <span className="text-xs text-muted-foreground/80">Text, voice, and receipt photo support</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400">✓</span>
+                <span className="text-xs text-muted-foreground/80">AI-powered category detection</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400">✓</span>
+                <span className="text-xs text-muted-foreground/80">Link via 6-digit code from settings</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-5 h-5 rounded-full bg-emerald-400/10 flex items-center justify-center text-[11px] sm:text-xs font-medium text-emerald-400">✓</span>
+                <span className="text-xs text-muted-foreground/80">Confirm before saving — nothing goes through without your OK</span>
+              </div>
+            </div>
+          </div>
+          <div className="w-full sm:w-64 shrink-0 bg-background/60 border border-white/[0.06] rounded-xl p-4 space-y-3 text-xs font-mono">
+            <div className="flex justify-end">
+              <div className="bg-emerald-500/20 text-emerald-300 rounded-xl rounded-br-sm px-3 py-2 max-w-[80%]">50 groceries</div>
+            </div>
+            <div className="flex justify-start">
+              <div className="bg-white/[0.06] text-muted-foreground rounded-xl rounded-bl-sm px-3 py-2 max-w-[90%]">
+                🛒 Expense detected!<br />
+                <br />
+                Workspace: Home<br />
+                Amount: R$ 50.00<br />
+                Category: Groceries<br />
+                <br />
+                Reply yes or no
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <div className="bg-emerald-500/20 text-emerald-300 rounded-xl rounded-br-sm px-3 py-2">yes</div>
+            </div>
+            <div className="flex justify-start">
+              <div className="bg-white/[0.06] text-muted-foreground rounded-xl rounded-bl-sm px-3 py-2">✅ Saved!</div>
             </div>
           </div>
         </div>
