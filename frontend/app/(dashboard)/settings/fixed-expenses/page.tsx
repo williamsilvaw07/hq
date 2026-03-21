@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Home, Pencil, Plus } from "lucide-react";
+import { ArrowLeft, Home, Pencil, Plus, Receipt, Check } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -14,6 +14,8 @@ import {
   formatRecurrenceRule,
 } from "@/lib/fixed-expenses";
 import { FixedBillModal } from "./FixedBillModal";
+import { PaymentProofModal } from "./PaymentProofModal";
+import type { BillPayment } from "@/lib/bill-payments";
 
 export default function FixedExpensesPage() {
   const { workspaceId } = useAuth();
@@ -22,7 +24,21 @@ export default function FixedExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [modalBill, setModalBill] = useState<FixedBill | null | "new">(null);
+  const [paymentBill, setPaymentBill] = useState<FixedBill | null>(null);
+  const [monthPayments, setMonthPayments] = useState<BillPayment[]>([]);
   const monthlyTotal = fixedBillsTotal(bills);
+
+  const fetchMonthPayments = useCallback(() => {
+    if (!workspaceId) return;
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    api<BillPayment[]>(
+      `/api/workspaces/${workspaceId}/bill-payments?month=${month}&year=${year}`,
+    )
+      .then((r) => setMonthPayments(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setMonthPayments([]));
+  }, [workspaceId]);
 
   const fetchBills = useCallback(() => {
     if (!workspaceId) return;
@@ -33,7 +49,7 @@ export default function FixedExpensesPage() {
       .finally(() => setLoading(false));
   }, [workspaceId]);
 
-  useEffect(() => { fetchBills(); }, [fetchBills]);
+  useEffect(() => { fetchBills(); fetchMonthPayments(); }, [fetchBills, fetchMonthPayments]);
 
   useEffect(() => {
     const onRefresh = () => fetchBills();
@@ -173,7 +189,14 @@ export default function FixedExpensesPage() {
               <BillCard
                 key={bill.id}
                 bill={bill}
+                isPaidThisMonth={monthPayments.some(
+                  (p) =>
+                    p.fixedBillId === bill.id &&
+                    p.periodMonth === new Date().getMonth() + 1 &&
+                    p.periodYear === new Date().getFullYear(),
+                )}
                 onEdit={() => setModalBill({ ...bill })}
+                onPayment={() => setPaymentBill(bill)}
               />
             ))
           )}
@@ -189,16 +212,31 @@ export default function FixedExpensesPage() {
           saving={saving}
         />
       )}
+
+      {paymentBill && workspaceId && (
+        <PaymentProofModal
+          bill={paymentBill}
+          workspaceId={workspaceId}
+          onClose={() => {
+            setPaymentBill(null);
+            fetchMonthPayments();
+          }}
+        />
+      )}
     </div>
   );
 }
 
 function BillCard({
   bill,
+  isPaidThisMonth,
   onEdit,
+  onPayment,
 }: {
   bill: FixedBill;
+  isPaidThisMonth: boolean;
   onEdit: () => void;
+  onPayment: () => void;
 }) {
   const next = computeNextOccurrence(bill);
   const nextLabel = next ? formatBillDisplayDate(next) : "—";
@@ -232,9 +270,9 @@ function BillCard({
       {/* Divider */}
       <div className="border-t border-white/[0.06] mx-4" />
 
-      {/* Bottom section: next date + edit button */}
+      {/* Bottom section: next date + actions */}
       <div className="flex items-center justify-between px-4 py-3">
-        <div>
+        <div className="flex-1 min-w-0">
           <p className="text-[11px] sm:text-xs font-medium text-muted-foreground/50 uppercase tracking-wider">
             Next Bill Date
           </p>
@@ -242,14 +280,41 @@ function BillCard({
             {nextLabel} · {rule}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onEdit}
-          className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-md active:scale-90 transition-all"
-          aria-label={`Edit ${bill.name}`}
-        >
-          <Pencil className="w-3 h-3 text-black" />
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          {isPaidThisMonth ? (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10">
+              <Check className="w-3 h-3 text-emerald-400" />
+              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Paid</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onPayment}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 active:scale-90 transition-all"
+              title="Record payment"
+            >
+              <Receipt className="w-3 h-3 text-amber-400" />
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Pay</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onPayment}
+            className="w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center active:scale-90 transition-all"
+            aria-label={`Payment history for ${bill.name}`}
+            title="Payment history"
+          >
+            <Receipt className="w-3 h-3 text-muted-foreground/60" />
+          </button>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-md active:scale-90 transition-all"
+            aria-label={`Edit ${bill.name}`}
+          >
+            <Pencil className="w-3 h-3 text-black" />
+          </button>
+        </div>
       </div>
     </div>
   );

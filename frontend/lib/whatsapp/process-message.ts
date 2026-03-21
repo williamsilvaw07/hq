@@ -4,6 +4,10 @@ import { parseExpenseMessage, suggestCategory, detectReply } from "@/lib/telegra
 import { sendWhatsAppMessage } from "./send";
 import { validateWhatsAppLinkCode, linkWhatsAppAccount } from "./link";
 import { transcribeAudio, categorizeExpense, extractExpenseFromImage, handleSmartMessage } from "@/lib/telegram/groq";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { ensureBillPaymentTable } from "@/lib/bill-payment-migrate";
+import { createBillPayment, updateBillPaymentProof } from "@/lib/repos/bill-payment-repo";
 
 type UserRow = {
   id: number;
@@ -27,6 +31,13 @@ type PendingTransaction = {
   amount: number;
   description: string | null;
   category_id: number | null;
+};
+
+type FixedBillRow = {
+  id: number;
+  workspace_id: number;
+  name: string;
+  amount: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -96,6 +107,15 @@ export async function processWhatsAppMessage(
   if (lower.startsWith("workspace") || lower.startsWith("/workspace")) {
     const args = trimmed.replace(/^\/?workspace\s*/i, "").trim();
     await handleWorkspaceCommand(from, args);
+    return;
+  }
+  if (lower.startsWith("pay ") || lower.startsWith("pagar ") || lower.startsWith("/pay ")) {
+    const billName = trimmed.replace(/^\/?(?:pay|pagar)\s+/i, "").trim();
+    await handlePayBillCommand(from, billName);
+    return;
+  }
+  if (lower === "bills" || lower === "contas" || lower === "/bills") {
+    await handleListBillsCommand(from);
     return;
   }
 
@@ -198,6 +218,10 @@ export async function processWhatsAppImage(
     return;
   }
 
+  // Check if there's a pending bill payment awaiting proof
+  const proofAttached = await tryAttachBillPaymentProof(from, imageBuffer);
+  if (proofAttached) return;
+
   let extracted: string | null;
   try {
     extracted = await extractExpenseFromImage(imageBuffer);
@@ -252,6 +276,10 @@ async function handleHelpCommand(from: string): Promise<void> {
   msg += "  income 500 salary → R$ 500 income\n";
   msg += "  recebi 500 salário → R$ 500 income\n\n";
   msg += "After each entry I'll ask you to confirm (yes/no) before saving.\n\n";
+  msg += "— Bill Payments —\n";
+  msg += "  bills — List your fixed bills\n";
+  msg += "  pay Rent — Record a bill payment\n";
+  msg += "  Then send a photo as payment proof!\n\n";
   msg += "— Commands —\n";
   msg += "  workspace — View & switch workspaces\n";
   msg += "  status — Show active workspace\n";
@@ -615,6 +643,178 @@ async function handleCategoryPick(from: string, pick: number): Promise<boolean> 
 
   console.log(`[whatsapp] User ${user.id} changed category to ${chosen.name} and confirmed transaction #${pending.id}`);
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// Bill payment proof attachment
+// ---------------------------------------------------------------------------
+
+type PendingPaymentRow = {
+  id: number;
+  fixed_bill_id: number;
+  workspace_id: number;
+  bill_name: string;
+  amount: number;
+};
+
+async function tryAttachBillPaymentProof(from: string, imageBuffer: Buffer): Promise<boolean> {
+  const user = await fetchOne<UserRow>(
+    "SELECT id, name, default_workspace_id FROM User WHERE whatsapp_id = ? LIMIT 1",
+    [from],
+  );
+  if (!user || !user.default_workspace_id) return false;
+
+  await ensureBillPaymentTable();
+
+  // Find the most recent pending proof payment (created in the last 10 minutes)
+  const pending = await fetchOne<PendingPaymentRow>(
+    `SELECT bp.id, bp.fixed_bill_id, bp.workspace_id, fb.name AS bill_name, bp.amount
+     FROM BillPayment bp
+     JOIN FixedBill fb ON fb.id = bp.fixed_bill_id
+     WHERE bp.workspace_id = ? AND bp.paid_by_user_id = ? AND bp.notes = 'pending_proof'
+       AND bp.source = 'whatsapp'
+       AND bp.created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)
+     ORDER BY bp.created_at DESC LIMIT 1`,
+    [user.default_workspace_id, user.id],
+  );
+
+  if (!pending) return false;
+
+  // Save the image as proof
+  try {
+    const dir = join(process.cwd(), "uploads", "payments", String(pending.workspace_id), String(pending.fixed_bill_id));
+    await mkdir(dir, { recursive: true });
+    const filename = `proof-wa-${Date.now()}.jpg`;
+    const path = join(dir, filename);
+    await writeFile(path, imageBuffer);
+
+    const proofUrl = `/api/uploads/payments/${pending.workspace_id}/${pending.fixed_bill_id}/${filename}`;
+    await updateBillPaymentProof(pending.id, pending.workspace_id, proofUrl, filename);
+
+    // Clear the pending_proof marker
+    await execute(
+      `UPDATE BillPayment SET notes = NULL, updated_at = NOW(3) WHERE id = ?`,
+      [pending.id],
+    );
+
+    const amountFormatted = formatMoney(Number(pending.amount), { minimumFractionDigits: 2 });
+
+    await sendWhatsAppMessage(
+      from,
+      `📎 Payment proof attached!\n\n📄 ${pending.bill_name}\n💰 ${amountFormatted}\n\n✅ All done! You can view it in the app.`,
+    );
+
+    console.log(`[whatsapp] Proof attached to payment #${pending.id} for bill "${pending.bill_name}"`);
+    return true;
+  } catch (err) {
+    console.error("[whatsapp] Failed to save payment proof:", err);
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Bill payment commands
+// ---------------------------------------------------------------------------
+
+async function handleListBillsCommand(from: string): Promise<void> {
+  const user = await fetchOne<UserRow>(
+    "SELECT id, name, default_workspace_id FROM User WHERE whatsapp_id = ? LIMIT 1",
+    [from],
+  );
+  if (!user || !user.default_workspace_id) {
+    await sendWhatsAppMessage(from, "⚠️ No active workspace. Send *workspace* to pick one.");
+    return;
+  }
+
+  const bills = await fetchMany<FixedBillRow>(
+    "SELECT id, workspace_id, name, amount FROM FixedBill WHERE workspace_id = ? ORDER BY name ASC",
+    [user.default_workspace_id],
+  );
+
+  if (bills.length === 0) {
+    await sendWhatsAppMessage(from, "📋 No fixed bills found. Add them in the app first.");
+    return;
+  }
+
+  let msg = "📋 Your fixed bills:\n\n";
+  bills.forEach((b, i) => {
+    msg += `  ${i + 1}. ${b.name} — ${formatMoney(Number(b.amount), { minimumFractionDigits: 2 })}\n`;
+  });
+  msg += "\nTo record a payment, send:\n  *pay Rent* (or the bill name)";
+  msg += "\n  Then send a photo as proof!";
+
+  await sendWhatsAppMessage(from, msg);
+}
+
+async function handlePayBillCommand(from: string, billName: string): Promise<void> {
+  const user = await fetchOne<UserRow>(
+    "SELECT id, name, default_workspace_id FROM User WHERE whatsapp_id = ? LIMIT 1",
+    [from],
+  );
+  if (!user || !user.default_workspace_id) {
+    await sendWhatsAppMessage(from, "⚠️ No active workspace. Send *workspace* to pick one.");
+    return;
+  }
+
+  const bills = await fetchMany<FixedBillRow>(
+    "SELECT id, workspace_id, name, amount FROM FixedBill WHERE workspace_id = ? ORDER BY name ASC",
+    [user.default_workspace_id],
+  );
+
+  if (bills.length === 0) {
+    await sendWhatsAppMessage(from, "📋 No fixed bills found. Add them in the app first.");
+    return;
+  }
+
+  // Try to match by name (partial, case-insensitive)
+  const lower = billName.toLowerCase();
+  const match = bills.find((b) => b.name.toLowerCase().includes(lower) || lower.includes(b.name.toLowerCase()));
+
+  if (!match) {
+    let msg = `❌ Bill "${billName}" not found.\n\nYour bills:\n`;
+    bills.forEach((b, i) => {
+      msg += `  ${i + 1}. ${b.name}\n`;
+    });
+    msg += `\nTry: *pay ${bills[0].name}*`;
+    await sendWhatsAppMessage(from, msg);
+    return;
+  }
+
+  // Create a pending bill payment record
+  await ensureBillPaymentTable();
+  const today = new Date();
+  const paidAt = today.toISOString().slice(0, 10);
+  const periodMonth = today.getMonth() + 1;
+  const periodYear = today.getFullYear();
+
+  const paymentId = await createBillPayment({
+    fixedBillId: match.id,
+    workspaceId: user.default_workspace_id,
+    paidByUserId: user.id,
+    amount: Number(match.amount),
+    paidAt,
+    periodMonth,
+    periodYear,
+    source: "whatsapp",
+  });
+
+  // Store pending payment ID for proof attachment
+  await execute(
+    `UPDATE BillPayment SET notes = 'pending_proof' WHERE id = ?`,
+    [paymentId],
+  );
+
+  const amountFormatted = formatMoney(Number(match.amount), { minimumFractionDigits: 2 });
+
+  let msg = `✅ Bill payment recorded!\n\n`;
+  msg += `📄 ${match.name}\n`;
+  msg += `💰 ${amountFormatted}\n`;
+  msg += `📅 Period: ${periodMonth}/${periodYear}\n\n`;
+  msg += `📸 Send a photo now to attach payment proof.\n`;
+  msg += `Or send any other message to continue.`;
+
+  await sendWhatsAppMessage(from, msg);
+  console.log(`[whatsapp] Bill payment #${paymentId} created for user ${user.id} — ${match.name} ${amountFormatted}`);
 }
 
 // ---------------------------------------------------------------------------
