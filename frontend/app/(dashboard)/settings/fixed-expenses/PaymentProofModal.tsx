@@ -13,9 +13,7 @@ import {
   FileText,
   Image as ImageIcon,
   Check,
-  Calendar,
   DollarSign,
-  StickyNote,
   X,
   ExternalLink,
   Trash2,
@@ -35,11 +33,8 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
 
   // New payment form state
   const today = new Date();
-  const [amount, setAmount] = useState(bill.amount);
-  const [paidAt, setPaidAt] = useState(today.toISOString().slice(0, 10));
   const [periodMonth, setPeriodMonth] = useState(today.getMonth() + 1);
   const [periodYear, setPeriodYear] = useState(today.getFullYear());
-  const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -87,11 +82,10 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
     try {
       const token = localStorage.getItem("token");
       const form = new FormData();
-      form.append("amount", String(amount));
-      form.append("paidAt", paidAt);
+      form.append("amount", String(bill.amount));
+      form.append("paidAt", today.toISOString().slice(0, 10));
       form.append("periodMonth", String(periodMonth));
       form.append("periodYear", String(periodYear));
-      if (notes.trim()) form.append("notes", notes.trim());
       if (file) form.append("proof", file);
 
       const res = await fetch(
@@ -104,10 +98,6 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
       );
 
       if (res.ok) {
-        // Reset form
-        setAmount(bill.amount);
-        setPaidAt(today.toISOString().slice(0, 10));
-        setNotes("");
         clearFile();
         await fetchPayments();
         setTab("history");
@@ -150,7 +140,7 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={submitting || amount <= 0}
+            disabled={submitting}
             className="w-full py-4 rounded-full bg-white text-black text-sm font-bold uppercase tracking-wider active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
           >
             {submitting ? (
@@ -163,6 +153,16 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
       }
     >
       <div className="space-y-5 pb-2">
+        {/* Amount (read-only) */}
+        <div className="text-center py-2">
+          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">
+            Amount
+          </p>
+          <h2 className="text-3xl font-black tracking-tight text-foreground">
+            {formatMoney(bill.amount)}
+          </h2>
+        </div>
+
         {/* Status badge */}
         <div className="text-center">
           {currentMonthPaid ? (
@@ -202,96 +202,40 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
 
         {tab === "new" ? (
           <div className="space-y-4">
-            {/* Amount */}
-            <div className="text-center py-2">
-              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">
-                Amount Paid
-              </p>
-              <div className="flex items-baseline justify-center gap-2">
-                <span className="text-lg font-light text-muted-foreground/30 leading-none">R$</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={amount || ""}
-                  onChange={(e) => setAmount(Number(e.target.value) || 0)}
-                  className="text-4xl font-black bg-transparent outline-none text-center w-auto min-w-[60px] max-w-[200px] tracking-tight [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-muted-foreground/20"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            {/* Date + Period */}
-            <div className="border border-white/[0.08] rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
-              <div className="flex items-center gap-3 px-4 py-4">
-                <Calendar className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">
-                    Payment Date
-                  </p>
+            {/* Billing Period */}
+            <div className="flex items-center gap-3 border border-white/[0.08] rounded-2xl px-4 py-4">
+              <DollarSign className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">
+                  Billing Period
+                </p>
+                <div className="flex gap-3">
+                  <select
+                    value={periodMonth}
+                    onChange={(e) => setPeriodMonth(parseInt(e.target.value, 10))}
+                    className="bg-transparent outline-none text-sm font-semibold text-foreground flex-1"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {new Date(2000, i).toLocaleString("en", { month: "long" })}
+                      </option>
+                    ))}
+                  </select>
                   <input
-                    type="date"
-                    value={paidAt}
-                    onChange={(e) => {
-                      setPaidAt(e.target.value);
-                      const d = new Date(e.target.value + "T00:00:00");
-                      setPeriodMonth(d.getMonth() + 1);
-                      setPeriodYear(d.getFullYear());
-                    }}
-                    className="w-full bg-transparent outline-none text-sm font-semibold text-foreground appearance-none"
+                    type="number"
+                    value={periodYear}
+                    onChange={(e) => setPeriodYear(parseInt(e.target.value, 10) || today.getFullYear())}
+                    className="w-20 bg-transparent outline-none text-sm font-semibold text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
-              <div className="flex items-center gap-3 px-4 py-4">
-                <DollarSign className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">
-                    Billing Period
-                  </p>
-                  <div className="flex gap-3">
-                    <select
-                      value={periodMonth}
-                      onChange={(e) => setPeriodMonth(parseInt(e.target.value, 10))}
-                      className="bg-transparent outline-none text-sm font-semibold text-foreground flex-1"
-                    >
-                      {Array.from({ length: 12 }, (_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          {new Date(2000, i).toLocaleString("en", { month: "long" })}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      value={periodYear}
-                      onChange={(e) => setPeriodYear(parseInt(e.target.value, 10) || today.getFullYear())}
-                      className="w-20 bg-transparent outline-none text-sm font-semibold text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Notes */}
-            <div className="flex items-start gap-3 border border-white/[0.08] rounded-2xl px-4 py-4">
-              <StickyNote className="w-4 h-4 text-muted-foreground/30 shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">
-                  Notes (optional)
-                </p>
-                <input
-                  type="text"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="e.g. Paid via PIX, ref #123..."
-                  className="w-full bg-transparent outline-none text-sm font-semibold text-foreground placeholder:text-muted-foreground/25"
-                />
-              </div>
-            </div>
-
-            {/* File upload */}
+            {/* Receipt upload */}
             <div className="border border-white/[0.08] rounded-2xl overflow-hidden">
               <div className="px-4 py-4">
                 <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">
-                  Payment Proof (optional)
+                  Payment Receipt
                 </p>
 
                 {file ? (
@@ -328,7 +272,7 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
                   >
                     <Upload className="w-6 h-6 text-muted-foreground/40" />
                     <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">
-                      Tap to upload
+                      Tap to upload receipt
                     </span>
                     <span className="text-[10px] text-muted-foreground/30">
                       Images or PDF, max 5MB
@@ -425,12 +369,6 @@ function PaymentHistoryCard({
           </button>
         </div>
       </div>
-
-      {payment.notes && (
-        <div className="px-4 pb-3">
-          <p className="text-[11px] text-muted-foreground/40 italic">{payment.notes}</p>
-        </div>
-      )}
 
       {showProof && payment.proofUrl && (
         <div className="border-t border-white/[0.06] p-4">
