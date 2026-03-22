@@ -15,6 +15,7 @@ import { CURRENCY_SYMBOL, formatBRL, formatCompact } from "@/lib/format";
 import { TransactionModal } from "../transactions/TransactionModal";
 import { BudgetModal } from "../budgets/BudgetModal";
 import { SkeletonBox } from "@/components/ui/Skeleton";
+import { PaymentProofModal } from "../settings/fixed-expenses/PaymentProofModal";
 
 type DashboardData = {
   period_income?: number;
@@ -64,6 +65,7 @@ export default function DashboardPage() {
   // Modal states
   const [budgetModalOpen, setBudgetModalOpen] = useState(false);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
+  const [paymentBill, setPaymentBill] = useState<FixedBill | null>(null);
   const [editingBudget, setEditingBudget] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
@@ -275,8 +277,8 @@ export default function DashboardPage() {
               <>
                 <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-widest mb-4 opacity-50">Spent This Month</p>
                 <div className={`flex items-baseline gap-2 mb-2 ${periodExpense > 0 ? "text-foreground" : "text-muted-foreground/20"}`}>
-                  <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
-                  <h2 className="text-5xl font-black tracking-tighter leading-none">
+                  <span className="text-lg font-light leading-none">{CURRENCY_SYMBOL}</span>
+                  <h2 className="text-3xl font-black tracking-tighter leading-none">
                     {formatBRL(periodExpense, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h2>
                 </div>
@@ -312,8 +314,8 @@ export default function DashboardPage() {
               <div className="text-center py-4">
                 <p className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-widest mb-4 opacity-50">Spent This Month</p>
                 <div className="flex items-baseline justify-center gap-2 mb-4 text-muted-foreground/20">
-                  <span className="text-2xl font-light leading-none">{CURRENCY_SYMBOL}</span>
-                  <h2 className="text-5xl font-black tracking-tighter leading-none">0.00</h2>
+                  <span className="text-lg font-light leading-none">{CURRENCY_SYMBOL}</span>
+                  <h2 className="text-3xl font-black tracking-tighter leading-none">0.00</h2>
                 </div>
                 <p className="text-xs text-muted-foreground/40">Add a budget or record a transaction to get started</p>
               </div>
@@ -542,9 +544,11 @@ export default function DashboardPage() {
                 const next = computeNextOccurrence(bill);
                 const nextLabel = next ? formatBillDisplayDate(next) : "—";
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={bill.id}
-                    className="flex items-center justify-between px-3 py-3 bg-card rounded-lg"
+                    onClick={() => setPaymentBill(bill)}
+                    className="flex items-center justify-between px-3 py-3 bg-card rounded-lg w-full text-left active:scale-[0.98] transition-all"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0">
@@ -574,7 +578,7 @@ export default function DashboardPage() {
                         </a>
                       )}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -600,6 +604,14 @@ export default function DashboardPage() {
         accounts={accounts}
         saving={saving}
       />
+
+      {paymentBill && workspaceId && (
+        <PaymentProofModal
+          bill={paymentBill}
+          workspaceId={workspaceId}
+          onClose={() => setPaymentBill(null)}
+        />
+      )}
 
     </div>
   );
