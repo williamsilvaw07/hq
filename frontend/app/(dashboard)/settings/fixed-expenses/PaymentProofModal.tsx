@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { formatMoney } from "@/lib/format";
 import { buildMediaUrl } from "@/lib/api";
@@ -11,12 +11,14 @@ import {
   Loader2,
   Upload,
   FileText,
-  Image as ImageIcon,
   Check,
-  DollarSign,
+  CalendarRange,
   X,
   ExternalLink,
   Trash2,
+  Camera,
+  Receipt,
+  TrendingUp,
 } from "lucide-react";
 
 type Props = {
@@ -31,7 +33,6 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [tab, setTab] = useState<"history" | "new">("new");
 
-  // New payment form state
   const today = new Date();
   const [periodMonth, setPeriodMonth] = useState(today.getMonth() + 1);
   const [periodYear, setPeriodYear] = useState(today.getFullYear());
@@ -64,8 +65,7 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
     const picked = e.target.files?.[0] ?? null;
     setFile(picked);
     if (picked && picked.type.startsWith("image/")) {
-      const url = URL.createObjectURL(picked);
-      setPreview(url);
+      setPreview(URL.createObjectURL(picked));
     } else {
       setPreview(null);
     }
@@ -129,11 +129,28 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
     (p) => p.periodMonth === today.getMonth() + 1 && p.periodYear === today.getFullYear(),
   );
 
+  // Stats
+  const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+  const withProof = payments.filter((p) => !!p.proofUrl).length;
+
+  // Group payments by period (month/year)
+  const grouped = useMemo(() => {
+    const map = new Map<string, BillPayment[]>();
+    for (const p of payments) {
+      const key = `${p.periodYear}-${String(p.periodMonth).padStart(2, "0")}`;
+      const list = map.get(key) ?? [];
+      list.push(p);
+      map.set(key, list);
+    }
+    // Sort by key descending (newest first)
+    return Array.from(map.entries()).sort(([a], [b]) => b.localeCompare(a));
+  }, [payments]);
+
   return (
     <Modal
       isOpen
       onClose={onClose}
-      subtitle="PAYMENT PROOF"
+      subtitle={bill.icon ? `${bill.icon} ${bill.category}` : bill.category}
       title={bill.name}
       footer={
         tab === "new" ? (
@@ -153,39 +170,29 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
       }
     >
       <div className="space-y-5 pb-2">
-        {/* Amount (read-only) */}
-        <div className="text-center py-2">
-          <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">
-            Amount
-          </p>
-          <h2 className="text-3xl font-black tracking-tight text-foreground">
+        {/* Amount + status hero */}
+        <div className="bg-white/[0.03] rounded-2xl p-5 text-center">
+          <p className="text-3xl font-black tracking-tight text-foreground">
             {formatMoney(bill.amount)}
-          </h2>
-        </div>
-
-        {/* Status badge */}
-        <div className="text-center">
-          {currentMonthPaid ? (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <Check className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                Paid this month
+          </p>
+          <div className="mt-3">
+            {currentMonthPaid ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
+                <Check className="w-3.5 h-3.5" /> Paid this month
               </span>
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                Not paid yet
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                Pending payment
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Tab switcher */}
         <div className="grid grid-cols-2 bg-black/30 p-1 rounded-full gap-1">
           {[
-            { value: "new" as const, label: "New Payment" },
-            { value: "history" as const, label: `History (${payments.length})` },
+            { value: "new" as const, label: "Record Payment" },
+            { value: "history" as const, label: `History${payments.length > 0 ? ` (${payments.length})` : ""}` },
           ].map(({ value, label }) => (
             <button
               key={value}
@@ -203,118 +210,168 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
         {tab === "new" ? (
           <div className="space-y-4">
             {/* Billing Period */}
-            <div className="flex items-center gap-3 border border-white/[0.08] rounded-2xl px-4 py-4">
-              <DollarSign className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">
+            <div className="border border-white/[0.08] rounded-2xl px-4 py-4">
+              <div className="flex items-center gap-3 mb-3">
+                <CalendarRange className="w-4 h-4 text-muted-foreground/40" />
+                <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">
                   Billing Period
                 </p>
-                <div className="flex gap-3">
-                  <select
-                    value={periodMonth}
-                    onChange={(e) => setPeriodMonth(parseInt(e.target.value, 10))}
-                    className="bg-transparent outline-none text-sm font-semibold text-foreground flex-1"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => (
-                      <option key={i + 1} value={i + 1}>
-                        {new Date(2000, i).toLocaleString("en", { month: "long" })}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="number"
-                    value={periodYear}
-                    onChange={(e) => setPeriodYear(parseInt(e.target.value, 10) || today.getFullYear())}
-                    className="w-20 bg-transparent outline-none text-sm font-semibold text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <select
+                  value={periodMonth}
+                  onChange={(e) => setPeriodMonth(parseInt(e.target.value, 10))}
+                  className="bg-white/[0.06] rounded-xl px-3 py-3 outline-none text-base font-semibold text-foreground appearance-none"
+                >
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {new Date(2000, i).toLocaleString("en", { month: "long" })}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  value={periodYear}
+                  onChange={(e) => setPeriodYear(parseInt(e.target.value, 10) || today.getFullYear())}
+                  className="bg-white/[0.06] rounded-xl px-3 py-3 outline-none text-base font-semibold text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
               </div>
             </div>
 
             {/* Receipt upload */}
-            <div className="border border-white/[0.08] rounded-2xl overflow-hidden">
-              <div className="px-4 py-4">
-                <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-3">
-                  Payment Receipt
+            <div className="border border-white/[0.08] rounded-2xl px-4 py-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Camera className="w-4 h-4 text-muted-foreground/40" />
+                <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">
+                  Attach Receipt
                 </p>
+              </div>
 
-                {file ? (
-                  <div className="space-y-3">
-                    {preview ? (
-                      <div className="relative rounded-xl overflow-hidden bg-black/20">
-                        <img
-                          src={preview}
-                          alt="Payment proof preview"
-                          className="w-full max-h-48 object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04]">
-                        <FileText className="w-5 h-5 text-muted-foreground/50" />
-                        <span className="text-sm font-medium text-foreground truncate flex-1">
-                          {file.name}
-                        </span>
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={clearFile}
-                      className="flex items-center gap-1.5 text-xs font-bold text-chart-2 uppercase tracking-wider active:opacity-70"
-                    >
-                      <X className="w-3 h-3" /> Remove file
-                    </button>
-                  </div>
-                ) : (
+              {file ? (
+                <div className="space-y-3">
+                  {preview ? (
+                    <div className="rounded-xl overflow-hidden bg-black/20">
+                      <img
+                        src={preview}
+                        alt="Receipt preview"
+                        className="w-full max-h-52 object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.04]">
+                      <FileText className="w-5 h-5 text-muted-foreground/50" />
+                      <span className="text-sm font-medium text-foreground truncate flex-1">
+                        {file.name}
+                      </span>
+                    </div>
+                  )}
                   <button
                     type="button"
-                    onClick={() => fileRef.current?.click()}
-                    className="w-full py-8 rounded-xl border-2 border-dashed border-white/[0.1] hover:border-white/[0.2] transition-colors flex flex-col items-center gap-2"
+                    onClick={clearFile}
+                    className="flex items-center justify-center gap-1.5 w-full py-2 text-xs font-bold text-chart-2 uppercase tracking-wider active:opacity-70"
                   >
-                    <Upload className="w-6 h-6 text-muted-foreground/40" />
-                    <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">
-                      Tap to upload receipt
-                    </span>
-                    <span className="text-[10px] text-muted-foreground/30">
-                      Images or PDF, max 5MB
-                    </span>
+                    <X className="w-3.5 h-3.5" /> Remove
                   </button>
-                )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full py-10 rounded-xl border-2 border-dashed border-white/[0.12] active:border-white/[0.25] transition-colors flex flex-col items-center gap-3"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center">
+                    <Upload className="w-5 h-5 text-muted-foreground/50" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">
+                      Tap to upload receipt
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/30 mt-1">
+                      Photo, screenshot, or PDF — max 5MB
+                    </p>
+                  </div>
+                </button>
+              )}
 
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          /* History tab */
+          <div className="space-y-4">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
+              <div className="flex items-center justify-center py-16">
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground/40" />
               </div>
             ) : payments.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-sm text-muted-foreground/50">No payments recorded yet.</p>
+              <div className="text-center py-16">
+                <div className="w-14 h-14 rounded-full bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
+                  <Receipt className="w-6 h-6 text-muted-foreground/30" />
+                </div>
+                <p className="text-sm font-medium text-muted-foreground/40 mb-4">No payments recorded yet</p>
                 <button
                   type="button"
                   onClick={() => setTab("new")}
-                  className="mt-3 text-xs font-bold text-white uppercase tracking-wider active:opacity-70"
+                  className="px-5 py-2.5 rounded-full bg-white text-black text-xs font-bold uppercase tracking-wider active:scale-95 transition-all"
                 >
                   Record first payment
                 </button>
               </div>
             ) : (
-              payments.map((payment) => (
-                <PaymentHistoryCard
-                  key={payment.id}
-                  payment={payment}
-                  onDelete={() => handleDelete(payment.id)}
-                />
-              ))
+              <>
+                {/* Stats cards */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-white/[0.04] rounded-xl p-3 text-center">
+                    <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-wider mb-1">
+                      Total Paid
+                    </p>
+                    <p className="text-sm font-black text-foreground tracking-tight">
+                      {formatMoney(totalPaid)}
+                    </p>
+                  </div>
+                  <div className="bg-white/[0.04] rounded-xl p-3 text-center">
+                    <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-wider mb-1">
+                      Payments
+                    </p>
+                    <p className="text-sm font-black text-foreground tracking-tight">
+                      {payments.length}
+                    </p>
+                  </div>
+                  <div className="bg-white/[0.04] rounded-xl p-3 text-center">
+                    <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-wider mb-1">
+                      Receipts
+                    </p>
+                    <p className="text-sm font-black text-foreground tracking-tight">
+                      {withProof}/{payments.length}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Grouped by month */}
+                {grouped.map(([key, monthPayments]) => {
+                  const first = monthPayments[0];
+                  return (
+                    <div key={key} className="space-y-2">
+                      <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-wider px-1">
+                        {formatPeriod(first.periodMonth, first.periodYear)}
+                      </p>
+                      {monthPayments.map((payment) => (
+                        <PaymentHistoryCard
+                          key={payment.id}
+                          payment={payment}
+                          onDelete={() => handleDelete(payment.id)}
+                        />
+                      ))}
+                    </div>
+                  );
+                })}
+              </>
             )}
           </div>
         )}
@@ -330,80 +387,116 @@ function PaymentHistoryCard({
   payment: BillPayment;
   onDelete: () => void;
 }) {
-  const [showProof, setShowProof] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const hasProof = !!payment.proofUrl;
   const isPdf = payment.proofUrl?.endsWith(".pdf");
+  const proofSrc = hasProof ? buildMediaUrl(payment.proofUrl!) : null;
+
+  // Format paid_at safely — handle both string and Date-like values
+  const paidAtDisplay = (() => {
+    if (!payment.paidAt) return "—";
+    const s = String(payment.paidAt);
+    // If it looks like ISO datetime, take just the date
+    if (s.length > 10) return s.slice(0, 10);
+    return s;
+  })();
 
   return (
     <div className="bg-white/[0.04] rounded-2xl overflow-hidden">
-      <div className="flex items-center gap-3 p-4">
-        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-          <Check className="w-5 h-5 text-emerald-400" />
+      {/* Header row */}
+      <div className="flex items-center gap-3 px-4 pt-4 pb-3">
+        <div className="w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
+          <Check className="w-4 h-4 text-emerald-400" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-foreground">
             {formatMoney(payment.amount)}
           </p>
-          <p className="text-[11px] text-muted-foreground/50 mt-0.5">
-            {formatPeriod(payment.periodMonth, payment.periodYear)} · Paid {payment.paidAt}
-            {payment.paidByName ? ` by ${payment.paidByName}` : ""}
+          <p className="text-[11px] text-muted-foreground/40 mt-0.5">
+            Paid {paidAtDisplay}
+            {payment.paidByName ? ` · ${payment.paidByName}` : ""}
+            {payment.source !== "web" ? ` · via ${payment.source}` : ""}
           </p>
         </div>
-        <div className="flex items-center gap-1">
-          {payment.proofUrl && (
+
+        {/* Delete */}
+        {confirmDelete ? (
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={() => setShowProof(!showProof)}
-              className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-all"
-              title="View proof"
+              onClick={() => { onDelete(); setConfirmDelete(false); }}
+              className="px-3 py-1.5 rounded-full bg-red-500/20 text-[10px] font-bold text-red-400 uppercase tracking-wider active:scale-95 transition-all"
             >
-              <ImageIcon className="w-3.5 h-3.5 text-muted-foreground/60" />
+              Delete
             </button>
-          )}
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(false)}
+              className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wider"
+            >
+              No
+            </button>
+          </div>
+        ) : (
           <button
             type="button"
-            onClick={onDelete}
-            className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-all"
+            onClick={() => setConfirmDelete(true)}
+            className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center active:scale-90 transition-all"
             title="Delete payment"
           >
-            <Trash2 className="w-3.5 h-3.5 text-chart-2/60" />
+            <Trash2 className="w-3.5 h-3.5 text-muted-foreground/30" />
           </button>
-        </div>
+        )}
       </div>
 
-      {showProof && payment.proofUrl && (
-        <div className="border-t border-white/[0.06] p-4">
+      {/* Proof — always visible if exists */}
+      {hasProof && (
+        <div className="px-4 pb-4">
           {isPdf ? (
             <a
-              href={buildMediaUrl(payment.proofUrl)}
+              href={proofSrc!}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300"
+              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] active:bg-white/[0.08] transition-colors"
             >
-              <FileText className="w-4 h-4" />
-              {payment.proofFilename ?? "View PDF"}
-              <ExternalLink className="w-3 h-3" />
+              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5 text-blue-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-foreground truncate">
+                  {payment.proofFilename ?? "Receipt.pdf"}
+                </p>
+                <p className="text-[10px] text-muted-foreground/40 mt-0.5">Tap to open PDF</p>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground/30 shrink-0" />
             </a>
           ) : (
             <a
-              href={buildMediaUrl(payment.proofUrl)}
+              href={proofSrc!}
               target="_blank"
               rel="noopener noreferrer"
+              className="block rounded-xl overflow-hidden bg-black/20 active:opacity-90 transition-opacity"
             >
               <img
-                src={buildMediaUrl(payment.proofUrl)}
-                alt="Payment proof"
-                className="w-full rounded-xl max-h-64 object-contain bg-black/20"
+                src={proofSrc!}
+                alt="Payment receipt"
+                className="w-full max-h-56 object-contain"
+                loading="lazy"
               />
             </a>
           )}
         </div>
       )}
 
-      {payment.source !== "web" && (
-        <div className="px-4 pb-3">
-          <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-wider">
-            via {payment.source}
-          </span>
+      {/* No proof indicator */}
+      {!hasProof && (
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-2 py-2 px-3 rounded-xl bg-white/[0.02]">
+            <Camera className="w-3.5 h-3.5 text-muted-foreground/20" />
+            <span className="text-[10px] font-medium text-muted-foreground/25 uppercase tracking-wider">
+              No receipt attached
+            </span>
+          </div>
         </div>
       )}
     </div>

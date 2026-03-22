@@ -16,6 +16,7 @@ import { TransactionModal } from "../transactions/TransactionModal";
 import { BudgetModal } from "../budgets/BudgetModal";
 import { SkeletonBox } from "@/components/ui/Skeleton";
 import { PaymentProofModal } from "../settings/fixed-expenses/PaymentProofModal";
+import type { BillPayment } from "@/lib/bill-payments";
 
 type DashboardData = {
   period_income?: number;
@@ -59,6 +60,7 @@ export default function DashboardPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [creditCards, setCreditCards] = useState<{ id: number; name: string }[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [billPayments, setBillPayments] = useState<BillPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -98,8 +100,11 @@ export default function DashboardPage() {
         .then((r) => Array.isArray(r.data) ? r.data.map((c: any) => ({ id: c.id, name: c.name })) : []),
       api<any>(`/api/workspaces/${workspaceId}/transactions?per_page=6&page=1`)
         .then((r) => Array.isArray(r.data?.data) ? r.data.data : []),
+      api<BillPayment[]>(`/api/workspaces/${workspaceId}/bill-payments?month=${new Date().getMonth() + 1}&year=${new Date().getFullYear()}`)
+        .then((r) => Array.isArray(r.data) ? r.data : [])
+        .catch(() => [] as BillPayment[]),
     ])
-      .then(([d, b, f, cat, acc, cards, txs]) => {
+      .then(([d, b, f, cat, acc, cards, txs, bp]) => {
         setDashboard(d);
         setBudgets(b);
         setFixedBills(f);
@@ -107,6 +112,7 @@ export default function DashboardPage() {
         setAccounts(acc);
         setCreditCards(cards);
         setRecentTransactions(txs);
+        setBillPayments(bp);
         setLoadError(null);
       })
       .catch((err) => {
@@ -234,16 +240,15 @@ export default function DashboardPage() {
   const variableLimit = budgets.reduce((sum, b) => sum + Number(b.amount || 0), 0);
   const variableSpent = budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
   const monthlyFixedTotal = fixedBillsTotal(fixedBills);
-  // Only count fixed bills whose due day has passed or is today
-  const todayDay = new Date().getDate();
-  const fixedBillsDueTotal = fixedBills
-    .filter((b) => (b.dayOfMonth ?? 1) <= todayDay)
-    .reduce((sum, b) => sum + b.amount, 0);
+  // Sum of actual paid fixed bills this month
+  const fixedBillsPaidTotal = billPayments.reduce((sum, p) => sum + p.amount, 0);
   const totalBudget = monthlyFixedTotal + variableLimit;
   const variablePercent = variableLimit > 0 ? Math.min(100, (variableSpent / variableLimit) * 100) : 0;
-  const unbudgeted = Math.max(0, Number(dashboard?.period_expense ?? 0) - variableSpent);
-  const periodExpense = Number(dashboard?.period_expense ?? 0);
+  const periodTransactionExpense = Number(dashboard?.period_expense ?? 0);
+  // Total spent = transaction expenses + paid fixed bills
+  const periodExpense = periodTransactionExpense + fixedBillsPaidTotal;
   const periodIncome = Number(dashboard?.period_income ?? 0);
+  const unbudgeted = Math.max(0, periodTransactionExpense - variableSpent);
   const spentPercent = totalBudget > 0 ? Math.min(100, (periodExpense / totalBudget) * 100) : 0;
 
   const today = new Date();
@@ -329,16 +334,16 @@ export default function DashboardPage() {
               <div className="flex-1 bg-card p-3 rounded-xl flex flex-col justify-between">
                 <div>
                   <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-wider mb-1 opacity-50">Fixed Bills</p>
-                  <p className={`text-sm font-black tracking-tighter leading-tight ${fixedBillsDueTotal > 0 ? "text-chart-1" : "text-muted-foreground/30"}`}>
-                    {CURRENCY_SYMBOL} {formatBRL(fixedBillsDueTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  <p className={`text-sm font-black tracking-tighter leading-tight ${fixedBillsPaidTotal > 0 ? "text-foreground" : "text-muted-foreground/30"}`}>
+                    {CURRENCY_SYMBOL} {formatBRL(fixedBillsPaidTotal, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </p>
                 </div>
                 <div className="space-y-1 mt-auto">
                   <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                    {monthlyFixedTotal > 0 && (
+                    {monthlyFixedTotal > 0 && fixedBillsPaidTotal > 0 && (
                       <div
-                        style={{ width: `${Math.max(Math.min(100, (fixedBillsDueTotal / monthlyFixedTotal) * 100), 2)}%` }}
-                        className={`h-full rounded-full transition-all duration-700 ${(fixedBillsDueTotal / monthlyFixedTotal) * 100 >= 90 ? "bg-chart-2" : (fixedBillsDueTotal / monthlyFixedTotal) * 100 >= 70 ? "bg-yellow-400" : "bg-chart-1"}`}
+                        style={{ width: `${Math.max(Math.min(100, (fixedBillsPaidTotal / monthlyFixedTotal) * 100), 2)}%` }}
+                        className="h-full rounded-full transition-all duration-700 bg-white/30"
                       />
                     )}
                   </div>
@@ -609,7 +614,10 @@ export default function DashboardPage() {
         <PaymentProofModal
           bill={paymentBill}
           workspaceId={workspaceId}
-          onClose={() => setPaymentBill(null)}
+          onClose={() => {
+            setPaymentBill(null);
+            fetchData();
+          }}
         />
       )}
 

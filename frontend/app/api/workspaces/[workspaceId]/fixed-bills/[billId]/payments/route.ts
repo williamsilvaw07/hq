@@ -21,10 +21,17 @@ const ALLOWED_TYPES = [
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 function toApiPayment(row: BillPaymentWithUser) {
-  const paidAt =
-    typeof row.paid_at === "string"
-      ? row.paid_at.slice(0, 10)
-      : new Date(row.paid_at).toISOString().slice(0, 10);
+  // MySQL DATE can come back as Date object or string
+  const rawPaidAt = row.paid_at as unknown;
+  let paidAt: string;
+  if (rawPaidAt instanceof Date) {
+    paidAt = rawPaidAt.toISOString().slice(0, 10);
+  } else if (typeof rawPaidAt === "string") {
+    paidAt = rawPaidAt.slice(0, 10);
+  } else {
+    paidAt = new Date(String(rawPaidAt)).toISOString().slice(0, 10);
+  }
+
   return {
     id: row.id,
     fixedBillId: row.fixed_bill_id,
@@ -32,13 +39,13 @@ function toApiPayment(row: BillPaymentWithUser) {
     paidByName: row.paid_by_name ?? null,
     amount: Number(row.amount),
     paidAt,
-    periodMonth: row.period_month,
-    periodYear: row.period_year,
-    proofUrl: row.proof_url,
-    proofFilename: row.proof_filename,
-    notes: row.notes,
-    source: row.source,
-    createdAt: row.created_at,
+    periodMonth: Number(row.period_month),
+    periodYear: Number(row.period_year),
+    proofUrl: row.proof_url ?? null,
+    proofFilename: row.proof_filename ?? null,
+    notes: row.notes ?? null,
+    source: row.source ?? "web",
+    createdAt: typeof row.created_at === "string" ? row.created_at : new Date(row.created_at).toISOString(),
   };
 }
 

@@ -5,22 +5,27 @@ import { ensureBillPaymentTable } from "@/lib/bill-payment-migrate";
 import { findPaymentsByWorkspaceMonth, type BillPaymentRow } from "@/lib/repos/bill-payment-repo";
 
 function toApi(row: BillPaymentRow) {
-  const paidAt =
-    typeof row.paid_at === "string"
-      ? row.paid_at.slice(0, 10)
-      : new Date(row.paid_at).toISOString().slice(0, 10);
+  const rawPaidAt = row.paid_at as unknown;
+  let paidAt: string;
+  if (rawPaidAt instanceof Date) {
+    paidAt = rawPaidAt.toISOString().slice(0, 10);
+  } else if (typeof rawPaidAt === "string") {
+    paidAt = rawPaidAt.slice(0, 10);
+  } else {
+    paidAt = new Date(String(rawPaidAt)).toISOString().slice(0, 10);
+  }
   return {
     id: row.id,
     fixedBillId: row.fixed_bill_id,
     paidByUserId: row.paid_by_user_id,
     amount: Number(row.amount),
     paidAt,
-    periodMonth: row.period_month,
-    periodYear: row.period_year,
-    proofUrl: row.proof_url,
-    proofFilename: row.proof_filename,
-    notes: row.notes,
-    source: row.source,
+    periodMonth: Number(row.period_month),
+    periodYear: Number(row.period_year),
+    proofUrl: row.proof_url ?? null,
+    proofFilename: row.proof_filename ?? null,
+    notes: row.notes ?? null,
+    source: row.source ?? "web",
   };
 }
 

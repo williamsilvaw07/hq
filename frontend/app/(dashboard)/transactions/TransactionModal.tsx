@@ -47,7 +47,7 @@ export function TransactionModal({
     }
   }, [initialData, isOpen]);
 
-  const canSave = !saving && !!amount && parseFloat(amount) > 0 && (type === "income" || !!categoryId) && (!hasSuggestedCategory || categoryConfirmed || categoryId !== initialData?.category_id?.toString());
+  const canSave = !saving && !!amount && parseFloat(amount) > 0 && (type === "income" || !!categoryId || categoryId === "unbudgeted") && (!hasSuggestedCategory || categoryConfirmed || categoryId !== initialData?.category_id?.toString());
 
   return (
     <Modal
@@ -68,7 +68,7 @@ export function TransactionModal({
             </button>
             <button
               type="button"
-              onClick={() => onSave({ type, amount: parseFloat(amount), description, category_id: Number(categoryId), account_id: Number(accountId), date, ...(isDraft ? { status: "confirmed" } : {}) })}
+              onClick={() => onSave({ type, amount: parseFloat(amount), description, category_id: categoryId === "unbudgeted" ? null : Number(categoryId), account_id: Number(accountId), date, ...(isDraft ? { status: "confirmed" } : {}) })}
               disabled={!canSave}
               className="flex-[1.4] py-4 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
             >
@@ -162,6 +162,7 @@ export function TransactionModal({
                   >
                     <option value="">Select a category…</option>
                     {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    <option value="unbudgeted">Unbudgeted</option>
                   </select>
                 </div>
                 <ChevronDown className="w-4 h-4 text-muted-foreground/20 shrink-0" />
