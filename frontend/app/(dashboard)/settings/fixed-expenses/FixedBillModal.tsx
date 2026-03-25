@@ -8,7 +8,7 @@ import {
   formatRecurrenceRule,
 } from "@/lib/fixed-expenses";
 import { Modal } from "@/components/ui/Modal";
-import { Loader2, Pencil, RefreshCw, CalendarDays, Sparkles, LinkIcon } from "lucide-react";
+import { Loader2, Pencil, RefreshCw, CalendarDays, Sparkles, LinkIcon, StickyNote, User, Lock, Copy, Check, Eye, EyeOff } from "lucide-react";
 
 const FIXED_BILL_EMOJI_OPTIONS = [
   "🏠", "💡", "📺", "📱", "💻", "☁️", "🚗", "🏥", "📚", "🛒",
@@ -28,7 +28,16 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
     id: -1, name: "", category: "General", amount: 0, icon: "🏠",
     due: today.toISOString().slice(0, 10), dueSoon: false,
     frequency: "monthly", dayOfMonth: today.getDate(), dayOfWeek: null, endDate: null, paymentLink: null,
+    notes: null, loginEmail: null, loginPassword: null,
   });
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  function copyToClipboard(value: string, field: string) {
+    navigator.clipboard.writeText(value);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  }
 
   const nextOccurrence = computeNextOccurrence(draft);
   const recurrenceRule = formatRecurrenceRule(draft);
@@ -219,6 +228,100 @@ export function FixedBillModal({ initialBill, onClose, onSave, onDelete, saving 
               placeholder="https://..."
               className="w-full bg-transparent outline-none text-sm font-semibold text-foreground placeholder:text-muted-foreground/25 appearance-none"
             />
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div className="border border-white/[0.08] rounded-2xl px-4 py-4">
+          <div className="flex items-center gap-3 mb-2">
+            <StickyNote className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+            <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">Notes</p>
+          </div>
+          <textarea
+            value={draft.notes || ""}
+            onChange={(e) => setDraft(prev => ({ ...prev, notes: e.target.value }))}
+            placeholder="Add notes about this bill..."
+            rows={3}
+            className="w-full bg-transparent outline-none text-sm font-semibold text-foreground placeholder:text-muted-foreground/25 appearance-none resize-none"
+          />
+        </div>
+
+        {/* Account Login Info */}
+        <div className="border border-white/[0.08] rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
+          <div className="px-4 pt-4 pb-2">
+            <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">Account Login</p>
+          </div>
+
+          {/* Email / Username */}
+          <div className="flex items-center gap-3 px-4 py-4">
+            <User className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Email / Username</p>
+              <input
+                type="text"
+                value={draft.loginEmail || ""}
+                onChange={(e) => setDraft(prev => ({ ...prev, loginEmail: e.target.value }))}
+                placeholder="user@example.com"
+                className="w-full bg-transparent outline-none text-sm font-semibold text-foreground placeholder:text-muted-foreground/25 appearance-none"
+              />
+            </div>
+            {draft.loginEmail && (
+              <button
+                type="button"
+                onClick={() => copyToClipboard(draft.loginEmail!, "email")}
+                className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-all shrink-0"
+                title="Copy email"
+              >
+                {copiedField === "email" ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-muted-foreground/50" />
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Password */}
+          <div className="flex items-center gap-3 px-4 py-4">
+            <Lock className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Password</p>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={draft.loginPassword || ""}
+                onChange={(e) => setDraft(prev => ({ ...prev, loginPassword: e.target.value }))}
+                placeholder="••••••••"
+                className="w-full bg-transparent outline-none text-sm font-semibold text-foreground placeholder:text-muted-foreground/25 appearance-none"
+              />
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowPassword(prev => !prev)}
+                className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-all"
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-3.5 h-3.5 text-muted-foreground/50" />
+                ) : (
+                  <Eye className="w-3.5 h-3.5 text-muted-foreground/50" />
+                )}
+              </button>
+              {draft.loginPassword && (
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(draft.loginPassword!, "password")}
+                  className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-all"
+                  title="Copy password"
+                >
+                  {copiedField === "password" ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5 text-muted-foreground/50" />
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

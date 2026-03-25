@@ -21,6 +21,12 @@ export type FixedBill = {
   endDate: string | null;
   /** Optional payment URL so users can pay the bill directly */
   paymentLink?: string | null;
+  /** Free-form notes about the bill */
+  notes?: string | null;
+  /** Account login email/username for the service */
+  loginEmail?: string | null;
+  /** Account login password for the service */
+  loginPassword?: string | null;
 };
 
 export const MOCK_FIXED_BILLS: FixedBill[] = [

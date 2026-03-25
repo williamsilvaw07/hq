@@ -20,6 +20,9 @@ function toApiBill(row: {
   day_of_week: number | null;
   end_date: string | null;
   payment_link?: string | null;
+  notes?: string | null;
+  login_email?: string | null;
+  login_password?: string | null;
 }) {
   const dueStr = typeof row.due === "string" ? row.due.slice(0, 10) : new Date(row.due).toISOString().slice(0, 10);
 
@@ -58,6 +61,9 @@ function toApiBill(row: {
     dayOfWeek: row.day_of_week,
     endDate: row.end_date,
     paymentLink: row.payment_link ?? null,
+    notes: row.notes ?? null,
+    loginEmail: row.login_email ?? null,
+    loginPassword: row.login_password ?? null,
   };
 }
 
@@ -92,6 +98,9 @@ export async function PATCH(
     if (body.dayOfWeek !== undefined) data.dayOfWeek = body.dayOfWeek;
     if (body.endDate !== undefined) data.endDate = body.endDate;
     if (body.paymentLink !== undefined) data.paymentLink = typeof body.paymentLink === "string" && body.paymentLink.trim() ? body.paymentLink.trim() : null;
+    if (body.notes !== undefined) data.notes = typeof body.notes === "string" && body.notes.trim() ? body.notes.trim() : null;
+    if (body.loginEmail !== undefined) data.loginEmail = typeof body.loginEmail === "string" && body.loginEmail.trim() ? body.loginEmail.trim() : null;
+    if (body.loginPassword !== undefined) data.loginPassword = typeof body.loginPassword === "string" && body.loginPassword.trim() ? body.loginPassword.trim() : null;
 
     await updateFixedBill(id, wid, data);
     const updated = await findFixedBillById(id, wid);

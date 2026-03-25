@@ -30,4 +30,25 @@ export async function ensureFixedBillTable(): Promise<void> {
   } catch {
     // Column already exists — ignore
   }
+
+  // Add notes column if missing
+  try {
+    await execute(`ALTER TABLE \`FixedBill\` ADD COLUMN \`notes\` TEXT NULL`);
+  } catch {
+    // Column already exists — ignore
+  }
+
+  // Add login_email column if missing
+  try {
+    await execute(`ALTER TABLE \`FixedBill\` ADD COLUMN \`login_email\` VARCHAR(500) NULL`);
+  } catch {
+    // Column already exists — ignore
+  }
+
+  // Add login_password column if missing
+  try {
+    await execute(`ALTER TABLE \`FixedBill\` ADD COLUMN \`login_password\` VARCHAR(500) NULL`);
+  } catch {
+    // Column already exists — ignore
+  }
 }

@@ -19,6 +19,12 @@ import {
   Camera,
   Receipt,
   TrendingUp,
+  StickyNote,
+  User,
+  Lock,
+  Copy,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 type Props = {
@@ -39,6 +45,16 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  function copyToClipboard(value: string, field: string) {
+    navigator.clipboard.writeText(value);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  }
+
+  const hasAccountInfo = !!(bill.notes || bill.loginEmail || bill.loginPassword);
 
   const fetchPayments = useCallback(async () => {
     setLoading(true);
@@ -187,6 +203,84 @@ export function PaymentProofModal({ bill, workspaceId, onClose }: Props) {
             )}
           </div>
         </div>
+
+        {/* Notes & Account Info */}
+        {hasAccountInfo && (
+          <div className="border border-white/[0.08] rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
+            {/* Notes */}
+            {bill.notes && (
+              <div className="flex items-start gap-3 px-4 py-4">
+                <StickyNote className="w-4 h-4 text-muted-foreground/30 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Notes</p>
+                  <p className="text-sm text-foreground/80 whitespace-pre-wrap">{bill.notes}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Email / Username */}
+            {bill.loginEmail && (
+              <div className="flex items-center gap-3 px-4 py-4">
+                <User className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Email / Username</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{bill.loginEmail}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(bill.loginEmail!, "email")}
+                  className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-all shrink-0"
+                  title="Copy email"
+                >
+                  {copiedField === "email" ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5 text-muted-foreground/50" />
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Password */}
+            {bill.loginPassword && (
+              <div className="flex items-center gap-3 px-4 py-4">
+                <Lock className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Password</p>
+                  <p className="text-sm font-semibold text-foreground font-mono">
+                    {showPassword ? bill.loginPassword : "••••••••"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(prev => !prev)}
+                    className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-all"
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-3.5 h-3.5 text-muted-foreground/50" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5 text-muted-foreground/50" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(bill.loginPassword!, "password")}
+                    className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-all"
+                    title="Copy password"
+                  >
+                    {copiedField === "password" ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5 text-muted-foreground/50" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Tab switcher */}
         <div className="grid grid-cols-2 bg-black/30 p-1 rounded-full gap-1">

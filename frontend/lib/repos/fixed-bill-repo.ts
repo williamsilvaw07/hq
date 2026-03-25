@@ -14,11 +14,14 @@ export type FixedBillRow = {
   day_of_week: number | null;
   end_date: string | null;
   payment_link: string | null;
+  notes: string | null;
+  login_email: string | null;
+  login_password: string | null;
 };
 
 export async function findFixedBillsByWorkspace(workspaceId: number): Promise<FixedBillRow[]> {
   const rows = await fetchMany<FixedBillRow>(
-    `SELECT id, workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link
+    `SELECT id, workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link, notes, login_email, login_password
      FROM FixedBill
      WHERE workspace_id = ?
      ORDER BY name ASC`,
@@ -29,7 +32,7 @@ export async function findFixedBillsByWorkspace(workspaceId: number): Promise<Fi
 
 export async function findFixedBillById(id: number, workspaceId: number): Promise<FixedBillRow | null> {
   return fetchOne<FixedBillRow>(
-    `SELECT id, workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link
+    `SELECT id, workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link, notes, login_email, login_password
      FROM FixedBill
      WHERE id = ? AND workspace_id = ?
      LIMIT 1`,
@@ -61,15 +64,21 @@ export async function createFixedBill(data: {
   dayOfWeek: number | null;
   endDate: string | null;
   paymentLink?: string | null;
+  notes?: string | null;
+  loginEmail?: string | null;
+  loginPassword?: string | null;
 }): Promise<number> {
   const dueStr = formatDueForDb(data.due);
   const endStr = data.endDate ? formatDueForDb(data.endDate) : null;
   const icon = data.icon && data.icon.trim() ? data.icon.trim() : null;
   const paymentLink = data.paymentLink && data.paymentLink.trim() ? data.paymentLink.trim() : null;
+  const notes = data.notes && data.notes.trim() ? data.notes.trim() : null;
+  const loginEmail = data.loginEmail && data.loginEmail.trim() ? data.loginEmail.trim() : null;
+  const loginPassword = data.loginPassword && data.loginPassword.trim() ? data.loginPassword.trim() : null;
 
   const id = await insertOne(
-    `INSERT INTO FixedBill (workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO FixedBill (workspace_id, name, category, amount, icon, due, frequency, day_of_month, day_of_week, end_date, payment_link, notes, login_email, login_password)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.workspaceId,
       data.name,
@@ -82,6 +91,9 @@ export async function createFixedBill(data: {
       data.dayOfWeek,
       endStr,
       paymentLink,
+      notes,
+      loginEmail,
+      loginPassword,
     ]
   );
   return id;
@@ -101,6 +113,9 @@ export async function updateFixedBill(
     dayOfWeek?: number | null;
     endDate?: string | null;
     paymentLink?: string | null;
+    notes?: string | null;
+    loginEmail?: string | null;
+    loginPassword?: string | null;
   }
 ): Promise<void> {
   const fields: string[] = [];
@@ -145,6 +160,18 @@ export async function updateFixedBill(
   if (data.paymentLink !== undefined) {
     fields.push("payment_link = ?");
     params.push(data.paymentLink && data.paymentLink.trim() ? data.paymentLink.trim() : null);
+  }
+  if (data.notes !== undefined) {
+    fields.push("notes = ?");
+    params.push(data.notes && data.notes.trim() ? data.notes.trim() : null);
+  }
+  if (data.loginEmail !== undefined) {
+    fields.push("login_email = ?");
+    params.push(data.loginEmail && data.loginEmail.trim() ? data.loginEmail.trim() : null);
+  }
+  if (data.loginPassword !== undefined) {
+    fields.push("login_password = ?");
+    params.push(data.loginPassword && data.loginPassword.trim() ? data.loginPassword.trim() : null);
   }
 
   if (fields.length === 0) return;

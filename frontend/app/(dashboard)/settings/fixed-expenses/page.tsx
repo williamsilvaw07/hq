@@ -87,6 +87,9 @@ export default function FixedExpensesPage() {
             dayOfWeek: bill.dayOfWeek,
             endDate: bill.endDate,
             paymentLink: bill.paymentLink,
+            notes: bill.notes,
+            loginEmail: bill.loginEmail,
+            loginPassword: bill.loginPassword,
           }),
         });
         if (r.data) {
@@ -108,6 +111,9 @@ export default function FixedExpensesPage() {
             dayOfWeek: bill.dayOfWeek,
             endDate: bill.endDate,
             paymentLink: bill.paymentLink,
+            notes: bill.notes,
+            loginEmail: bill.loginEmail,
+            loginPassword: bill.loginPassword,
           }),
         });
         if (updated.data) {
